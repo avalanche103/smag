@@ -3,7 +3,9 @@ import path from "node:path";
 
 dotenv.config();
 
-const rootDir = path.resolve(__dirname, "..", "..");
+const rootDir = process.cwd();
+const projectDataDir = path.join(rootDir, "data");
+const runtimeDataDir = process.env.VERCEL ? path.join("/tmp", "smag-data") : projectDataDir;
 
 export const env = {
   port: Number(process.env.PORT ?? 3000),
@@ -14,10 +16,13 @@ export const env = {
   analyticsId: process.env.ANALYTICS_ID ?? "",
   mailTo: process.env.MAIL_TO ?? "editor@example.com",
   rootDir,
-  dataDir: path.join(rootDir, "data"),
-  contentFile: path.join(rootDir, "data", "content.json"),
-  uploadsDir: path.join(rootDir, "data", "uploads"),
-  coversDir: path.join(rootDir, "data", "uploads", "covers"),
-  invoicesDir: path.join(rootDir, "data", "uploads", "invoices"),
-  listsDir: path.join(rootDir, "data", "uploads", "lists")
+  isVercel: Boolean(process.env.VERCEL),
+  projectDataDir,
+  dataDir: runtimeDataDir,
+  seedContentFile: path.join(projectDataDir, "content.json"),
+  contentFile: path.join(runtimeDataDir, "content.json"),
+  uploadsDir: path.join(runtimeDataDir, "uploads"),
+  coversDir: path.join(runtimeDataDir, "uploads", "covers"),
+  invoicesDir: path.join(runtimeDataDir, "uploads", "invoices"),
+  listsDir: path.join(runtimeDataDir, "uploads", "lists")
 };

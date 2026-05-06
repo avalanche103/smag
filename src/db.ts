@@ -6,6 +6,10 @@ import { env } from "./config/env";
 import type { DataStore, PageContent } from "./types";
 
 fs.mkdirSync(path.dirname(env.contentFile), { recursive: true });
+fs.mkdirSync(env.uploadsDir, { recursive: true });
+fs.mkdirSync(env.coversDir, { recursive: true });
+fs.mkdirSync(env.invoicesDir, { recursive: true });
+fs.mkdirSync(env.listsDir, { recursive: true });
 
 const settingDefaults: Array<[string, string]> = [
   ["siteTitle", "Строительство: Экономика, учет, право"],
@@ -137,13 +141,22 @@ function mergeDefaults(store: DataStore): DataStore {
 
 export function ensureDataFile(): void {
   if (!fs.existsSync(env.contentFile)) {
-    fs.writeFileSync(env.contentFile, JSON.stringify(createInitialStore(), null, 2), "utf-8");
+    if (fs.existsSync(env.seedContentFile)) {
+      fs.copyFileSync(env.seedContentFile, env.contentFile);
+    } else {
+      fs.writeFileSync(env.contentFile, JSON.stringify(createInitialStore(), null, 2), "utf-8");
+    }
     return;
   }
 
   const current = JSON.parse(fs.readFileSync(env.contentFile, "utf-8")) as DataStore;
   const merged = mergeDefaults(current);
-  fs.writeFileSync(env.contentFile, JSON.stringify(merged, null, 2), "utf-8");
+  const normalized = JSON.stringify(merged);
+  const currentSerialized = JSON.stringify(current);
+
+  if (normalized !== currentSerialized) {
+    fs.writeFileSync(env.contentFile, JSON.stringify(merged, null, 2), "utf-8");
+  }
 }
 
 export function readStore(): DataStore {
