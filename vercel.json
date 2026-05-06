@@ -2,11 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.ts": {
-      "includeFiles": [
-        "src/views/**",
-        "src/public/**",
-        "data/content.json"
-      ]
+      "includeFiles": "{src/views/**,src/public/**,data/content.json}"
     }
   },
   "rewrites": [
