@@ -3,22 +3,9 @@
 <main class="admin-login-page">
   <div class="admin-login-card">
     <p class="eyebrow">CMS</p>
-    <h1>Вход в админ-панель</h1>
-    <% if (flash) { %>
-      <div class="flash flash-<%= flash.type %>"><%= flash.message %></div>
-    <% } %>
-    <form method="post" action="/admin/login" class="stack-form">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <label>
-        Логин
-        <input type="text" name="login" required />
-      </label>
-      <label>
-        Пароль
-        <input type="password" name="password" required />
-      </label>
-      <button class="button button-accent" type="submit">Войти</button>
-    </form>
+    <h1>Админ-панель открыта без пароля</h1>
+    <p>Переход в административную часть выполняется автоматически.</p>
+    <a class="button button-accent" href="/admin">Открыть админку</a>
   </div>
 </main>
 
