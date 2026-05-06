@@ -1,0 +1,41 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Обзор</p>
+        <h1>Управление сайтом</h1>
+      </div>
+    </div>
+    <div class="admin-cards">
+      <article class="admin-card">
+        <h2>Последние выпуски</h2>
+        <ul class="admin-list">
+          <% issues.forEach((issue) => { %>
+            <li><strong><%= issue.numberLabel %></strong> — <%= issue.title %></li>
+          <% }) %>
+        </ul>
+      </article>
+      <article class="admin-card">
+        <h2>Новые обращения</h2>
+        <ul class="admin-list">
+          <% messages.forEach((message) => { %>
+            <li><strong><%= message.name %></strong> — <%= message.email %></li>
+          <% }) %>
+        </ul>
+      </article>
+      <article class="admin-card">
+        <h2>Перечни</h2>
+        <ul class="admin-list">
+          <% lists.forEach((item) => { %>
+            <li><strong><%= item.periodLabel %></strong> — <%= item.title %></li>
+          <% }) %>
+        </ul>
+      </article>
+    </div>
+  </section>
+</main>
+</body>
+</html>

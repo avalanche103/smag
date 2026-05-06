@@ -1,0 +1,23 @@
+<header class="site-header">
+  <div class="shell header-row">
+    <a class="brand" href="/">
+      <span class="brand-mark">С</span>
+      <span>
+        <strong><%= site.siteTitle %></strong>
+        <small>официальный сайт журнала</small>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" data-nav-toggle aria-label="Открыть меню">Меню</button>
+
+    <nav class="site-nav" data-nav>
+      <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">О журнале</a>
+      <a href="/issues" class="<%= path.startsWith('/issues') ? 'is-active' : '' %>">Выпуски</a>
+      <a href="/published-lists" class="<%= path === '/published-lists' ? 'is-active' : '' %>">Перечни</a>
+      <a href="/payment" class="<%= path === '/payment' ? 'is-active' : '' %>">Счет и оплата</a>
+      <a href="/contacts" class="<%= path === '/contacts' ? 'is-active' : '' %>">Контакты</a>
+    </nav>
+
+    <a class="button button-accent header-cta" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет-фактуру</a>
+  </div>
+</header>

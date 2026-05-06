@@ -1,0 +1,51 @@
+<%- include('partials/head', { meta, site }) %>
+<%- include('partials/header', { path, site }) %>
+<%- include('partials/flash', { flash }) %>
+
+<main class="section">
+  <div class="shell page-grid">
+    <div class="page-intro">
+      <p class="eyebrow">О журнале</p>
+      <h1><%= page.title %></h1>
+      <p class="lead"><%= page.lead %></p>
+      <p><%= page.body %></p>
+    </div>
+    <div class="info-panel">
+      <div>
+        <h2>Тематика</h2>
+        <p>Экономика строительства, бухгалтерский учет, налогообложение, правовое регулирование, договорная работа и управленческие решения.</p>
+      </div>
+      <div>
+        <h2>Для кого</h2>
+        <p><%= site.aboutAudience %></p>
+      </div>
+      <div>
+        <h2>Периодичность</h2>
+        <p><%= site.periodicity %></p>
+      </div>
+      <div>
+        <h2>Издатель</h2>
+        <p><%= site.publisher %></p>
+      </div>
+      <div>
+        <h2>Редакция</h2>
+        <p><%= site.editorialInfo %></p>
+      </div>
+      <div>
+        <h2>Формат распространения</h2>
+        <p><%= site.distributionFormat %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell promo-banner">
+    <div>
+      <p class="eyebrow">Поддержка подписчиков</p>
+      <h2><%= site.hotlineTitle %></h2>
+      <p><%= site.hotlineText %></p>
+    </div>
+    <a class="button button-accent" href="tel:<%= site.phone %>">Позвонить в редакцию</a>
+  </div>
+</main>
+
+<%- include('partials/footer', { site }) %>

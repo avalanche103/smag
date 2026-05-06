@@ -1,0 +1,54 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Настройки</p>
+        <h1>Основные данные сайта</h1>
+      </div>
+    </div>
+
+    <form method="post" action="/admin/settings" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="form-grid-two">
+        <label>Название сайта<input type="text" name="siteTitle" value="<%= settings.siteTitle %>" required /></label>
+        <label>URL сайта<input type="url" name="siteUrl" value="<%= settings.siteUrl || '' %>" /></label>
+        <label>Телефон<input type="text" name="phone" value="<%= settings.phone %>" /></label>
+        <label>Email<input type="email" name="email" value="<%= settings.email %>" /></label>
+        <label>Адрес<input type="text" name="address" value="<%= settings.address %>" /></label>
+        <label>Часы работы<input type="text" name="workingHours" value="<%= settings.workingHours %>" /></label>
+        <label>Контактное лицо<input type="text" name="contactPerson" value="<%= settings.contactPerson %>" /></label>
+        <label>Analytics ID<input type="text" name="analyticsId" value="<%= settings.analyticsId || '' %>" /></label>
+      </div>
+      <label>Описание сайта<textarea name="siteDescription" rows="3"><%= settings.siteDescription %></textarea></label>
+      <label>Hero-заголовок<textarea name="heroTitle" rows="2"><%= settings.heroTitle %></textarea></label>
+      <label>Hero-текст<textarea name="heroText" rows="4"><%= settings.heroText %></textarea></label>
+      <label>Аудитория<textarea name="aboutAudience" rows="3"><%= settings.aboutAudience %></textarea></label>
+      <label>Периодичность<input type="text" name="periodicity" value="<%= settings.periodicity || '' %>" /></label>
+      <label>Издатель<textarea name="publisher" rows="3"><%= settings.publisher %></textarea></label>
+      <label>Редакция<textarea name="editorialInfo" rows="4"><%= settings.editorialInfo %></textarea></label>
+      <label>Формат распространения<textarea name="distributionFormat" rows="3"><%= settings.distributionFormat %></textarea></label>
+      <label>Заголовок горячей линии<textarea name="hotlineTitle" rows="2"><%= settings.hotlineTitle %></textarea></label>
+      <label>Текст горячей линии<textarea name="hotlineText" rows="3"><%= settings.hotlineText %></textarea></label>
+      <label>Заголовок оплаты<textarea name="paymentTitle" rows="2"><%= settings.paymentTitle %></textarea></label>
+      <label>Описание оплаты<textarea name="paymentText" rows="4"><%= settings.paymentText %></textarea></label>
+      <label>Реквизиты<textarea name="requisites" rows="4"><%= settings.requisites || '' %></textarea></label>
+      <label>SEO Title главной<input type="text" name="seoHomeTitle" value="<%= settings.seoHomeTitle %>" /></label>
+      <label>SEO Description главной<textarea name="seoHomeDescription" rows="3"><%= settings.seoHomeDescription %></textarea></label>
+      <label>Email для уведомлений<input type="email" name="mailTo" value="<%= settings.mailTo || '' %>" /></label>
+      <button class="button button-accent" type="submit">Сохранить настройки</button>
+    </form>
+
+    <form method="post" action="/admin/invoice" enctype="multipart/form-data" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <h2>Счет-фактура</h2>
+      <p>Текущий файл: <%= settings.invoiceFile || 'не загружен' %></p>
+      <label>PDF-файл<input type="file" name="invoiceFile" accept="application/pdf" required /></label>
+      <button class="button button-secondary" type="submit">Загрузить счет</button>
+    </form>
+  </section>
+</main>
+</body>
+</html>

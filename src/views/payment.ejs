@@ -1,0 +1,44 @@
+<%- include('partials/head', { meta, site }) %>
+<%- include('partials/header', { path, site }) %>
+<%- include('partials/flash', { flash }) %>
+
+<main class="section">
+  <div class="shell payment-grid">
+    <section>
+      <p class="eyebrow">Счет и оплата</p>
+      <h1><%= page.title %></h1>
+      <p class="lead"><%= page.lead %></p>
+      <p><%= site.paymentText %></p>
+      <div class="hero-actions">
+        <% if (invoiceFile) { %>
+          <a class="button button-accent" href="<%= invoiceFile %>" target="_blank" rel="noopener">Открыть PDF в новой вкладке</a>
+          <a class="button button-secondary" href="<%= invoiceFile %>" download>Скачать счет-фактуру</a>
+        <% } else { %>
+          <a class="button button-secondary" href="/contacts">Запросить счет у редакции</a>
+        <% } %>
+      </div>
+    </section>
+    <aside class="info-panel">
+      <div>
+        <h2>Порядок оплаты</h2>
+        <p><%= page.body %></p>
+      </div>
+      <div>
+        <h2>Контакт по оплате</h2>
+        <p><%= site.contactPerson %></p>
+        <p><a href="mailto:<%= site.email %>"><%= site.email %></a></p>
+        <p><a href="tel:<%= site.phone %>"><%= site.phone %></a></p>
+      </div>
+      <div>
+        <h2>Реквизиты</h2>
+        <p><%= site.requisites %></p>
+      </div>
+      <div class="hotline-box">
+        <p class="eyebrow">Горячая линия</p>
+        <p><%= site.hotlineText %></p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<%- include('partials/footer', { site }) %>

@@ -1,0 +1,39 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Выпуски</p>
+        <h1>Управление номерами журнала</h1>
+      </div>
+      <a class="button button-accent" href="/admin/issues/new">Добавить выпуск</a>
+    </div>
+    <div class="admin-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Номер</th><th>Дата</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+          <% issues.forEach((issue) => { %>
+            <tr>
+              <td><%= issue.numberLabel %></td>
+              <td><%= issue.publishDate %></td>
+              <td><%= issue.isPublished ? 'Опубликован' : 'Скрыт' %><%= issue.isFeatured ? ' / главный' : '' %></td>
+              <td class="action-cell">
+                <a class="text-link" href="/admin/issues/<%= issue.id %>/edit">Редактировать</a>
+                <form method="post" action="/admin/issues/<%= issue.id %>/delete">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button class="button-link" type="submit">Удалить</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

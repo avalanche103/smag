@@ -1,0 +1,26 @@
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <div>
+      <p class="eyebrow">Журнал</p>
+      <h2><%= site.siteTitle %></h2>
+      <p><%= site.siteDescription %></p>
+    </div>
+    <div>
+      <p class="eyebrow">Контакты редакции</p>
+      <ul class="footer-list">
+        <li><a href="tel:<%= site.phone %>"><%= site.phone %></a></li>
+        <li><a href="mailto:<%= site.email %>"><%= site.email %></a></li>
+        <li><%= site.address %></li>
+        <li><%= site.workingHours %></li>
+      </ul>
+    </div>
+    <div>
+      <p class="eyebrow">Оплата</p>
+      <p>Счет-фактура доступен для скачивания в PDF и может быть обновлен через админ-панель.</p>
+      <a class="text-link" href="/payment">Перейти к оплате</a>
+    </div>
+  </div>
+  <script src="/scripts/main.js" defer></script>
+</footer>
+</body>
+</html>

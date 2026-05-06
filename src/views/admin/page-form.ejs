@@ -1,0 +1,22 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Страница</p>
+        <h1><%= page.title %></h1>
+      </div>
+    </div>
+    <form method="post" action="/admin/pages/<%= page.pageKey %>" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <label>Заголовок<input type="text" name="title" value="<%= page.title %>" required /></label>
+      <label>Лид<textarea name="lead" rows="3"><%= page.lead %></textarea></label>
+      <label>Основной текст<textarea name="body" rows="8"><%= page.body %></textarea></label>
+      <button class="button button-accent" type="submit">Сохранить</button>
+    </form>
+  </section>
+</main>
+</body>
+</html>

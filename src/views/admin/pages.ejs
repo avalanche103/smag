@@ -1,0 +1,31 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Страницы</p>
+        <h1>Редактирование текстовых блоков</h1>
+      </div>
+    </div>
+    <div class="admin-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Ключ</th><th>Заголовок</th><th>Действие</th></tr>
+        </thead>
+        <tbody>
+          <% pages.forEach((page) => { %>
+            <tr>
+              <td><%= page.pageKey %></td>
+              <td><%= page.title %></td>
+              <td><a class="text-link" href="/admin/pages/<%= page.pageKey %>">Редактировать</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

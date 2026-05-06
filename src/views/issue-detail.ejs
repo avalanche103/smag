@@ -1,0 +1,33 @@
+<%- include('partials/head', { meta, site }) %>
+<%- include('partials/header', { path, site }) %>
+<%- include('partials/flash', { flash }) %>
+
+<main class="section">
+  <div class="shell detail-grid">
+    <div class="cover-frame">
+      <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
+    </div>
+    <div>
+      <p class="eyebrow">Карточка выпуска</p>
+      <h1><%= issue.numberLabel %></h1>
+      <p class="lead"><%= issue.title %></p>
+      <p><%= issue.summary %></p>
+      <dl class="meta-grid meta-grid-stacked">
+        <div>
+          <dt>Дата выпуска</dt>
+          <dd><%= dayjs(issue.publishDate).format('D MMMM YYYY') %></dd>
+        </div>
+        <div>
+          <dt>Краткий анонс</dt>
+          <dd><%= issue.teaser %></dd>
+        </div>
+      </dl>
+      <div class="hero-actions">
+        <a class="button button-accent" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет-фактуру</a>
+        <a class="button button-secondary" href="/issues">Назад к выпускам</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer', { site }) %>

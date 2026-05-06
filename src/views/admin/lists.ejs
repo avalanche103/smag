@@ -1,0 +1,49 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Перечни опубликованного</p>
+        <h1>Импорт Excel-файлов</h1>
+      </div>
+    </div>
+    <form method="post" action="/admin/lists" enctype="multipart/form-data" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <label>Заголовок<input type="text" name="title" value="Перечень опубликованного" required /></label>
+      <label>Период<input type="text" name="periodLabel" placeholder="I квартал 2026" required /></label>
+      <label>Excel-файл XLSX<input type="file" name="listFile" accept=".xlsx" required /></label>
+      <button class="button button-accent" type="submit">Импортировать</button>
+    </form>
+    <div class="admin-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Период</th><th>Заголовок</th><th>Видимость</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+          <% items.forEach((item) => { %>
+            <tr>
+              <td><%= item.periodLabel %></td>
+              <td><%= item.title %></td>
+              <td><%= item.isVisible ? 'Показан' : 'Скрыт' %></td>
+              <td class="action-cell">
+                <form method="post" action="/admin/lists/<%= item.id %>/toggle">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <input type="hidden" name="isVisible" value="<%= item.isVisible ? 0 : 1 %>" />
+                  <button class="button-link" type="submit"><%= item.isVisible ? 'Скрыть' : 'Показать' %></button>
+                </form>
+                <form method="post" action="/admin/lists/<%= item.id %>/delete">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button class="button-link" type="submit">Удалить</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

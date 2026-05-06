@@ -1,0 +1,104 @@
+<%- include('partials/head', { meta, site }) %>
+<%- include('partials/header', { path, site }) %>
+<%- include('partials/flash', { flash }) %>
+
+<main>
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div>
+        <p class="eyebrow">Отраслевой журнал</p>
+        <h1><%= site.heroTitle %></h1>
+        <p class="hero-text"><%= site.heroText %></p>
+        <div class="hero-actions">
+          <a class="button button-accent" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет-фактуру</a>
+          <a class="button button-secondary" href="/issues">Смотреть выпуски</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <span class="eyebrow">Для кого</span>
+        <p><%= site.aboutAudience %></p>
+        <ul class="check-list">
+          <li>Экономика строительства и финансирование проектов</li>
+          <li>Учет, налоги и договорная работа</li>
+          <li>Правовое сопровождение строительной деятельности</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <% if (featuredIssue) { %>
+    <section class="section">
+      <div class="shell latest-grid">
+        <div>
+          <p class="eyebrow">Последний номер</p>
+          <h2><%= featuredIssue.numberLabel %></h2>
+          <p class="lead"><%= featuredIssue.title %></p>
+          <p><%= featuredIssue.summary %></p>
+          <dl class="meta-grid">
+            <div>
+              <dt>Дата выпуска</dt>
+              <dd><%= dayjs(featuredIssue.publishDate).format('D MMMM YYYY') %></dd>
+            </div>
+            <div>
+              <dt>Формат</dt>
+              <dd><%= site.distributionFormat %></dd>
+            </div>
+          </dl>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/issues/<%= featuredIssue.slug %>">Карточка выпуска</a>
+            <a class="button button-secondary" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет</a>
+          </div>
+        </div>
+        <div class="cover-frame">
+          <img src="<%= featuredIssue.coverImage %>" alt="Обложка <%= featuredIssue.numberLabel %>" />
+        </div>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="section section-muted">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Анонсы и архив</p>
+          <h2>Выпуски журнала</h2>
+        </div>
+        <a class="text-link" href="/issues">Все выпуски</a>
+      </div>
+      <div class="card-grid">
+        <% issues.forEach((issue) => { %>
+          <article class="issue-card">
+            <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
+            <div>
+              <span class="issue-date"><%= dayjs(issue.publishDate).format('MMMM YYYY') %></span>
+              <h3><%= issue.numberLabel %></h3>
+              <p><%= issue.teaser %></p>
+              <a class="text-link" href="/issues/<%= issue.slug %>">Открыть карточку</a>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell promo-grid">
+      <div class="promo-block">
+        <p class="eyebrow">Горячая линия</p>
+        <h2><%= site.hotlineTitle %></h2>
+        <p><%= site.hotlineText %></p>
+        <a class="text-link" href="tel:<%= site.phone %>"><%= site.phone %></a>
+      </div>
+      <div class="promo-block promo-contacts">
+        <p class="eyebrow">Контакты</p>
+        <ul class="footer-list">
+          <li><a href="mailto:<%= site.email %>"><%= site.email %></a></li>
+          <li><%= site.address %></li>
+          <li><%= site.contactPerson %></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer', { site }) %>

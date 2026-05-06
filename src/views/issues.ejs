@@ -1,0 +1,33 @@
+<%- include('partials/head', { meta, site }) %>
+<%- include('partials/header', { path, site }) %>
+<%- include('partials/flash', { flash }) %>
+
+<main class="section">
+  <div class="shell section-head page-head">
+    <div>
+      <p class="eyebrow">Выпуски</p>
+      <h1>Актуальные и архивные номера</h1>
+      <p class="lead">На сайте размещаются только анонсы, обложки и карточки выпусков без полного текста статей.</p>
+    </div>
+    <a class="button button-accent" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет-фактуру</a>
+  </div>
+  <div class="shell card-grid card-grid-wide">
+    <% issues.forEach((issue) => { %>
+      <article class="issue-card issue-card-wide">
+        <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
+        <div>
+          <span class="issue-date"><%= dayjs(issue.publishDate).format('D MMMM YYYY') %></span>
+          <h2><%= issue.numberLabel %></h2>
+          <p class="lead"><%= issue.title %></p>
+          <p><%= issue.teaser %></p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/issues/<%= issue.slug %>">Карточка выпуска</a>
+            <a class="button button-secondary" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет</a>
+          </div>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</main>
+
+<%- include('partials/footer', { site }) %>

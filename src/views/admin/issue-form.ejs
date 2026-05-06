@@ -1,0 +1,35 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Выпуск</p>
+        <h1><%= issue ? 'Редактирование выпуска' : 'Новый выпуск' %></h1>
+      </div>
+    </div>
+    <form method="post" action="/admin/issues" enctype="multipart/form-data" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input type="hidden" name="id" value="<%= issue?.id || '' %>" />
+      <input type="hidden" name="existingCover" value="<%= issue?.coverImage || '' %>" />
+      <div class="form-grid-two">
+        <label>Номер выпуска<input type="text" name="numberLabel" value="<%= issue?.numberLabel || '' %>" required /></label>
+        <label>Дата выпуска<input type="date" name="publishDate" value="<%= issue?.publishDate || '' %>" required /></label>
+        <label>Заголовок<input type="text" name="title" value="<%= issue?.title || '' %>" required /></label>
+        <label>Slug<input type="text" name="slug" value="<%= issue?.slug || '' %>" /></label>
+      </div>
+      <label>Краткий анонс<textarea name="teaser" rows="4"><%= issue?.teaser || '' %></textarea></label>
+      <label>Подробное описание<textarea name="summary" rows="6"><%= issue?.summary || '' %></textarea></label>
+      <label>Обложка JPG/PNG/WebP<input type="file" name="coverImage" accept="image/png,image/jpeg,image/webp" <%= issue ? '' : 'required' %> /></label>
+      <% if (issue?.coverImage) { %>
+        <img class="thumb-preview" src="<%= issue.coverImage %>" alt="Текущая обложка" />
+      <% } %>
+      <label class="checkbox"><input type="checkbox" name="isPublished" value="1" <%= issue?.isPublished ? 'checked' : '' %> /> Опубликовать выпуск</label>
+      <label class="checkbox"><input type="checkbox" name="isFeatured" value="1" <%= issue?.isFeatured ? 'checked' : '' %> /> Показать как последний номер</label>
+      <button class="button button-accent" type="submit">Сохранить выпуск</button>
+    </form>
+  </section>
+</main>
+</body>
+</html>

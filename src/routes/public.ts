@@ -1,0 +1,158 @@
+import fs from "node:fs";
+import path from "node:path";
+import type { RequestHandler } from "express";
+import { Router } from "express";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import "dayjs/locale/ru";
+import {
+  getFeaturedIssue,
+  getIssueBySlug,
+  getPageContent,
+  getSettings,
+  listIssues,
+  listPublishedLists,
+  saveMessage
+} from "../services/contentService";
+import { parseWorkbookPreview } from "../utils/excel";
+
+dayjs.extend(localizedFormat);
+dayjs.locale("ru");
+
+function buildMeta(title: string, description: string) {
+  return { title, description };
+}
+
+export default function publicRouter(formLimiter: RequestHandler) {
+  const router = Router();
+
+  router.get("/", (_req, res) => {
+    const settings = getSettings();
+    const featuredIssue = getFeaturedIssue();
+    const issues = listIssues().slice(0, 6);
+
+    res.render("home", {
+      page: getPageContent("home"),
+      featuredIssue,
+      issues,
+      meta: buildMeta(settings.seoHomeTitle || settings.siteTitle, settings.seoHomeDescription || settings.siteDescription),
+      dayjs
+    });
+  });
+
+  router.get("/about", (_req, res) => {
+    const settings = getSettings();
+    res.render("about", {
+      page: getPageContent("about"),
+      meta: buildMeta(`О журнале | ${settings.siteTitle}`, settings.siteDescription)
+    });
+  });
+
+  router.get("/issues", (_req, res) => {
+    const settings = getSettings();
+    res.render("issues", {
+      issues: listIssues(),
+      meta: buildMeta(`Выпуски | ${settings.siteTitle}`, "Актуальные и архивные выпуски журнала с анонсами и обложками."),
+      dayjs
+    });
+  });
+
+  router.get("/issues/:slug", (req, res) => {
+    const settings = getSettings();
+    const issue = getIssueBySlug(req.params.slug);
+    if (!issue) {
+      res.status(404).render("404", {
+        meta: buildMeta("Выпуск не найден", "Запрошенный выпуск не найден.")
+      });
+      return;
+    }
+
+    res.render("issue-detail", {
+      issue,
+      meta: buildMeta(`${issue.numberLabel} | ${settings.siteTitle}`, issue.teaser),
+      dayjs
+    });
+  });
+
+  router.get("/published-lists", async (_req, res, next) => {
+    const settings = getSettings();
+    try {
+      const items = await Promise.all(
+        listPublishedLists(true).map(async (item) => {
+          const absolute = item.filePath ? path.resolve(item.filePath) : "";
+          const preview = absolute && fs.existsSync(absolute) ? await parseWorkbookPreview(absolute) : { headers: [], rows: [] };
+          return {
+            ...item,
+            preview
+          };
+        })
+      );
+
+      res.render("published-lists", {
+        items,
+        meta: buildMeta(`Перечни опубликованного | ${settings.siteTitle}`, "Импортированные перечни опубликованного с возможностью скачивания файлов."),
+        dayjs
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get("/payment", (_req, res) => {
+    const settings = getSettings();
+    res.render("payment", {
+      page: getPageContent("payment"),
+      meta: buildMeta(`Счет и оплата | ${settings.siteTitle}`, "Скачивание счета-фактуры и порядок оплаты."),
+      invoiceFile: settings.invoiceFile
+    });
+  });
+
+  router.get("/contacts", (_req, res) => {
+    const settings = getSettings();
+    res.render("contacts", {
+      page: getPageContent("contacts"),
+      meta: buildMeta(`Контакты | ${settings.siteTitle}`, "Контактная информация редакции и форма обратной связи."),
+      success: false
+    });
+  });
+
+  router.post("/contacts", formLimiter, (req, res) => {
+    const { name, email, phone, message, website } = req.body as Record<string, string>;
+    if (website) {
+      req.session.flash = { type: "success", message: "Сообщение отправлено." };
+      res.redirect("/contacts");
+      return;
+    }
+
+    if (!name || !email || !phone || !message) {
+      req.session.flash = { type: "error", message: "Заполните все поля формы." };
+      res.redirect("/contacts");
+      return;
+    }
+
+    saveMessage(name.trim(), email.trim(), phone.trim(), message.trim());
+    req.session.flash = { type: "success", message: "Сообщение отправлено. Редакция свяжется с вами." };
+    res.redirect("/contacts");
+  });
+
+  router.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send("User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n");
+  });
+
+  router.get("/sitemap.xml", (_req, res) => {
+    const settings = getSettings();
+    const base = (settings.siteUrl || process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+    const urls = ["", "/about", "/issues", "/published-lists", "/payment", "/contacts"];
+    const issueUrls = listIssues().map((issue) => `/issues/${issue.slug}`);
+    const body = [
+      ...urls,
+      ...issueUrls
+    ]
+      .map((url) => `<url><loc>${base}${url}</loc></url>`)
+      .join("");
+
+    res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}</urlset>`);
+  });
+
+  return router;
+}

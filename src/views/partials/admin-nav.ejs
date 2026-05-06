@@ -1,0 +1,15 @@
+<aside class="admin-sidebar">
+  <a href="/admin" class="admin-brand">CMS журнала</a>
+  <nav class="admin-nav">
+    <a href="/admin">Обзор</a>
+    <a href="/admin/settings">Настройки</a>
+    <a href="/admin/pages">Страницы</a>
+    <a href="/admin/issues">Выпуски</a>
+    <a href="/admin/lists">Перечни</a>
+    <a href="/admin/messages">Сообщения</a>
+  </nav>
+  <form method="post" action="/admin/logout">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <button class="button button-secondary admin-logout" type="submit">Выйти</button>
+  </form>
+</aside>

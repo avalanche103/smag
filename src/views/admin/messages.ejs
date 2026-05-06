@@ -1,0 +1,35 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Сообщения</p>
+        <h1>Форма обратной связи</h1>
+      </div>
+    </div>
+    <div class="stack-list">
+      <% messages.forEach((message) => { %>
+        <article class="admin-card">
+          <div class="section-head compact-head">
+            <div>
+              <h2><%= message.name %></h2>
+              <p><a href="mailto:<%= message.email %>"><%= message.email %></a> · <a href="tel:<%= message.phone %>"><%= message.phone %></a></p>
+            </div>
+            <% if (!message.isRead) { %>
+              <form method="post" action="/admin/messages/<%= message.id %>/read">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button class="button button-secondary" type="submit">Отметить прочитанным</button>
+              </form>
+            <% } %>
+          </div>
+          <p><%= message.message %></p>
+          <small>Получено: <%= message.createdAt %></small>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+</main>
+</body>
+</html>

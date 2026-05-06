@@ -1,0 +1,46 @@
+<%- include('partials/head', { meta, site }) %>
+<%- include('partials/header', { path, site }) %>
+<%- include('partials/flash', { flash }) %>
+
+<main class="section">
+  <div class="shell contact-grid">
+    <section>
+      <p class="eyebrow">Контакты</p>
+      <h1><%= page.title %></h1>
+      <p class="lead"><%= page.lead %></p>
+      <ul class="contact-list">
+        <li><strong>Телефон:</strong> <a href="tel:<%= site.phone %>"><%= site.phone %></a></li>
+        <li><strong>Email:</strong> <a href="mailto:<%= site.email %>"><%= site.email %></a></li>
+        <li><strong>Адрес:</strong> <%= site.address %></li>
+        <li><strong>Часы работы:</strong> <%= site.workingHours %></li>
+        <li><strong>Контактное лицо:</strong> <%= site.contactPerson %></li>
+      </ul>
+    </section>
+    <section class="form-card">
+      <h2>Форма обратной связи</h2>
+      <form method="post" action="/contacts" class="stack-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off" />
+        <label>
+          Имя
+          <input type="text" name="name" required />
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" required />
+        </label>
+        <label>
+          Телефон
+          <input type="tel" name="phone" required />
+        </label>
+        <label>
+          Сообщение
+          <textarea name="message" rows="5" required></textarea>
+        </label>
+        <button class="button button-accent" type="submit">Отправить сообщение</button>
+      </form>
+    </section>
+  </div>
+</main>
+
+<%- include('partials/footer', { site }) %>
