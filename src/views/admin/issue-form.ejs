@@ -1,4 +1,19 @@
 <%- include('../partials/head', { meta, site }) %>
+<%
+  const issueMaterialsSource = typeof materials !== 'undefined' && Array.isArray(materials)
+    ? materials
+    : Array.isArray(issue?.materials)
+      ? issue.materials
+      : [];
+  const issueMaterials = issueMaterialsSource.map((material) => ({
+    title: material?.title || '',
+    isPrimary: material?.isPrimary ? 1 : 0
+  }));
+
+  while (issueMaterials.length < 10) {
+    issueMaterials.push({ title: '', isPrimary: 0 });
+  }
+%>
 <main class="admin-layout">
   <%- include('../partials/admin-nav', { csrfToken }) %>
   <section class="admin-main">
@@ -16,11 +31,34 @@
       <div class="form-grid-two">
         <label>Номер выпуска<input type="text" name="numberLabel" value="<%= issue?.numberLabel || '' %>" required /></label>
         <label>Дата выпуска<input type="date" name="publishDate" value="<%= issue?.publishDate || '' %>" required /></label>
-        <label>Заголовок<input type="text" name="title" value="<%= issue?.title || '' %>" required /></label>
         <label>Slug<input type="text" name="slug" value="<%= issue?.slug || '' %>" /></label>
       </div>
-      <label>Краткий анонс<textarea name="teaser" rows="4"><%= issue?.teaser || '' %></textarea></label>
-      <label>Подробное описание<textarea name="summary" rows="6"><%= issue?.summary || '' %></textarea></label>
+      <div class="materials-editor" data-material-editor data-max-primary="3">
+        <div class="materials-editor-head">
+          <div>
+            <label>Список материалов</label>
+            <p class="form-note">По умолчанию доступно 10 строк. Отметьте до 3 пунктов как основные для блоков «Последний номер» и «Выпуски журналов».</p>
+          </div>
+          <div class="materials-editor-actions">
+            <span class="material-status" data-primary-status></span>
+            <button class="button button-secondary" type="button" data-add-material>Добавить строку</button>
+          </div>
+        </div>
+        <div class="materials-list" data-material-list>
+          <% issueMaterials.forEach((material, index) => { %>
+            <div class="material-row">
+              <label>Материал <%= index + 1 %><input type="text" name="materials[<%= index %>][title]" value="<%= material.title %>" /></label>
+              <label class="checkbox material-primary"><input type="checkbox" name="materials[<%= index %>][isPrimary]" value="1" data-material-primary <%= material.isPrimary ? 'checked' : '' %> /> Основные материалы</label>
+            </div>
+          <% }) %>
+        </div>
+        <template data-material-template>
+          <div class="material-row">
+            <label>Материал __NUMBER__<input type="text" name="materials[__INDEX__][title]" value="" /></label>
+            <label class="checkbox material-primary"><input type="checkbox" name="materials[__INDEX__][isPrimary]" value="1" data-material-primary /> Основные материалы</label>
+          </div>
+        </template>
+      </div>
       <label>Обложка JPG/PNG/WebP<input type="file" name="coverImage" accept="image/png,image/jpeg,image/webp" <%= issue ? '' : 'required' %> /></label>
       <% if (issue?.coverImage) { %>
         <img class="thumb-preview" src="<%= issue.coverImage %>" alt="Текущая обложка" />

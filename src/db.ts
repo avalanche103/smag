@@ -3,7 +3,7 @@ import path from "node:path";
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { env } from "./config/env";
-import type { DataStore, PageContent } from "./types";
+import type { DataStore, IssueMaterial, JournalIssue, PageContent } from "./types";
 
 fs.mkdirSync(path.dirname(env.contentFile), { recursive: true });
 fs.mkdirSync(env.uploadsDir, { recursive: true });
@@ -70,6 +70,82 @@ const pageDefaults = [
   }
 ] as const satisfies PageContent[];
 
+const MAX_PRIMARY_MATERIALS = 3;
+
+function splitLegacyMaterialText(value: unknown): string[] {
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[\s\-•–—]+/, "").trim())
+    .filter(Boolean);
+}
+
+function normalizeIssueMaterials(materials: unknown, legacyValues: unknown[] = []): IssueMaterial[] {
+  const source = Array.isArray(materials)
+    ? materials
+    : typeof materials === "object" && materials !== null
+      ? Object.values(materials as Record<string, unknown>)
+      : [];
+
+  const parsed = source
+    .map((item) => {
+      if (!item || typeof item !== "object") {
+        return null;
+      }
+
+      const entry = item as Record<string, unknown>;
+      const title = typeof entry.title === "string" ? entry.title.trim() : "";
+      if (!title) {
+        return null;
+      }
+
+      return {
+        title,
+        isPrimary: entry.isPrimary ? 1 : 0
+      } satisfies IssueMaterial;
+    })
+    .filter((item): item is IssueMaterial => item !== null);
+
+  const fallback = legacyValues
+    .flatMap((value) => splitLegacyMaterialText(value))
+    .filter((title, index, items) => items.indexOf(title) === index)
+    .map((title, index) => ({
+      title,
+      isPrimary: index < MAX_PRIMARY_MATERIALS ? 1 : 0
+    } satisfies IssueMaterial));
+
+  let primaryCount = 0;
+
+  return (parsed.length ? parsed : fallback).map((item) => {
+    const isPrimary = item.isPrimary === 1 && primaryCount < MAX_PRIMARY_MATERIALS ? 1 : 0;
+    if (isPrimary) {
+      primaryCount += 1;
+    }
+
+    return {
+      title: item.title,
+      isPrimary
+    };
+  });
+}
+
+function normalizeIssue(issue: Record<string, unknown>): JournalIssue {
+  return {
+    id: Number(issue.id ?? 0),
+    numberLabel: typeof issue.numberLabel === "string" ? issue.numberLabel : "",
+    publishDate: typeof issue.publishDate === "string" ? issue.publishDate : "",
+    slug: typeof issue.slug === "string" ? issue.slug : "",
+    materials: normalizeIssueMaterials(issue.materials, [issue.title, issue.teaser, issue.summary]),
+    coverImage: typeof issue.coverImage === "string" ? issue.coverImage : "",
+    isPublished: issue.isPublished ? 1 : 0,
+    isFeatured: issue.isFeatured ? 1 : 0,
+    createdAt: typeof issue.createdAt === "string" ? issue.createdAt : new Date().toISOString()
+  };
+}
+
 function createInitialStore(): DataStore {
   const timestamp = new Date().toISOString();
   const issues = [
@@ -78,9 +154,13 @@ function createInitialStore(): DataStore {
       numberLabel: "№ 2 (2026)",
       publishDate: "2026-04-20",
       slug: slugify("№ 2 (2026)-Экономика и правовые риски строительных проектов", { lower: true, strict: true, locale: "ru" }),
-      title: "Экономика и правовые риски строительных проектов",
-      teaser: "Изменения в подрядных договорах, учет капитальных затрат и практика разрешения споров в строительстве Беларуси.",
-      summary: "В выпуск включены материалы по договорной работе, сметной дисциплине, налоговым последствиям инвестиционно-строительных проектов в Республике Беларусь и внутреннему контролю.",
+      materials: [
+        { title: "Экономика и правовые риски строительных проектов", isPrimary: 1 },
+        { title: "Изменения в подрядных договорах", isPrimary: 1 },
+        { title: "Учет капитальных затрат и практика разрешения споров в строительстве Беларуси", isPrimary: 1 },
+        { title: "Сметная дисциплина и контроль инвестиционно-строительных проектов", isPrimary: 0 },
+        { title: "Внутренний контроль в строительной организации", isPrimary: 0 }
+      ],
       coverImage: "https://placehold.co/640x900/e5dfd1/23313e?text=%D0%96%D1%83%D1%80%D0%BD%D0%B0%D0%BB+2%2F2026",
       isPublished: 1,
       isFeatured: 1,
@@ -91,9 +171,13 @@ function createInitialStore(): DataStore {
       numberLabel: "№ 1 (2026)",
       publishDate: "2026-02-15",
       slug: slugify("№ 1 (2026)-Учет и налогообложение в строительных организациях", { lower: true, strict: true, locale: "ru" }),
-      title: "Учет и налогообложение в строительных организациях Беларуси",
-      teaser: "Практические кейсы по себестоимости, авансам, резервам и управленческому контролю в строительной компании Республики Беларусь.",
-      summary: "Материалы номера посвящены формированию финансового результата, налоговому планированию и правовому обеспечению строительной деятельности в Беларуси.",
+      materials: [
+        { title: "Учет и налогообложение в строительных организациях Беларуси", isPrimary: 1 },
+        { title: "Практические кейсы по себестоимости, авансам и резервам", isPrimary: 1 },
+        { title: "Управленческий контроль в строительной компании Республики Беларусь", isPrimary: 1 },
+        { title: "Формирование финансового результата и налоговое планирование", isPrimary: 0 },
+        { title: "Правовое обеспечение строительной деятельности в Беларуси", isPrimary: 0 }
+      ],
       coverImage: "https://placehold.co/640x900/dfe7ea/1f3847?text=%D0%96%D1%83%D1%80%D0%BD%D0%B0%D0%BB+1%2F2026",
       isPublished: 1,
       isFeatured: 0,
@@ -129,11 +213,13 @@ function createInitialStore(): DataStore {
 
 function mergeDefaults(store: DataStore): DataStore {
   const initial = createInitialStore();
+  const issues = (store.issues.length ? store.issues : initial.issues).map((issue) => normalizeIssue(issue as unknown as Record<string, unknown>));
+
   return {
     admins: store.admins.length ? store.admins : initial.admins,
     settings: { ...initial.settings, ...store.settings },
     pages: initial.pages.map((page) => store.pages.find((item) => item.pageKey === page.pageKey) ?? page),
-    issues: store.issues.length ? store.issues : initial.issues,
+    issues,
     publishedLists: store.publishedLists.length ? store.publishedLists : initial.publishedLists,
     contactMessages: store.contactMessages ?? []
   };

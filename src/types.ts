@@ -1,13 +1,16 @@
 export type PageKey = "home" | "about" | "payment" | "contacts";
 
+export interface IssueMaterial {
+  title: string;
+  isPrimary: number;
+}
+
 export interface JournalIssue {
   id: number;
   numberLabel: string;
   publishDate: string;
   slug: string;
-  title: string;
-  teaser: string;
-  summary: string;
+  materials: IssueMaterial[];
   coverImage: string;
   isPublished: number;
   isFeatured: number;

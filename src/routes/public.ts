@@ -8,6 +8,7 @@ import "dayjs/locale/ru";
 import {
   getFeaturedIssue,
   getIssueBySlug,
+  getPrimaryIssueMaterials,
   getPageContent,
   getSettings,
   listIssues,
@@ -68,9 +69,13 @@ export default function publicRouter(formLimiter: RequestHandler) {
       return;
     }
 
+    const metaDescription = getPrimaryIssueMaterials(issue)
+      .map((material) => material.title)
+      .join("; ") || `Материалы выпуска ${issue.numberLabel}`;
+
     res.render("issue-detail", {
       issue,
-      meta: buildMeta(`${issue.numberLabel} | ${settings.siteTitle}`, issue.teaser),
+      meta: buildMeta(`${issue.numberLabel} | ${settings.siteTitle}`, metaDescription),
       dayjs
     });
   });

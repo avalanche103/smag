@@ -13,6 +13,20 @@ if errorlevel 1 (
 )
 
 if not exist node_modules (
+  goto install_deps
+)
+
+if not exist node_modules\.bin\nodemon.cmd (
+  goto install_deps
+)
+
+if not exist node_modules\.bin\ts-node.cmd (
+  goto install_deps
+)
+
+goto run_dev
+
+:install_deps
   echo [smag] Installing dependencies...
   call npm install
   if errorlevel 1 (
@@ -22,6 +36,7 @@ if not exist node_modules (
   )
 )
 
+:run_dev
 echo [smag] Running development server...
 call npm run dev
 

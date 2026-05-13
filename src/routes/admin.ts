@@ -1,12 +1,13 @@
 import path from "node:path";
 import { Router } from "express";
 import slugify from "slugify";
-import type { PageKey } from "../types";
+import type { IssueMaterial, PageKey } from "../types";
 import {
   createPublishedList,
   deleteIssue,
   deletePublishedList,
   getAllPages,
+  getIssueFormMaterials,
   getIssueById,
   getSettings,
   listIssues,
@@ -21,6 +22,26 @@ import {
 import { requireAdmin } from "../middleware/auth";
 import { verifyCsrfToken } from "../middleware/csrf";
 import { coverUpload, invoiceUpload, listUpload } from "../middleware/uploads";
+
+function parseIssueMaterials(input: unknown): IssueMaterial[] {
+  const entries = Array.isArray(input)
+    ? input
+    : typeof input === "object" && input !== null
+      ? Object.values(input as Record<string, unknown>)
+      : [];
+
+  return entries.map((entry) => {
+    if (!entry || typeof entry !== "object") {
+      return { title: "", isPrimary: 0 };
+    }
+
+    const record = entry as Record<string, unknown>;
+    return {
+      title: typeof record.title === "string" ? record.title : "",
+      isPrimary: record.isPrimary ? 1 : 0
+    };
+  });
+}
 
 export default function adminRouter() {
   const router = Router();
@@ -136,7 +157,8 @@ export default function adminRouter() {
   router.get("/issues/new", (_req, res) => {
     res.render("admin/issue-form", {
       meta: { title: "Новый выпуск", description: "Создание карточки выпуска" },
-      issue: null
+      issue: null,
+      materials: getIssueFormMaterials()
     });
   });
 
@@ -148,24 +170,29 @@ export default function adminRouter() {
     }
     res.render("admin/issue-form", {
       meta: { title: `Редактирование: ${issue.numberLabel}`, description: "Редактирование выпуска" },
-      issue
+      issue,
+      materials: getIssueFormMaterials(issue)
     });
   });
 
   router.post("/issues", coverUpload.single("coverImage"), verifyCsrfToken, (req, res) => {
-    const body = req.body as Record<string, string>;
+    const body = req.body as Record<string, unknown>;
     const uploadedCover = req.file ? `/uploads/covers/${req.file.filename}` : body.existingCover;
-    const slug = body.slug?.trim() || slugify(`${body.numberLabel}-${body.title}`, { lower: true, strict: true, locale: "ru" });
+    const materials = parseIssueMaterials(body.materials);
+    const firstMaterial = materials.find((material) => material.title.trim())?.title ?? "vypusk";
+    const numberLabel = typeof body.numberLabel === "string" ? body.numberLabel : "";
+    const slugSource = `${numberLabel}-${firstMaterial}`;
+    const slug = typeof body.slug === "string" && body.slug.trim()
+      ? body.slug.trim()
+      : slugify(slugSource, { lower: true, strict: true, locale: "ru" });
 
     saveIssue({
-      id: body.id ? Number(body.id) : undefined,
-      numberLabel: body.numberLabel ?? "",
-      publishDate: body.publishDate ?? "",
+      id: typeof body.id === "string" && body.id ? Number(body.id) : undefined,
+      numberLabel,
+      publishDate: typeof body.publishDate === "string" ? body.publishDate : "",
       slug,
-      title: body.title ?? "",
-      teaser: body.teaser ?? "",
-      summary: body.summary ?? "",
-      coverImage: uploadedCover ?? "",
+      materials,
+      coverImage: typeof uploadedCover === "string" ? uploadedCover : "",
       isPublished: body.isPublished ? 1 : 0,
       isFeatured: body.isFeatured ? 1 : 0
     });

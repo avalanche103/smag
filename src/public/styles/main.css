@@ -5,8 +5,8 @@
   --ink: #1d2b36;
   --muted: #5d6c76;
   --line: rgba(29, 43, 54, 0.12);
-  --accent: #af5f3c;
-  --accent-dark: #8d4728;
+  --accent: #c62828;
+  --accent-dark: #9f1f1f;
   --deep: #243847;
   --success: #d9efe3;
   --error: #f5ddd9;
@@ -79,6 +79,53 @@ select {
   margin-right: auto;
 }
 
+.brand-copy {
+  display: grid;
+  width: min(340px, 100%);
+  line-height: 1.04;
+  transform: scale(0.95);
+  transform-origin: left center;
+}
+
+.brand-line {
+  display: block;
+  width: 100%;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brand-line-primary,
+.brand-line-secondary {
+  font-size: 1.14rem;
+}
+
+.brand-line-primary {
+  color: var(--accent);
+  font-size: 2.772rem;
+  font-weight: 700;
+  letter-spacing: 0.008em;
+}
+
+.brand-line-secondary,
+.brand-line-tertiary {
+  color: #111;
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+.brand-line-secondary {
+  font-size: 1.85535rem;
+  letter-spacing: 0.008em;
+}
+
+.brand-line-tertiary {
+  margin-top: 4px;
+  font-size: 0.635rem;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
 .brand strong,
 h1,
 h2,
@@ -105,14 +152,6 @@ h3 {
 dt,
 small {
   color: var(--muted);
-}
-
-.brand-logo {
-  display: block;
-  width: auto;
-  height: 72px;
-  max-width: 240px;
-  object-fit: contain;
 }
 
 .site-nav {
@@ -282,6 +321,10 @@ small {
   padding: 28px;
 }
 
+.hero-card-white {
+  background: #fff;
+}
+
 .cover-frame {
   padding: 14px;
   background: linear-gradient(180deg, #fff, #f1ece3);
@@ -307,6 +350,8 @@ small {
 
 .issue-card {
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .issue-card > div {
@@ -316,10 +361,83 @@ small {
 .issue-card-wide {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.issue-card-body,
+.issue-card-body-wide {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.issue-card-footer {
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.issue-material-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.issue-material-list li {
+  color: var(--muted);
+}
+
+.issue-material-list-accent li {
+  color: var(--deep);
+  font-weight: 600;
+}
+
+.issue-material-list-featured {
+  margin-bottom: 24px;
+  gap: 14px;
+}
+
+.issue-material-list-compact {
+  margin-bottom: 18px;
+}
+
+.issue-material-list-detail li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(255, 253, 248, 0.88);
+  border: 1px solid rgba(36, 56, 71, 0.08);
+  border-radius: 18px;
+}
+
+.issue-material-list-detail li.is-primary {
+  border-color: rgba(175, 95, 60, 0.3);
+  background: linear-gradient(180deg, rgba(255, 247, 240, 0.92), rgba(255, 253, 248, 0.92));
+}
+
+.material-badge {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(175, 95, 60, 0.12);
+  color: var(--accent-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.detail-materials-block {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .issue-card-wide img {
-  height: 100%;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 64 / 90;
+  object-fit: cover;
 }
 
 .section-muted {
@@ -478,6 +596,59 @@ select {
   width: auto;
 }
 
+.materials-editor {
+  display: grid;
+  gap: 16px;
+}
+
+.materials-editor-head,
+.materials-editor-actions,
+.material-row {
+  display: flex;
+  gap: 14px;
+}
+
+.materials-editor-head,
+.materials-editor-actions {
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.materials-list {
+  display: grid;
+  gap: 12px;
+}
+
+.material-row {
+  align-items: end;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(36, 56, 71, 0.08);
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.material-row label:first-child {
+  flex: 1 1 auto;
+}
+
+.material-primary {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-bottom: 12px;
+}
+
+.form-note,
+.material-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.material-status.is-error {
+  color: #b13c28;
+}
+
 .admin-layout {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -600,6 +771,12 @@ select {
   }
 
   .promo-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .material-row,
+  .issue-material-list-detail li {
     flex-direction: column;
     align-items: flex-start;
   }

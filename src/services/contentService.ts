@@ -1,6 +1,47 @@
 import bcrypt from "bcryptjs";
 import { readStore, updateStore } from "../db";
-import type { ContactMessage, JournalIssue, PageContent, PageKey, PublishedListItem } from "../types";
+import type { ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem } from "../types";
+
+export const DEFAULT_ISSUE_MATERIAL_COUNT = 10;
+export const MAX_PRIMARY_ISSUE_MATERIALS = 3;
+
+export function sanitizeIssueMaterials(materials: IssueMaterial[]): IssueMaterial[] {
+  let primaryCount = 0;
+
+  return materials
+    .map((material) => {
+      const title = material.title.trim();
+      if (!title) {
+        return null;
+      }
+
+      const isPrimary = material.isPrimary === 1 && primaryCount < MAX_PRIMARY_ISSUE_MATERIALS ? 1 : 0;
+      if (isPrimary) {
+        primaryCount += 1;
+      }
+
+      return {
+        title,
+        isPrimary
+      } satisfies IssueMaterial;
+    })
+    .filter((material): material is IssueMaterial => material !== null);
+}
+
+export function getPrimaryIssueMaterials(issue: JournalIssue): IssueMaterial[] {
+  const primaryMaterials = issue.materials.filter((material) => material.isPrimary === 1);
+  return (primaryMaterials.length ? primaryMaterials : issue.materials).slice(0, MAX_PRIMARY_ISSUE_MATERIALS);
+}
+
+export function getIssueFormMaterials(issue?: JournalIssue): IssueMaterial[] {
+  const materials = [...(issue?.materials ?? [])].map((material) => ({ ...material }));
+
+  while (materials.length < DEFAULT_ISSUE_MATERIAL_COUNT) {
+    materials.push({ title: "", isPrimary: 0 });
+  }
+
+  return materials;
+}
 
 export function getSettings(): Record<string, string> {
   return readStore().settings;
@@ -62,6 +103,11 @@ export function getIssueById(id: number): JournalIssue | undefined {
 
 export function saveIssue(issue: Omit<JournalIssue, "id" | "createdAt"> & { id?: number }): void {
   updateStore((store) => {
+    const normalizedIssue = {
+      ...issue,
+      materials: sanitizeIssueMaterials(issue.materials)
+    };
+
     if (issue.isFeatured) {
       for (const item of store.issues) {
         item.isFeatured = 0;
@@ -73,13 +119,13 @@ export function saveIssue(issue: Omit<JournalIssue, "id" | "createdAt"> & { id?:
       if (!existing) {
         throw new Error(`Issue not found: ${issue.id}`);
       }
-      Object.assign(existing, issue);
+      Object.assign(existing, normalizedIssue);
       return;
     }
 
     const nextId = Math.max(0, ...store.issues.map((item) => item.id)) + 1;
     store.issues.push({
-      ...issue,
+      ...normalizedIssue,
       id: nextId,
       createdAt: new Date().toISOString()
     });

@@ -7,22 +7,24 @@
     <div>
       <p class="eyebrow">Выпуски</p>
       <h1>Актуальные и архивные номера</h1>
-      <p class="lead">На сайте размещаются только анонсы, обложки и карточки выпусков без полного текста статей.</p>
     </div>
-    <a class="button button-accent" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет-фактуру</a>
   </div>
-  <div class="shell card-grid card-grid-wide">
+  <div class="shell card-grid">
     <% issues.forEach((issue) => { %>
-      <article class="issue-card issue-card-wide">
+      <% const primaryMaterials = issue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
+      <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
+      <article class="issue-card">
         <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
-        <div>
+        <div class="issue-card-body">
           <span class="issue-date"><%= dayjs(issue.publishDate).format('D MMMM YYYY') %></span>
           <h2><%= issue.numberLabel %></h2>
-          <p class="lead"><%= issue.title %></p>
-          <p><%= issue.teaser %></p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="/issues/<%= issue.slug %>">Карточка выпуска</a>
-            <a class="button button-secondary" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет</a>
+          <ul class="issue-material-list issue-material-list-compact">
+            <% previewMaterials.forEach((material) => { %>
+              <li><%= material.title %></li>
+            <% }) %>
+          </ul>
+          <div class="issue-card-footer">
+            <a class="button button-primary" href="/issues/<%= issue.slug %>">Подробнее</a>
           </div>
         </div>
       </article>

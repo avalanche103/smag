@@ -14,7 +14,7 @@
           <a class="button button-secondary" href="/issues">Смотреть выпуски</a>
         </div>
       </div>
-      <div class="hero-card">
+      <div class="hero-card hero-card-white">
         <span class="eyebrow">Для кого</span>
         <p><%= site.aboutAudience %></p>
         <ul class="check-list">
@@ -27,26 +27,20 @@
   </section>
 
   <% if (featuredIssue) { %>
+    <% const featuredPrimaryMaterials = featuredIssue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
+    <% const featuredMaterials = (featuredPrimaryMaterials.length ? featuredPrimaryMaterials : featuredIssue.materials.filter((material) => material.title)).slice(0, 3); %>
     <section class="section">
       <div class="shell latest-grid">
         <div>
           <p class="eyebrow">Последний номер</p>
           <h2><%= featuredIssue.numberLabel %></h2>
-          <p class="lead"><%= featuredIssue.title %></p>
-          <p><%= featuredIssue.summary %></p>
-          <dl class="meta-grid">
-            <div>
-              <dt>Дата выпуска</dt>
-              <dd><%= dayjs(featuredIssue.publishDate).format('D MMMM YYYY') %></dd>
-            </div>
-            <div>
-              <dt>Формат</dt>
-              <dd><%= site.distributionFormat %></dd>
-            </div>
-          </dl>
+          <ul class="issue-material-list issue-material-list-featured issue-material-list-accent">
+            <% featuredMaterials.forEach((material) => { %>
+              <li><%= material.title %></li>
+            <% }) %>
+          </ul>
           <div class="hero-actions">
-            <a class="button button-primary" href="/issues/<%= featuredIssue.slug %>">Карточка выпуска</a>
-            <a class="button button-secondary" href="<%= site.invoiceFile || '/payment' %>" <%= site.invoiceFile ? 'target="_blank" rel="noopener"' : '' %>>Скачать счет</a>
+            <a class="button button-primary" href="/issues/<%= featuredIssue.slug %>">Подробнее</a>
           </div>
         </div>
         <div class="cover-frame">
@@ -58,6 +52,7 @@
 
   <section class="section section-muted">
     <div class="shell">
+      <% const archiveIssues = featuredIssue ? issues.filter((issue) => issue.id !== featuredIssue.id) : issues; %>
       <div class="section-head">
         <div>
           <p class="eyebrow">Анонсы и архив</p>
@@ -66,14 +61,22 @@
         <a class="text-link" href="/issues">Все выпуски</a>
       </div>
       <div class="card-grid">
-        <% issues.forEach((issue) => { %>
+        <% archiveIssues.forEach((issue) => { %>
+          <% const primaryMaterials = issue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
+          <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
           <article class="issue-card">
             <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
-            <div>
+            <div class="issue-card-body">
               <span class="issue-date"><%= dayjs(issue.publishDate).format('MMMM YYYY') %></span>
               <h3><%= issue.numberLabel %></h3>
-              <p><%= issue.teaser %></p>
-              <a class="text-link" href="/issues/<%= issue.slug %>">Открыть карточку</a>
+              <ul class="issue-material-list issue-material-list-compact">
+                <% previewMaterials.forEach((material) => { %>
+                  <li><%= material.title %></li>
+                <% }) %>
+              </ul>
+              <div class="issue-card-footer">
+                <a class="text-link" href="/issues/<%= issue.slug %>">Подробнее</a>
+              </div>
             </div>
           </article>
         <% }) %>

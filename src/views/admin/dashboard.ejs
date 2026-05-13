@@ -14,7 +14,8 @@
         <h2>Последние выпуски</h2>
         <ul class="admin-list">
           <% issues.forEach((issue) => { %>
-            <li><strong><%= issue.numberLabel %></strong> — <%= issue.title %></li>
+            <% const leadMaterial = issue.materials.find((material) => material.title); %>
+            <li><strong><%= issue.numberLabel %></strong><%= leadMaterial ? ` — ${leadMaterial.title}` : '' %></li>
           <% }) %>
         </ul>
       </article>
