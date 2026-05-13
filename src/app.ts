@@ -5,7 +5,7 @@ import methodOverride from "method-override";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { env } from "./config/env";
-import { attachCsrfToken, verifyCsrfToken } from "./middleware/csrf";
+import { attachCsrfToken } from "./middleware/csrf";
 import { getSettings } from "./services/contentService";
 import publicRouter from "./routes/public";
 import adminRouter from "./routes/admin";
@@ -53,7 +53,6 @@ const formLimiter = rateLimit({
 app.use("/styles", express.static(path.join(env.rootDir, "src", "public", "styles")));
 app.use("/scripts", express.static(path.join(env.rootDir, "src", "public", "scripts")));
 app.use("/uploads", express.static(env.uploadsDir));
-app.use(verifyCsrfToken);
 app.use(attachCsrfToken);
 
 app.use((req, res, next) => {

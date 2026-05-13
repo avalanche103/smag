@@ -19,6 +19,7 @@ import {
   updateSettings
 } from "../services/contentService";
 import { requireAdmin } from "../middleware/auth";
+import { verifyCsrfToken } from "../middleware/csrf";
 import { coverUpload, invoiceUpload, listUpload } from "../middleware/uploads";
 
 export default function adminRouter() {
@@ -30,13 +31,7 @@ export default function adminRouter() {
     res.redirect("/admin");
   });
 
-  router.post("/login", (req, res) => {
-    req.session.adminId = 1;
-    req.session.adminLogin = "admin";
-    res.redirect("/admin");
-  });
-
-  router.post("/logout", requireAdmin, (req, res) => {
+  router.post("/logout", requireAdmin, verifyCsrfToken, (req, res) => {
     req.session.destroy(() => {
       res.redirect("/admin");
     });
@@ -60,7 +55,7 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/settings", (req, res) => {
+  router.post("/settings", verifyCsrfToken, (req, res) => {
     const body = req.body as Record<string, string>;
     updateSettings({
       siteTitle: body.siteTitle ?? "",
@@ -92,7 +87,7 @@ export default function adminRouter() {
     res.redirect("/admin/settings");
   });
 
-  router.post("/invoice", invoiceUpload.single("invoiceFile"), (req, res) => {
+  router.post("/invoice", invoiceUpload.single("invoiceFile"), verifyCsrfToken, (req, res) => {
     const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : "";
     if (!uploaded) {
       req.session.flash = { type: "error", message: "Выберите PDF-файл счета." };
@@ -124,7 +119,7 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/pages/:pageKey", (req, res) => {
+  router.post("/pages/:pageKey", verifyCsrfToken, (req, res) => {
     const { title, lead, body } = req.body as Record<string, string>;
     updatePageContent(req.params.pageKey as PageKey, title ?? "", lead ?? "", body ?? "");
     req.session.flash = { type: "success", message: "Страница обновлена." };
@@ -157,7 +152,7 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/issues", coverUpload.single("coverImage"), (req, res) => {
+  router.post("/issues", coverUpload.single("coverImage"), verifyCsrfToken, (req, res) => {
     const body = req.body as Record<string, string>;
     const uploadedCover = req.file ? `/uploads/covers/${req.file.filename}` : body.existingCover;
     const slug = body.slug?.trim() || slugify(`${body.numberLabel}-${body.title}`, { lower: true, strict: true, locale: "ru" });
@@ -179,7 +174,7 @@ export default function adminRouter() {
     res.redirect("/admin/issues");
   });
 
-  router.post("/issues/:id/delete", (req, res) => {
+  router.post("/issues/:id/delete", verifyCsrfToken, (req, res) => {
     deleteIssue(Number(req.params.id));
     req.session.flash = { type: "success", message: "Выпуск удален." };
     res.redirect("/admin/issues");
@@ -192,7 +187,7 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/lists", listUpload.single("listFile"), (req, res) => {
+  router.post("/lists", listUpload.single("listFile"), verifyCsrfToken, (req, res) => {
     if (!req.file) {
       req.session.flash = { type: "error", message: "Выберите Excel-файл для импорта." };
       res.redirect("/admin/lists");
@@ -209,13 +204,13 @@ export default function adminRouter() {
     res.redirect("/admin/lists");
   });
 
-  router.post("/lists/:id/toggle", (req, res) => {
+  router.post("/lists/:id/toggle", verifyCsrfToken, (req, res) => {
     togglePublishedList(Number(req.params.id), Number(req.body.isVisible ?? 0));
     req.session.flash = { type: "success", message: "Статус перечня обновлен." };
     res.redirect("/admin/lists");
   });
 
-  router.post("/lists/:id/delete", (req, res) => {
+  router.post("/lists/:id/delete", verifyCsrfToken, (req, res) => {
     deletePublishedList(Number(req.params.id));
     req.session.flash = { type: "success", message: "Перечень удален." };
     res.redirect("/admin/lists");
@@ -228,7 +223,7 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/messages/:id/read", (req, res) => {
+  router.post("/messages/:id/read", verifyCsrfToken, (req, res) => {
     markMessageRead(Number(req.params.id));
     req.session.flash = { type: "success", message: "Сообщение отмечено как прочитанное." };
     res.redirect("/admin/messages");

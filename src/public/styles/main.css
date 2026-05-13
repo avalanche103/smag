@@ -14,8 +14,8 @@
   --radius: 24px;
   --radius-sm: 16px;
   --shell: min(1160px, calc(100vw - 32px));
-  --font-ui: "IBM Plex Sans", "Segoe UI", sans-serif;
-  --font-display: "Source Serif 4", Georgia, serif;
+  --font-ui: "Helvetica", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Roboto Slab", Georgia, serif;
 }
 
 * {
@@ -87,6 +87,18 @@ h2,
 h3 {
   font-family: var(--font-display);
   letter-spacing: -0.03em;
+}
+
+h1 {
+  font-weight: 700;
+}
+
+h2 {
+  font-weight: 600;
+}
+
+h3 {
+  font-weight: 500;
 }
 
 .brand small,

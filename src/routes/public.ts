@@ -14,6 +14,7 @@ import {
   listPublishedLists,
   saveMessage
 } from "../services/contentService";
+import { verifyCsrfToken } from "../middleware/csrf";
 import { parseWorkbookPreview } from "../utils/excel";
 
 dayjs.extend(localizedFormat);
@@ -116,7 +117,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
     });
   });
 
-  router.post("/contacts", formLimiter, (req, res) => {
+  router.post("/contacts", formLimiter, verifyCsrfToken, (req, res) => {
     const { name, email, phone, message, website } = req.body as Record<string, string>;
     if (website) {
       req.session.flash = { type: "success", message: "Сообщение отправлено." };

@@ -9,6 +9,11 @@ export function verifyCsrfToken(req: Request, res: Response, next: NextFunction)
     return;
   }
 
+  if (typeof req.headers["content-type"] === "string" && req.headers["content-type"].startsWith("multipart/form-data")) {
+    next();
+    return;
+  }
+
   const token = typeof req.body?._csrf === "string" ? req.body._csrf : req.get("x-csrf-token");
   if (!token || token !== req.session.csrfToken) {
     res.status(403).send("Invalid CSRF token");

@@ -75,7 +75,7 @@
       "summary": "В выпуск включены материалы по договорной работе, сметной дисциплине, налоговым последствиям инвестиционно-строительных проектов в Республике Беларусь и внутреннему контролю.",
       "coverImage": "https://placehold.co/640x900/e5dfd1/23313e?text=%D0%96%D1%83%D1%80%D0%BD%D0%B0%D0%BB+2%2F2026",
       "isPublished": 1,
-      "isFeatured": 1,
+      "isFeatured": 0,
       "createdAt": "2026-05-06T20:33:18.724Z"
     },
     {
@@ -90,6 +90,19 @@
       "isPublished": 1,
       "isFeatured": 0,
       "createdAt": "2026-05-06T20:33:18.724Z"
+    },
+    {
+      "id": 3,
+      "numberLabel": "№ 4 (2026)",
+      "publishDate": "2026-05-04",
+      "slug": "4-2026-skrytaya-bezvozmezdnost-v-dogovorah-svyazannyh-so-stroitelstvom",
+      "title": "Скрытая безвозмездность в договорах, связанных со строительством",
+      "teaser": "",
+      "summary": "",
+      "coverImage": "/uploads/covers/1778662106869-jda0Kcmq.jpg",
+      "isPublished": 1,
+      "isFeatured": 1,
+      "createdAt": "2026-05-13T08:48:27.060Z"
     }
   ],
   "publishedLists": [
