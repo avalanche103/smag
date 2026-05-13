@@ -30,9 +30,7 @@ body {
   margin: 0;
   font-family: var(--font-ui);
   color: var(--ink);
-  background:
-    radial-gradient(circle at top left, rgba(175, 95, 60, 0.12), transparent 34%),
-    linear-gradient(180deg, #f7f2e9 0%, #efe7d8 100%);
+  background: #fff;
   line-height: 1.6;
 }
 
@@ -63,7 +61,7 @@ select {
   top: 0;
   z-index: 20;
   backdrop-filter: blur(16px);
-  background: rgba(247, 242, 233, 0.86);
+  background: rgba(255, 255, 255, 0.9);
   border-bottom: 1px solid var(--line);
 }
 
@@ -109,15 +107,12 @@ small {
   color: var(--muted);
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--deep), #38586e);
-  color: #fff;
-  font-weight: 700;
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 72px;
+  max-width: 240px;
+  object-fit: contain;
 }
 
 .site-nav {

@@ -5,11 +5,11 @@
   "description": "Site and custom CMS for the journal \"Строительство: Экономика, учет, право\"",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "nodemon --watch src --ext ts,ejs,css,js,json --exec ts-node --files src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "db:seed": "tsx src/scripts/seed.ts",
-    "backup": "tsx src/scripts/backup.ts",
+    "db:seed": "ts-node --files src/scripts/seed.ts",
+    "backup": "ts-node --files src/scripts/backup.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
@@ -35,6 +35,8 @@
     "@types/method-override": "^0.0.35",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.9",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.8.2"
   }
