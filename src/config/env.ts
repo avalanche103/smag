@@ -21,8 +21,8 @@ export const env = {
   dataDir: runtimeDataDir,
   seedContentFile: path.join(projectDataDir, "content.json"),
   contentFile: path.join(runtimeDataDir, "content.json"),
-  uploadsDir: path.join(runtimeDataDir, "uploads"),
-  coversDir: path.join(runtimeDataDir, "uploads", "covers"),
-  invoicesDir: path.join(runtimeDataDir, "uploads", "invoices"),
-  listsDir: path.join(runtimeDataDir, "uploads", "lists")
+  uploadsDir: path.join(projectDataDir, "uploads"),
+  coversDir: path.join(projectDataDir, "uploads", "covers"),
+  invoicesDir: path.join(projectDataDir, "uploads", "invoices"),
+  listsDir: path.join(projectDataDir, "uploads", "lists")
 };

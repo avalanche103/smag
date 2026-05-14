@@ -68,7 +68,7 @@
     {
       "id": 1,
       "numberLabel": "№ 2 (2026)",
-      "publishDate": "2026-04-20",
+      "publishDate": "2026-02-28",
       "slug": "2-2026-ekonomika-i-pravovye-riski-stroitelnyh-proektov",
       "materials": [
         {
@@ -84,7 +84,7 @@
           "isPrimary": 1
         }
       ],
-      "coverImage": "https://placehold.co/640x900/e5dfd1/23313e?text=%D0%96%D1%83%D1%80%D0%BD%D0%B0%D0%BB+2%2F2026",
+      "coverImage": "/uploads/covers/1778749437241-LjxCLzzh.jpg",
       "isPublished": 1,
       "isFeatured": 0,
       "createdAt": "2026-05-06T20:33:18.724Z"
@@ -92,7 +92,7 @@
     {
       "id": 2,
       "numberLabel": "№ 1 (2026)",
-      "publishDate": "2026-02-15",
+      "publishDate": "2026-01-31",
       "slug": "1-2026-uchet-i-nalogooblozhenie-v-stroitelnyh-organizaciyah",
       "materials": [
         {
@@ -108,7 +108,7 @@
           "isPrimary": 1
         }
       ],
-      "coverImage": "https://placehold.co/640x900/dfe7ea/1f3847?text=%D0%96%D1%83%D1%80%D0%BD%D0%B0%D0%BB+1%2F2026",
+      "coverImage": "/uploads/covers/1778749454315-zcFz_Tpg.jpg",
       "isPublished": 1,
       "isFeatured": 0,
       "createdAt": "2026-05-06T20:33:18.724Z"
@@ -132,10 +132,21 @@
           "isPrimary": 1
         }
       ],
-      "coverImage": "/uploads/covers/1778701856205-C7CmsM54.jpg",
+      "coverImage": "/uploads/covers/1778749365768-ENcJeTFW.jpg",
       "isPublished": 1,
       "isFeatured": 1,
       "createdAt": "2026-05-13T08:48:27.060Z"
+    },
+    {
+      "id": 4,
+      "numberLabel": "№ 3 (2026)",
+      "publishDate": "2026-03-31",
+      "slug": "3-2026-vypusk",
+      "materials": [],
+      "coverImage": "/uploads/covers/1778749408336-QVdZS_oP.jpg",
+      "isPublished": 1,
+      "isFeatured": 0,
+      "createdAt": "2026-05-14T09:03:28.588Z"
     }
   ],
   "publishedLists": [
