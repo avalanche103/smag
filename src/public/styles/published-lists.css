@@ -1,0 +1,8 @@
+.table-wrap a {
+  text-decoration: underline;
+  color: #1a4b8b;
+  transition: color 0.2s;
+}
+.table-wrap a:hover {
+  color: #d13b00;
+}

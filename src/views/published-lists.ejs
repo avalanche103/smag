@@ -5,48 +5,33 @@
 <main class="section">
   <div class="shell page-head narrow-head">
     <p class="eyebrow">Перечни опубликованного</p>
-    <h1>Импортированные Excel-файлы</h1>
-    <p class="lead">Раздел публикует перечни в виде файлов для скачивания и показывает структуру первого листа после импорта.</p>
+    <h1>Опубликованные материалы по выпускам</h1>
+    <p class="lead">В таблице представлены все опубликованные материалы: номер выпуска, рубрика, название и автор.</p>
   </div>
-  <div class="shell stack-list">
-    <% items.forEach((item) => { %>
-      <section class="list-card">
-        <div class="section-head compact-head">
-          <div>
-            <h2><%= item.title %></h2>
-            <p><%= item.periodLabel %></p>
-          </div>
-          <% if (item.filePath) { %>
-            <a class="button button-secondary" href="/uploads/lists/<%= item.filePath.split('\\').pop() %>" target="_blank" rel="noopener">Скачать файл</a>
-          <% } %>
-        </div>
-        <% if (item.preview.headers.length) { %>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <% item.preview.headers.forEach((header) => { %>
-                    <th><%= header %></th>
-                  <% }) %>
-                </tr>
-              </thead>
-              <tbody>
-                <% item.preview.rows.slice(0, 8).forEach((row) => { %>
-                  <tr>
-                    <% row.forEach((cell) => { %>
-                      <td><%= cell %></td>
-                    <% }) %>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-        <% } else { %>
-          <p>Файл загружен, предварительный просмотр будет доступен после импорта данных.</p>
-        <% } %>
-      </section>
-    <% }) %>
+  <div class="shell table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>№ журнала</th>
+          <th>Рубрика</th>
+          <th>Название материала</th>
+          <th>Автор</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% materials.forEach((m) => { %>
+          <tr>
+            <td><a href="/issues/<%= m.slug %>"><%= m.numberLabel %></a></td>
+            <td><%= m.section %></td>
+            <td><%= m.title %></td>
+            <td><%= m.author %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
   </div>
 </main>
 
+<link rel="stylesheet" href="/styles/published-lists.css">
+<script src="/scripts/published-lists.js"></script>
 <%- include('partials/footer', { site }) %>

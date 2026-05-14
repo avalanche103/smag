@@ -80,28 +80,26 @@ export default function publicRouter(formLimiter: RequestHandler) {
     });
   });
 
-  router.get("/published-lists", async (_req, res, next) => {
+  router.get("/published-lists", (_req, res) => {
     const settings = getSettings();
-    try {
-      const items = await Promise.all(
-        listPublishedLists(true).map(async (item) => {
-          const absolute = item.filePath ? path.resolve(item.filePath) : "";
-          const preview = absolute && fs.existsSync(absolute) ? await parseWorkbookPreview(absolute) : { headers: [], rows: [] };
-          return {
-            ...item,
-            preview
-          };
-        })
-      );
+    const issues = listIssues();
+    // Собираем все материалы из всех выпусков
+    const materials = issues.flatMap(issue =>
+      (issue.materials || []).map(material => ({
+        numberLabel: issue.numberLabel,
+        slug: issue.slug,
+        publishDate: issue.publishDate,
+        section: material.section || '',
+        title: material.title || '',
+        author: material.author || ''
+      }))
+    ).filter(m => m.title);
 
-      res.render("published-lists", {
-        items,
-        meta: buildMeta(`Перечни опубликованного | ${settings.siteTitle}`, "Импортированные перечни опубликованного с возможностью скачивания файлов."),
-        dayjs
-      });
-    } catch (error) {
-      next(error);
-    }
+    res.render("published-lists", {
+      materials,
+      meta: buildMeta(`Перечни опубликованного | ${settings.siteTitle}`, "Перечень опубликованных материалов по выпускам."),
+      dayjs
+    });
   });
 
   router.get("/payment", (_req, res) => {
