@@ -22,7 +22,9 @@ export function sanitizeIssueMaterials(materials: IssueMaterial[]): IssueMateria
 
       return {
         title,
-        isPrimary
+        isPrimary,
+        author: "-",
+        section: "-"
       } satisfies IssueMaterial;
     })
     .filter((material): material is IssueMaterial => material !== null);
@@ -37,7 +39,7 @@ export function getIssueFormMaterials(issue?: JournalIssue): IssueMaterial[] {
   const materials = [...(issue?.materials ?? [])].map((material) => ({ ...material }));
 
   while (materials.length < DEFAULT_ISSUE_MATERIAL_COUNT) {
-    materials.push({ title: "", isPrimary: 0 });
+    materials.push({ title: "", isPrimary: 0, author: "-", section: "-" });
   }
 
   return materials;

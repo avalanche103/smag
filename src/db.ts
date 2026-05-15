@@ -25,7 +25,10 @@ const settingDefaults: Array<[string, string]> = [
   ["hotlineText", "Уточняйте порядок оплаты, реквизиты и сроки получения свежего номера у редакции."],
   ["paymentTitle", "Оплата и получение счета"],
   ["paymentText", "Скачайте актуальный счет-фактуру в PDF, оплатите удобным для организации способом и свяжитесь с редакцией для подтверждения поступления платежа."],
-  ["invoiceFile", ""],
+  ["invoiceFile1", ""],
+  ["invoiceLabel1", "Скачать счет 1"],
+  ["invoiceFile2", ""],
+  ["invoiceLabel2", "Скачать счет 2"],
   ["phone", "+375 (17) 000-00-00"],
   ["email", "info@smag.example"],
   ["address", "220000, Минск, ул. Примерная, д. 10"],
@@ -104,7 +107,9 @@ function normalizeIssueMaterials(materials: unknown, legacyValues: unknown[] = [
 
       return {
         title,
-        isPrimary: entry.isPrimary ? 1 : 0
+        isPrimary: entry.isPrimary ? 1 : 0,
+        author: typeof entry.author === "string" && entry.author.trim() ? entry.author : "-",
+        section: typeof entry.section === "string" && entry.section.trim() ? entry.section : "-"
       } satisfies IssueMaterial;
     })
     .filter((item): item is IssueMaterial => item !== null);
@@ -114,7 +119,9 @@ function normalizeIssueMaterials(materials: unknown, legacyValues: unknown[] = [
     .filter((title, index, items) => items.indexOf(title) === index)
     .map((title, index) => ({
       title,
-      isPrimary: index < MAX_PRIMARY_MATERIALS ? 1 : 0
+      isPrimary: index < MAX_PRIMARY_MATERIALS ? 1 : 0,
+      author: "-",
+      section: "-"
     } satisfies IssueMaterial));
 
   let primaryCount = 0;
@@ -127,7 +134,9 @@ function normalizeIssueMaterials(materials: unknown, legacyValues: unknown[] = [
 
     return {
       title: item.title,
-      isPrimary
+      isPrimary,
+      author: item.author ?? "-",
+      section: item.section ?? "-"
     };
   });
 }
@@ -155,11 +164,11 @@ function createInitialStore(): DataStore {
       publishDate: "2026-04-20",
       slug: slugify("№ 2 (2026)-Экономика и правовые риски строительных проектов", { lower: true, strict: true, locale: "ru" }),
       materials: [
-        { title: "Экономика и правовые риски строительных проектов", isPrimary: 1 },
-        { title: "Изменения в подрядных договорах", isPrimary: 1 },
-        { title: "Учет капитальных затрат и практика разрешения споров в строительстве Беларуси", isPrimary: 1 },
-        { title: "Сметная дисциплина и контроль инвестиционно-строительных проектов", isPrimary: 0 },
-        { title: "Внутренний контроль в строительной организации", isPrimary: 0 }
+        { title: "Экономика и правовые риски строительных проектов", isPrimary: 1, author: "-", section: "-" },
+        { title: "Изменения в подрядных договорах", isPrimary: 1, author: "-", section: "-" },
+        { title: "Учет капитальных затрат и практика разрешения споров в строительстве Беларуси", isPrimary: 1, author: "-", section: "-" },
+        { title: "Сметная дисциплина и контроль инвестиционно-строительных проектов", isPrimary: 0, author: "-", section: "-" },
+        { title: "Внутренний контроль в строительной организации", isPrimary: 0, author: "-", section: "-" }
       ],
       coverImage: "https://placehold.co/640x900/e5dfd1/23313e?text=%D0%96%D1%83%D1%80%D0%BD%D0%B0%D0%BB+2%2F2026",
       isPublished: 1,
@@ -172,11 +181,11 @@ function createInitialStore(): DataStore {
       publishDate: "2026-02-15",
       slug: slugify("№ 1 (2026)-Учет и налогообложение в строительных организациях", { lower: true, strict: true, locale: "ru" }),
       materials: [
-        { title: "Учет и налогообложение в строительных организациях Беларуси", isPrimary: 1 },
-        { title: "Практические кейсы по себестоимости, авансам и резервам", isPrimary: 1 },
-        { title: "Управленческий контроль в строительной компании Республики Беларусь", isPrimary: 1 },
-        { title: "Формирование финансового результата и налоговое планирование", isPrimary: 0 },
-        { title: "Правовое обеспечение строительной деятельности в Беларуси", isPrimary: 0 }
+        { title: "Учет и налогообложение в строительных организациях Беларуси", isPrimary: 1, author: "-", section: "-" },
+        { title: "Практические кейсы по себестоимости, авансам и резервам", isPrimary: 1, author: "-", section: "-" },
+        { title: "Управленческий контроль в строительной компании Республики Беларусь", isPrimary: 1, author: "-", section: "-" },
+        { title: "Формирование финансового результата и налоговое планирование", isPrimary: 0, author: "-", section: "-" },
+        { title: "Правовое обеспечение строительной деятельности в Беларуси", isPrimary: 0, author: "-", section: "-" }
       ],
       coverImage: "https://placehold.co/640x900/dfe7ea/1f3847?text=%D0%96%D1%83%D1%80%D0%BD%D0%B0%D0%BB+1%2F2026",
       isPublished: 1,

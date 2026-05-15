@@ -89,9 +89,9 @@ export default function publicRouter(formLimiter: RequestHandler) {
         numberLabel: issue.numberLabel,
         slug: issue.slug,
         publishDate: issue.publishDate,
-        section: material.section || '',
+        section: material.section && material.section.trim() ? material.section : '-',
         title: material.title || '',
-        author: material.author || ''
+        author: material.author && material.author.trim() ? material.author : '-'
       }))
     ).filter(m => m.title);
 
@@ -102,6 +102,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
     });
   });
 
+
   router.get("/payment", (_req, res) => {
     const settings = getSettings();
     res.render("payment", {
@@ -109,6 +110,28 @@ export default function publicRouter(formLimiter: RequestHandler) {
       meta: buildMeta(`Счет и оплата | ${settings.siteTitle}`, "Скачивание счета-фактуры и порядок оплаты."),
       invoiceFile: settings.invoiceFile
     });
+  });
+
+  router.get("/subscribe", (req, res) => {
+    const settings = getSettings();
+    res.render("subscribe", {
+      meta: buildMeta(`Подписка | ${settings.siteTitle}`, "Оформление подписки на журнал."),
+      site: settings,
+      flash: req.session.flash
+    });
+    req.session.flash = undefined;
+  });
+
+  router.post("/subscribe", formLimiter, verifyCsrfToken, (req, res) => {
+    const { name, email, phone, address } = req.body as Record<string, string>;
+    if (!name || !email || !address) {
+      req.session.flash = { type: "error", message: "Пожалуйста, заполните все обязательные поля." };
+      res.redirect("/subscribe");
+      return;
+    }
+    // Здесь можно добавить сохранение заявки в базу или отправку на email
+    req.session.flash = { type: "success", message: "Заявка на подписку отправлена. Редакция свяжется с вами." };
+    res.redirect("/subscribe");
   });
 
   router.get("/contacts", (_req, res) => {

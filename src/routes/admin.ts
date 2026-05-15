@@ -1,3 +1,7 @@
+// ...existing code...
+// ...existing code...
+// ...existing code...
+// ...existing code...
 import path from "node:path";
 import { Router } from "express";
 import slugify from "slugify";
@@ -32,13 +36,15 @@ function parseIssueMaterials(input: unknown): IssueMaterial[] {
 
   return entries.map((entry) => {
     if (!entry || typeof entry !== "object") {
-      return { title: "", isPrimary: 0 };
+      return { title: "", isPrimary: 0, author: "-", section: "-" };
     }
 
     const record = entry as Record<string, unknown>;
     return {
       title: typeof record.title === "string" ? record.title : "",
-      isPrimary: record.isPrimary ? 1 : 0
+      isPrimary: record.isPrimary ? 1 : 0,
+      author: typeof record.author === "string" && record.author.trim() ? record.author : "-",
+      section: typeof record.section === "string" && record.section.trim() ? record.section : "-"
     };
   });
 }
@@ -108,16 +114,20 @@ export default function adminRouter() {
     res.redirect("/admin/settings");
   });
 
-  router.post("/invoice", invoiceUpload.single("invoiceFile"), verifyCsrfToken, (req, res) => {
-    const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : "";
-    if (!uploaded) {
-      req.session.flash = { type: "error", message: "Выберите PDF-файл счета." };
-      res.redirect("/admin/settings");
-      return;
-    }
 
-    updateSettings({ invoiceFile: uploaded });
-    req.session.flash = { type: "success", message: "Счет-фактура обновлен." };
+  router.post("/invoice1", invoiceUpload.single("invoiceFile1"), verifyCsrfToken, (req, res) => {
+    const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : req.body.currentFile1 || "";
+    const label = req.body.invoiceLabel1 || "Скачать счет 1";
+    updateSettings({ invoiceFile1: uploaded, invoiceLabel1: label });
+    req.session.flash = { type: "success", message: "Счет 1 обновлен." };
+    res.redirect("/admin/settings");
+  });
+
+  router.post("/invoice2", invoiceUpload.single("invoiceFile2"), verifyCsrfToken, (req, res) => {
+    const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : req.body.currentFile2 || "";
+    const label = req.body.invoiceLabel2 || "Скачать счет 2";
+    updateSettings({ invoiceFile2: uploaded, invoiceLabel2: label });
+    req.session.flash = { type: "success", message: "Счет 2 обновлен." };
     res.redirect("/admin/settings");
   });
 

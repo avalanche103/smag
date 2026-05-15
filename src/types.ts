@@ -3,6 +3,8 @@ export type PageKey = "home" | "about" | "payment" | "contacts";
 export interface IssueMaterial {
   title: string;
   isPrimary: number;
+  author: string;
+  section: string;
 }
 
 export interface JournalIssue {
