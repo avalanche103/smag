@@ -7,11 +7,13 @@
       : [];
   const issueMaterials = issueMaterialsSource.map((material) => ({
     title: material?.title || '',
+    author: material?.author || '',
+    section: material?.section || '',
     isPrimary: material?.isPrimary ? 1 : 0
   }));
 
   while (issueMaterials.length < 10) {
-    issueMaterials.push({ title: '', isPrimary: 0 });
+    issueMaterials.push({ title: '', author: '', section: '', isPrimary: 0 });
   }
 %>
 <main class="admin-layout">
@@ -48,6 +50,8 @@
           <% issueMaterials.forEach((material, index) => { %>
             <div class="material-row">
               <label>Материал <%= index + 1 %><input type="text" name="materials[<%= index %>][title]" value="<%= material.title %>" /></label>
+              <label>Автор<input type="text" name="materials[<%= index %>][author]" value="<%= material.author %>" /></label>
+              <label>Рубрика<input type="text" name="materials[<%= index %>][section]" value="<%= material.section %>" /></label>
               <label class="checkbox material-primary"><input type="checkbox" name="materials[<%= index %>][isPrimary]" value="1" data-material-primary <%= material.isPrimary ? 'checked' : '' %> /> Основные материалы</label>
             </div>
           <% }) %>
@@ -55,6 +59,8 @@
         <template data-material-template>
           <div class="material-row">
             <label>Материал __NUMBER__<input type="text" name="materials[__INDEX__][title]" value="" /></label>
+            <label>Автор<input type="text" name="materials[__INDEX__][author]" value="" /></label>
+            <label>Рубрика<input type="text" name="materials[__INDEX__][section]" value="" /></label>
             <label class="checkbox material-primary"><input type="checkbox" name="materials[__INDEX__][isPrimary]" value="1" data-material-primary /> Основные материалы</label>
           </div>
         </template>

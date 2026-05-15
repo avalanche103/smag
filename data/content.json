@@ -21,7 +21,10 @@
     "hotlineText": "Уточняйте порядок оплаты, реквизиты и сроки получения свежего номера у редакции.",
     "paymentTitle": "Оплата и получение счета",
     "paymentText": "Скачайте актуальный счет-фактуру в PDF, оплатите удобным для организации способом и свяжитесь с редакцией для подтверждения поступления платежа.",
-    "invoiceFile": "",
+    "invoiceFile1": "/uploads/invoices/1778794616525-RZogZf7M.pdf",
+    "invoiceLabel1": "Счет на 2-е полугодие 2006 года",
+    "invoiceFile2": "/uploads/invoices/1778794646094-WJJFjlN1.pdf",
+    "invoiceLabel2": "Счет на 2006 год",
     "phone": "+375 (17) 000-00-00",
     "email": "info@smag.example",
     "address": "220000, Минск, ул. Примерная, д. 10",
@@ -32,7 +35,8 @@
     "seoHomeDescription": "Официальный сайт журнала для строительной отрасли Беларуси: описание, выпуски, перечни опубликованного, контакты и счет-фактура для оплаты.",
     "siteUrl": "http://localhost:3000",
     "analyticsId": "",
-    "mailTo": "editor@example.com"
+    "mailTo": "editor@example.com",
+    "invoiceFile": ""
   },
   "pages": [
     {
@@ -73,18 +77,24 @@
       "materials": [
         {
           "title": "Экономика и правовые риски строительных проектов в Беларуси",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         },
         {
           "title": "Изменения в подрядных договорах, учет капитальных затрат и практика разрешения споров в строительстве Беларуси.",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         },
         {
           "title": "В выпуск включены материалы по договорной работе, сметной дисциплине, налоговым последствиям инвестиционно-строительных проектов в Республике Беларусь и внутреннему контролю.",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         }
       ],
-      "coverImage": "/uploads/covers/1778749437241-LjxCLzzh.jpg",
+      "coverImage": "/uploads/covers/1778756232409-b1_eOayP.jpg",
       "isPublished": 1,
       "isFeatured": 0,
       "createdAt": "2026-05-06T20:33:18.724Z"
@@ -97,18 +107,24 @@
       "materials": [
         {
           "title": "Учет и налогообложение в строительных организациях Беларуси",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         },
         {
           "title": "Практические кейсы по себестоимости, авансам, резервам и управленческому контролю в строительной компании Республики Беларусь.",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         },
         {
           "title": "Материалы номера посвящены формированию финансового результата, налоговому планированию и правовому обеспечению строительной деятельности в Беларуси.",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         }
       ],
-      "coverImage": "/uploads/covers/1778749454315-zcFz_Tpg.jpg",
+      "coverImage": "/uploads/covers/1778756241971-amqgUS06.jpg",
       "isPublished": 1,
       "isFeatured": 0,
       "createdAt": "2026-05-06T20:33:18.724Z"
@@ -121,18 +137,24 @@
       "materials": [
         {
           "title": "Скрытая безвозмездность в договорах, связанных со строительством",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         },
         {
           "title": "Формирование стоимости подрядных работ: разъяснения Минстройархитектуры",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         },
         {
           "title": "Как обоснованно установить плату за услуги генподрядчика",
-          "isPrimary": 1
+          "isPrimary": 1,
+          "author": "-",
+          "section": "-"
         }
       ],
-      "coverImage": "/uploads/covers/1778749365768-ENcJeTFW.jpg",
+      "coverImage": "/uploads/covers/1778756213986-0m20KJrr.jpg",
       "isPublished": 1,
       "isFeatured": 1,
       "createdAt": "2026-05-13T08:48:27.060Z"
@@ -143,7 +165,7 @@
       "publishDate": "2026-03-31",
       "slug": "3-2026-vypusk",
       "materials": [],
-      "coverImage": "/uploads/covers/1778749408336-QVdZS_oP.jpg",
+      "coverImage": "/uploads/covers/1778756223095-tdMUvynp.jpg",
       "isPublished": 1,
       "isFeatured": 0,
       "createdAt": "2026-05-14T09:03:28.588Z"

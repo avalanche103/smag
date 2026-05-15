@@ -1,0 +1,49 @@
+<%- include('partials/head', { meta, site }) %>
+<%- include('partials/header', { path, site }) %>
+<%- include('partials/flash', { flash }) %>
+
+<main class="section">
+  <div class="shell payment-grid">
+    <section>
+      <p class="eyebrow">Подписка</p>
+      <h1>Оформление подписки</h1>
+      <p class="lead">Подписка на журнал — это:</p>
+      <ul class="subscribe-benefits">
+        <li>Доставка свежих выпусков прямо в офис или на e-mail</li>
+        <li>Доступ к профессиональным материалам и аналитике</li>
+        <li>Актуальные рекомендации по учету, экономике и праву в строительстве</li>
+        <li>Оперативная поддержка редакции для подписчиков</li>
+      </ul>
+      <div class="subscribe-invoices" style="margin-top:2em;display:flex;flex-direction:column;gap:1em;">
+        <% if (site.invoiceFile1) { %>
+          <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile1 %>" target="_blank" rel="noopener"><%= site.invoiceLabel1 || 'Скачать счет 1' %></a>
+        <% } %>
+        <% if (site.invoiceFile2) { %>
+          <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile2 %>" target="_blank" rel="noopener"><%= site.invoiceLabel2 || 'Скачать счет 2' %></a>
+        <% } %>
+      </div>
+    </section>
+    <aside class="info-panel">
+      <div>
+        <h2>Варианты подписки</h2>
+        <p>Выберите удобный для вас срок и способ получения журнала. Подробности уточняйте у редакции.</p>
+      </div>
+      <div>
+        <h2>Контакт для подписки</h2>
+        <p><%= site.contactPerson %></p>
+        <p><a href="mailto:<%= site.email %>"><%= site.email %></a></p>
+        <p><a href="tel:<%= site.phone %>"><%= site.phone %></a></p>
+      </div>
+      <div>
+        <h2>Реквизиты</h2>
+        <p><%= site.requisites %></p>
+      </div>
+      <div class="hotline-box">
+        <p class="eyebrow">Горячая линия</p>
+        <p><%= site.hotlineText %></p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<%- include('partials/footer', { site }) %>

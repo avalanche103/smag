@@ -1,0 +1,35 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Подписка</p>
+        <h1>Настройки счетов для подписки</h1>
+      </div>
+    </div>
+    <form method="post" action="/admin/invoice1" enctype="multipart/form-data" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <h2>Счет 1</h2>
+      <p>Текущий файл: <%= settings.invoiceFile1 || 'не загружен' %></p>
+      <label>Название кнопки
+        <input type="text" name="invoiceLabel1" value="<%= settings.invoiceLabel1 || 'Скачать счет 1' %>" required />
+      </label>
+      <label>PDF-файл<input type="file" name="invoiceFile1" accept="application/pdf" /></label>
+      <button class="button button-secondary" type="submit">Сохранить счет 1</button>
+    </form>
+    <form method="post" action="/admin/invoice2" enctype="multipart/form-data" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <h2>Счет 2</h2>
+      <p>Текущий файл: <%= settings.invoiceFile2 || 'не загружен' %></p>
+      <label>Название кнопки
+        <input type="text" name="invoiceLabel2" value="<%= settings.invoiceLabel2 || 'Скачать счет 2' %>" required />
+      </label>
+      <label>PDF-файл<input type="file" name="invoiceFile2" accept="application/pdf" /></label>
+      <button class="button button-secondary" type="submit">Сохранить счет 2</button>
+    </form>
+  </section>
+</main>
+</body>
+</html>
