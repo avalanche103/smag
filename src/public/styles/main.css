@@ -1,3 +1,32 @@
+/* Кнопки счетов на странице подписки */
+.subscribe-invoice-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 1em 2em;
+  font-size: 1.1em;
+  font-weight: 600;
+  text-align: center;
+  transition: background 0.2s;
+  margin-bottom: 0.5em;
+  box-shadow: 0 2px 8px rgba(157,34,53,0.08);
+}
+.subscribe-invoice-btn:hover, .subscribe-invoice-btn:focus {
+  background: var(--accent-dark);
+  color: #fff;
+}
+
+.subscribe-benefits {
+  margin: 1.5em 0 2em 0;
+  padding-left: 1.2em;
+  color: var(--deep);
+  font-size: 1.08em;
+}
+.subscribe-benefits li {
+  margin-bottom: 0.5em;
+  list-style: disc inside;
+}
 :root {
   --bg: #f2ede3;
   --surface: #faf7f1;
@@ -523,8 +552,13 @@ td {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
+  align-items: start;
+}
+/* Выровнять контакты редакции по правому краю */
+.footer-grid > div:last-child {
+  text-align: right;
 }
 
 .page-head,
