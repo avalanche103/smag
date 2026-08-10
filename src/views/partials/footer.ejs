@@ -3,15 +3,33 @@
     <div>
       <p class="eyebrow">Журнал</p>
       <h2><%= site.siteTitle %></h2>
-      <p><%= site.siteDescription %></p>
+      <p class="footer-copy"><%= site.siteDescription %></p>
+      <p class="footer-copy">Свидетельство о государственной регистрации средства массовой информации от 22.01.2024 № 1984, выданное Министерством информации Республики Беларусь.</p>
     </div>
     <div>
       <p class="eyebrow">Контакты редакции</p>
+      <h2 class="footer-title-spacer" aria-hidden="true"><%= site.siteTitle %></h2>
       <ul class="footer-list">
-        <li><a href="tel:<%= site.phone %>"><%= site.phone %></a></li>
-        <li><a href="mailto:<%= site.email %>"><%= site.email %></a></li>
+        <% if (site.publisher) { %>
+          <li><%= site.publisher %></li>
+        <% } %>
         <li><%= site.address %></li>
-        <li><%= site.workingHours %></li>
+        <li><a href="mailto:<%= site.email %>"><%= site.email %></a></li>
+        <% if (site.phone || site.phone2) { %>
+          <li>
+            <span class="contact-phones">
+              <% if (site.phone) { %>
+                <a href="tel:<%= site.phone %>"><%= site.phone %></a>
+              <% } %>
+              <% if (site.phone && site.phone2) { %>
+                <span class="contact-phones-sep" aria-hidden="true">·</span>
+              <% } %>
+              <% if (site.phone2) { %>
+                <a href="tel:<%= site.phone2 %>"><%= site.phone2 %></a>
+              <% } %>
+            </span>
+          </li>
+        <% } %>
       </ul>
     </div>
   </div>

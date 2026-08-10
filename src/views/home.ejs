@@ -16,12 +16,14 @@
       </div>
       <div class="hero-card hero-card-white">
         <span class="eyebrow">Для кого</span>
-        <p><%= site.aboutAudience %></p>
-        <ul class="check-list">
-          <li>Экономика строительства в Беларуси и финансирование проектов</li>
-          <li>Бухгалтерский учет, налогообложение и договорная работа</li>
-          <li>Правовое сопровождение строительной деятельности в Республике Беларусь</li>
-        </ul>
+        <% if (audienceTopics && audienceTopics.length) { %>
+          <ul class="check-list">
+            <% audienceTopics.forEach((topic) => { %>
+              <li><%= topic %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+        <div class="audience-intro rich-content"><%- aboutAudienceHtml %></div>
       </div>
     </div>
   </section>
@@ -85,20 +87,12 @@
   </section>
 
   <section class="section">
-    <div class="shell promo-grid">
-      <div class="promo-block">
+    <div class="shell">
+      <div class="promo-block promo-block-accent">
         <p class="eyebrow">Горячая линия</p>
         <h2><%= site.hotlineTitle %></h2>
         <p><%= site.hotlineText %></p>
         <a class="text-link" href="tel:<%= site.phone %>"><%= site.phone %></a>
-      </div>
-      <div class="promo-block promo-contacts">
-        <p class="eyebrow">Контакты</p>
-        <ul class="footer-list">
-          <li><a href="mailto:<%= site.email %>"><%= site.email %></a></li>
-          <li><%= site.address %></li>
-          <li><%= site.contactPerson %></li>
-        </ul>
       </div>
     </div>
   </section>

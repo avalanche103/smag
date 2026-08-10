@@ -15,6 +15,7 @@ import {
   listPublishedLists,
   saveMessage
 } from "../services/contentService";
+import { sendContactFormEmail } from "../services/mailService";
 import { verifyCsrfToken } from "../middleware/csrf";
 import { parseWorkbookPreview } from "../utils/excel";
 
@@ -46,6 +47,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
     const settings = getSettings();
     res.render("about", {
       page: getPageContent("about"),
+      featuredIssue: getFeaturedIssue(),
       meta: buildMeta(`О журнале | ${settings.siteTitle}`, settings.siteDescription)
     });
   });
@@ -143,7 +145,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
     });
   });
 
-  router.post("/contacts", formLimiter, verifyCsrfToken, (req, res) => {
+  router.post("/contacts", formLimiter, verifyCsrfToken, async (req, res) => {
     const { name, email, phone, message, website } = req.body as Record<string, string>;
     if (website) {
       req.session.flash = { type: "success", message: "Сообщение отправлено." };
@@ -157,8 +159,40 @@ export default function publicRouter(formLimiter: RequestHandler) {
       return;
     }
 
-    saveMessage(name.trim(), email.trim(), phone.trim(), message.trim());
-    req.session.flash = { type: "success", message: "Сообщение отправлено. Редакция свяжется с вами." };
+    const settings = getSettings();
+    const trimmed = {
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      message: message.trim()
+    };
+
+    saveMessage(trimmed.name, trimmed.email, trimmed.phone, trimmed.message);
+
+    const mailTo = (settings.mailTo || settings.email || "").trim();
+    if (!mailTo) {
+      req.session.flash = {
+        type: "error",
+        message: "Не указан email для уведомлений. Сообщение сохранено в админке."
+      };
+      res.redirect("/contacts");
+      return;
+    }
+
+    try {
+      await sendContactFormEmail({
+        to: mailTo,
+        ...trimmed
+      });
+      req.session.flash = { type: "success", message: "Сообщение отправлено. Редакция свяжется с вами." };
+    } catch (error) {
+      console.error("Contact form email failed:", error);
+      req.session.flash = {
+        type: "error",
+        message: "Не удалось отправить письмо. Сообщение сохранено в админке, попробуйте позже или позвоните в редакцию."
+      };
+    }
+
     res.redirect("/contacts");
   });
 

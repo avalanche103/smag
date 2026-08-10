@@ -9,11 +9,30 @@
       <h1><%= page.title %></h1>
       <p class="lead"><%= page.lead %></p>
       <ul class="contact-list">
-        <li><strong>Телефон:</strong> <a href="tel:<%= site.phone %>"><%= site.phone %></a></li>
-        <li><strong>Email:</strong> <a href="mailto:<%= site.email %>"><%= site.email %></a></li>
+        <% if (site.publisher) { %>
+          <li><strong>Юрлицо:</strong> <%= site.publisher %></li>
+        <% } %>
         <li><strong>Адрес:</strong> <%= site.address %></li>
-        <li><strong>Часы работы:</strong> <%= site.workingHours %></li>
-        <li><strong>Контактное лицо:</strong> <%= site.contactPerson %></li>
+        <li><strong>Email:</strong> <a href="mailto:<%= site.email %>"><%= site.email %></a></li>
+        <% if (site.phone || site.phone2) { %>
+          <li>
+            <strong>Телефоны:</strong>
+            <span class="contact-phones">
+              <% if (site.phone) { %>
+                <a href="tel:<%= site.phone %>"><%= site.phone %></a>
+              <% } %>
+              <% if (site.phone && site.phone2) { %>
+                <span class="contact-phones-sep" aria-hidden="true">·</span>
+              <% } %>
+              <% if (site.phone2) { %>
+                <a href="tel:<%= site.phone2 %>"><%= site.phone2 %></a>
+              <% } %>
+            </span>
+          </li>
+        <% } %>
+        <% if (site.workingHours) { %>
+          <li><strong>Часы работы:</strong> <%= site.workingHours %></li>
+        <% } %>
       </ul>
     </section>
     <section class="form-card">

@@ -216,6 +216,7 @@ small {
   padding: 13px 20px;
   cursor: pointer;
   transition: 180ms ease;
+  text-align: center;
 }
 
 .button:hover,
@@ -284,6 +285,53 @@ small {
   grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
 }
 
+.about-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.about-main {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  align-self: stretch;
+  min-height: 100%;
+}
+
+.page-intro .lead,
+.page-intro > p:not(.eyebrow) {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: 0 0 0.9em;
+}
+
+.page-intro > p:not(.eyebrow):last-child {
+  margin-bottom: 0;
+}
+
+.about-cover {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 360px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #1f3140;
+}
+
+.about-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  object-fit: cover;
+  object-position: center top;
+}
+
 .hero h1,
 .page-head h1,
 .not-found h1 {
@@ -309,7 +357,6 @@ small {
 .meta-grid,
 .section-head,
 .compact-head,
-.footer-grid,
 .admin-head {
   display: flex;
   gap: 14px;
@@ -318,7 +365,6 @@ small {
 .hero-actions,
 .section-head,
 .compact-head,
-.footer-grid,
 .admin-head {
   align-items: center;
   justify-content: space-between;
@@ -348,6 +394,31 @@ small {
 .promo-block,
 .list-card {
   padding: 28px;
+}
+
+.promo-block-accent {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(157, 34, 53, 0.22);
+}
+
+.promo-block-accent .eyebrow,
+.promo-block-accent h2,
+.promo-block-accent p {
+  color: #fff;
+}
+
+.promo-block-accent .eyebrow {
+  opacity: 0.82;
+}
+
+.promo-block-accent .text-link {
+  color: #fff;
+}
+
+.promo-block-accent .text-link:hover {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .hero-card-white {
@@ -509,6 +580,37 @@ dd {
   margin-bottom: 10px;
 }
 
+.footer-list {
+  list-style: disc;
+  list-style-position: outside;
+}
+
+.footer-grid > div:last-child .footer-list {
+  display: inline-block;
+  text-align: left;
+  margin-left: auto;
+  padding-left: 1.2em;
+}
+
+.contact-phones {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  align-items: baseline;
+}
+
+.contact-phones-sep {
+  opacity: 0.45;
+}
+
+.footer-list .contact-phones {
+  display: inline-flex;
+}
+
+.footer-grid > div:last-child .contact-phones {
+  justify-content: flex-start;
+}
+
 .table-wrap,
 .admin-table-wrap {
   overflow-x: auto;
@@ -556,8 +658,46 @@ td {
   gap: 24px;
   align-items: start;
 }
-/* Выровнять контакты редакции по правому краю */
+
+.footer-grid > div {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.footer-grid .eyebrow {
+  margin: 0 0 12px;
+  min-height: 1.2em;
+}
+
+.footer-grid h2 {
+  margin: 0 0 12px;
+}
+
+.footer-title-spacer {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+.footer-copy {
+  margin: 0 0 0.75em;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.footer-copy:last-child {
+  margin-bottom: 0;
+}
+
 .footer-grid > div:last-child {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.footer-grid > div:last-child .eyebrow {
+  width: 100%;
   text-align: right;
 }
 
@@ -596,6 +736,19 @@ td {
 .info-panel {
   display: grid;
   gap: 16px;
+}
+
+.info-panel > div p {
+  margin: 0 0 0.35em;
+}
+
+.info-panel > div p:last-child {
+  margin-bottom: 0;
+}
+
+.info-panel > .button {
+  text-align: center;
+  justify-self: stretch;
 }
 
 .form-grid-two {
@@ -681,6 +834,120 @@ select {
 
 .material-status.is-error {
   color: #b13c28;
+}
+
+.audience-editor {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(36, 56, 71, 0.1);
+  background: rgba(255, 253, 248, 0.9);
+}
+
+.audience-editor-head label {
+  margin-bottom: 0;
+}
+
+.audience-topic-row {
+  align-items: end;
+}
+
+.audience-topic-row .button {
+  flex: 0 0 auto;
+  margin-bottom: 2px;
+}
+
+.rich-editor {
+  display: grid;
+  gap: 0;
+  border: 1px solid rgba(36, 56, 71, 0.14);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.rich-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(36, 56, 71, 0.1);
+  background: #f7f2e8;
+}
+
+.rich-editor-toolbar button {
+  border: 1px solid rgba(36, 56, 71, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  color: #243847;
+  padding: 6px 10px;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+
+.rich-editor-toolbar button:hover {
+  border-color: rgba(36, 56, 71, 0.28);
+}
+
+.rich-editor-surface {
+  min-height: 140px;
+  padding: 14px 16px;
+  outline: none;
+  line-height: 1.55;
+}
+
+.rich-editor-surface:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+}
+
+.hero-card .eyebrow {
+  margin-bottom: 20px;
+}
+
+.hero-card .check-list,
+.hero-card .audience-intro {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.hero-card .audience-intro *,
+.hero-card .check-list * {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit;
+}
+
+.hero-card .check-list {
+  margin-bottom: 16px;
+}
+
+.hero-card .audience-intro {
+  margin-top: 4px;
+}
+
+.rich-content p,
+.audience-intro p,
+.rich-editor-surface p {
+  margin: 0 0 0.75em;
+}
+
+.rich-content p:last-child,
+.audience-intro p:last-child,
+.rich-editor-surface p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-content ul,
+.audience-intro ul,
+.rich-editor-surface ul {
+  margin: 0.5em 0 0.75em;
+  padding-left: 1.2em;
 }
 
 .admin-layout {
@@ -794,6 +1061,7 @@ select {
   .payment-grid,
   .contact-grid,
   .promo-grid,
+  .about-layout,
   .footer-grid,
   .admin-layout,
   .admin-cards,
@@ -810,6 +1078,7 @@ select {
   }
 
   .material-row,
+  .audience-topic-row,
   .issue-material-list-detail li {
     flex-direction: column;
     align-items: flex-start;

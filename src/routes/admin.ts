@@ -11,6 +11,8 @@ import {
   deleteIssue,
   deletePublishedList,
   getAllPages,
+  formatAudienceHtml,
+  getAudienceTopics,
   getIssueFormMaterials,
   getIssueById,
   getSettings,
@@ -19,6 +21,8 @@ import {
   listPublishedLists,
   markMessageRead,
   saveIssue,
+  serializeAudienceTopics,
+  sanitizeRichHtml,
   togglePublishedList,
   updatePageContent,
   updateSettings
@@ -76,39 +80,43 @@ export default function adminRouter() {
   });
 
   router.get("/settings", (_req, res) => {
+    const settings = getSettings();
     res.render("admin/settings", {
       meta: { title: "Настройки сайта", description: "Основные настройки и контакты" },
-      settings: getSettings()
+      settings,
+      audienceTopics: getAudienceTopics(settings),
+      aboutAudienceHtml: formatAudienceHtml(settings.aboutAudience)
     });
   });
 
   router.post("/settings", verifyCsrfToken, (req, res) => {
-    const body = req.body as Record<string, string>;
+    const body = req.body as Record<string, unknown>;
     updateSettings({
-      siteTitle: body.siteTitle ?? "",
-      siteDescription: body.siteDescription ?? "",
-      heroTitle: body.heroTitle ?? "",
-      heroText: body.heroText ?? "",
-      aboutAudience: body.aboutAudience ?? "",
-      periodicity: body.periodicity ?? "",
-      publisher: body.publisher ?? "",
-      editorialInfo: body.editorialInfo ?? "",
-      distributionFormat: body.distributionFormat ?? "",
-      hotlineTitle: body.hotlineTitle ?? "",
-      hotlineText: body.hotlineText ?? "",
-      paymentTitle: body.paymentTitle ?? "",
-      paymentText: body.paymentText ?? "",
-      phone: body.phone ?? "",
-      email: body.email ?? "",
-      address: body.address ?? "",
-      requisites: body.requisites ?? "",
-      workingHours: body.workingHours ?? "",
-      contactPerson: body.contactPerson ?? "",
-      seoHomeTitle: body.seoHomeTitle ?? "",
-      seoHomeDescription: body.seoHomeDescription ?? "",
-      siteUrl: body.siteUrl ?? "",
-      analyticsId: body.analyticsId ?? "",
-      mailTo: body.mailTo ?? ""
+      siteTitle: String(body.siteTitle ?? ""),
+      siteDescription: String(body.siteDescription ?? ""),
+      heroTitle: String(body.heroTitle ?? ""),
+      heroText: String(body.heroText ?? ""),
+      aboutAudience: sanitizeRichHtml(String(body.aboutAudience ?? "")),
+      aboutAudienceTopics: serializeAudienceTopics(body.audienceTopics),
+      periodicity: String(body.periodicity ?? ""),
+      publisher: String(body.publisher ?? ""),
+      editorialInfo: String(body.editorialInfo ?? ""),
+      distributionFormat: String(body.distributionFormat ?? ""),
+      hotlineTitle: String(body.hotlineTitle ?? ""),
+      hotlineText: String(body.hotlineText ?? ""),
+      paymentTitle: String(body.paymentTitle ?? ""),
+      paymentText: String(body.paymentText ?? ""),
+      phone: String(body.phone ?? ""),
+      phone2: String(body.phone2 ?? ""),
+      email: String(body.email ?? ""),
+      address: String(body.address ?? ""),
+      requisites: String(body.requisites ?? ""),
+      workingHours: String(body.workingHours ?? ""),
+      seoHomeTitle: String(body.seoHomeTitle ?? ""),
+      seoHomeDescription: String(body.seoHomeDescription ?? ""),
+      siteUrl: String(body.siteUrl ?? ""),
+      analyticsId: String(body.analyticsId ?? ""),
+      mailTo: String(body.mailTo ?? "")
     });
     req.session.flash = { type: "success", message: "Настройки сохранены." };
     res.redirect("/admin/settings");

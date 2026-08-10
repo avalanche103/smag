@@ -18,19 +18,77 @@
       <div class="form-grid-two">
         <label>Название сайта<input type="text" name="siteTitle" value="<%= settings.siteTitle %>" required /></label>
         <label>URL сайта<input type="url" name="siteUrl" value="<%= settings.siteUrl || '' %>" /></label>
-        <label>Телефон<input type="text" name="phone" value="<%= settings.phone %>" /></label>
+        <label>Физический адрес<input type="text" name="address" value="<%= settings.address %>" /></label>
         <label>Email<input type="email" name="email" value="<%= settings.email %>" /></label>
-        <label>Адрес<input type="text" name="address" value="<%= settings.address %>" /></label>
+        <label>Телефон 1<input type="text" name="phone" value="<%= settings.phone %>" /></label>
+        <label>Телефон 2<input type="text" name="phone2" value="<%= settings.phone2 || '' %>" /></label>
         <label>Часы работы<input type="text" name="workingHours" value="<%= settings.workingHours %>" /></label>
-        <label>Контактное лицо<input type="text" name="contactPerson" value="<%= settings.contactPerson %>" /></label>
         <label>Analytics ID<input type="text" name="analyticsId" value="<%= settings.analyticsId || '' %>" /></label>
       </div>
       <label>Описание сайта<textarea name="siteDescription" rows="3"><%= settings.siteDescription %></textarea></label>
       <label>Hero-заголовок<textarea name="heroTitle" rows="2"><%= settings.heroTitle %></textarea></label>
       <label>Hero-текст<textarea name="heroText" rows="4"><%= settings.heroText %></textarea></label>
-      <label>Аудитория<textarea name="aboutAudience" rows="3"><%= settings.aboutAudience %></textarea></label>
+
+      <div class="audience-editor" data-audience-editor>
+        <div class="audience-editor-head">
+          <div>
+            <label>Блок «Для кого»</label>
+            <p class="form-note">Сначала пункты списка, ниже — вводный текст. Можно добавлять и удалять строки.</p>
+          </div>
+        </div>
+        <div class="materials-editor-head">
+          <div>
+            <label>Пункты списка</label>
+            <p class="form-note">Эти строки выводятся в блоке «Для кого» на главной и на странице «О журнале».</p>
+          </div>
+          <div class="materials-editor-actions">
+            <button class="button button-secondary" type="button" data-add-audience-topic>Добавить пункт</button>
+          </div>
+        </div>
+        <div class="materials-list" data-audience-topic-list>
+          <% const topics = Array.isArray(audienceTopics) && audienceTopics.length
+            ? audienceTopics
+            : ['']; %>
+          <% topics.forEach((topic, index) => { %>
+            <div class="material-row audience-topic-row" data-audience-topic-row>
+              <label><span data-audience-topic-label>Пункт <%= index + 1 %></span>
+                <input type="text" name="audienceTopics[<%= index %>]" value="<%= topic %>" />
+              </label>
+              <button class="button button-secondary" type="button" data-remove-audience-topic>Удалить</button>
+            </div>
+          <% }) %>
+        </div>
+        <template data-audience-topic-template>
+          <div class="material-row audience-topic-row" data-audience-topic-row>
+            <label><span data-audience-topic-label>Пункт __NUMBER__</span>
+              <input type="text" name="audienceTopics[__INDEX__]" value="" />
+            </label>
+            <button class="button button-secondary" type="button" data-remove-audience-topic>Удалить</button>
+          </div>
+        </template>
+        <label>Вводный текст
+          <div class="rich-editor" data-rich-editor>
+            <div class="rich-editor-toolbar" data-rich-toolbar>
+              <button type="button" data-rich-command="bold" title="Жирный"><b>B</b></button>
+              <button type="button" data-rich-command="italic" title="Курсив"><i>I</i></button>
+              <button type="button" data-rich-command="underline" title="Подчёркивание"><u>U</u></button>
+              <button type="button" data-rich-command="insertUnorderedList" title="Маркированный список">• Список</button>
+              <button type="button" data-rich-command="insertOrderedList" title="Нумерованный список">1. Список</button>
+              <button type="button" data-rich-command="removeFormat" title="Очистить форматирование">Очистить</button>
+            </div>
+            <div
+              class="rich-editor-surface"
+              contenteditable="true"
+              data-rich-surface
+              data-placeholder="Кратко опишите аудиторию журнала"
+            ><%- aboutAudienceHtml || '' %></div>
+            <textarea name="aboutAudience" hidden data-rich-input><%= aboutAudienceHtml || '' %></textarea>
+          </div>
+        </label>
+      </div>
+
       <label>Периодичность<input type="text" name="periodicity" value="<%= settings.periodicity || '' %>" /></label>
-      <label>Издатель<textarea name="publisher" rows="3"><%= settings.publisher %></textarea></label>
+      <label>Юрлицо / издатель<textarea name="publisher" rows="2"><%= settings.publisher %></textarea></label>
       <label>Редакция<textarea name="editorialInfo" rows="4"><%= settings.editorialInfo %></textarea></label>
       <label>Формат распространения<textarea name="distributionFormat" rows="3"><%= settings.distributionFormat %></textarea></label>
       <label>Заголовок горячей линии<textarea name="hotlineTitle" rows="2"><%= settings.hotlineTitle %></textarea></label>
@@ -40,7 +98,10 @@
       <label>Реквизиты<textarea name="requisites" rows="4"><%= settings.requisites || '' %></textarea></label>
       <label>SEO Title главной<input type="text" name="seoHomeTitle" value="<%= settings.seoHomeTitle %>" /></label>
       <label>SEO Description главной<textarea name="seoHomeDescription" rows="3"><%= settings.seoHomeDescription %></textarea></label>
-      <label>Email для уведомлений<input type="email" name="mailTo" value="<%= settings.mailTo || '' %>" /></label>
+      <label>Email для уведомлений
+        <input type="email" name="mailTo" value="<%= settings.mailTo || '' %>" />
+        <span class="form-note">Сюда приходят сообщения с формы обратной связи.</span>
+      </label>
       <button class="button button-accent" type="submit">Сохранить настройки</button>
     </form>
 
@@ -72,5 +133,6 @@
 
   </section>
 </main>
+<script src="/scripts/main.js" defer></script>
 </body>
 </html>

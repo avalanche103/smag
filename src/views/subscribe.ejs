@@ -30,9 +30,14 @@
       </div>
       <div>
         <h2>Контакт для подписки</h2>
-        <p><%= site.contactPerson %></p>
+        <p><%= site.address %></p>
         <p><a href="mailto:<%= site.email %>"><%= site.email %></a></p>
-        <p><a href="tel:<%= site.phone %>"><%= site.phone %></a></p>
+        <% if (site.phone) { %>
+          <p><a href="tel:<%= site.phone %>"><%= site.phone %></a></p>
+        <% } %>
+        <% if (site.phone2) { %>
+          <p><a href="tel:<%= site.phone2 %>"><%= site.phone2 %></a></p>
+        <% } %>
       </div>
       <div>
         <h2>Реквизиты</h2>

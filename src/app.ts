@@ -6,7 +6,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { env } from "./config/env";
 import { attachCsrfToken } from "./middleware/csrf";
-import { getSettings } from "./services/contentService";
+import { formatAudienceHtml, getAudienceTopics, getSettings } from "./services/contentService";
 import publicRouter from "./routes/public";
 import adminRouter from "./routes/admin";
 
@@ -61,6 +61,8 @@ app.use(attachCsrfToken);
 app.use((req, res, next) => {
   const settings = getSettings();
   res.locals.site = settings;
+  res.locals.audienceTopics = getAudienceTopics(settings);
+  res.locals.aboutAudienceHtml = formatAudienceHtml(settings.aboutAudience);
   res.locals.path = req.path;
   res.locals.admin = req.session.adminLogin ? { login: req.session.adminLogin } : null;
   res.locals.csrfToken = req.session.csrfToken;

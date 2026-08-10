@@ -45,8 +45,99 @@ export function getIssueFormMaterials(issue?: JournalIssue): IssueMaterial[] {
   return materials;
 }
 
+export const DEFAULT_AUDIENCE_TOPICS = [
+  "Экономика строительства в Беларуси и финансирование проектов",
+  "Бухгалтерский учет, налогообложение и договорная работа",
+  "Правовое сопровождение строительной деятельности в Республике Беларусь"
+];
+
+export function parseAudienceTopics(value: unknown): string[] {
+  if (typeof value !== "string") {
+    return [...DEFAULT_AUDIENCE_TOPICS];
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [...DEFAULT_AUDIENCE_TOPICS];
+    }
+
+    return parsed
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter(Boolean);
+  } catch {
+    return [...DEFAULT_AUDIENCE_TOPICS];
+  }
+}
+
+export function serializeAudienceTopics(input: unknown): string {
+  const entries = Array.isArray(input)
+    ? input
+    : typeof input === "object" && input !== null
+      ? Object.values(input as Record<string, unknown>)
+      : [];
+
+  const topics = entries
+    .map((item) => (typeof item === "string" ? item.trim() : ""))
+    .filter(Boolean);
+
+  return JSON.stringify(topics);
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+export function sanitizeRichHtml(value: string): string {
+  return value
+    .replace(/<\/?o:p\b[^>]*>/gi, "")
+    .replace(/<\/?span\b[^>]*>/gi, "")
+    .replace(/\s(?:class|lang|align|dir|id)="[^"]*"/gi, "")
+    .replace(/\sstyle="[^"]*"/gi, "")
+    .replace(/<(p|div|ul|ol|li|b|strong|i|em|u)\b[^>]*>/gi, "<$1>")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/<p>\s*<\/p>/gi, "")
+    .trim();
+}
+
+export function formatAudienceHtml(value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+    return sanitizeRichHtml(trimmed);
+  }
+
+  return trimmed
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => `<p>${escapeHtml(line)}</p>`)
+    .join("");
+}
+
 export function getSettings(): Record<string, string> {
   return readStore().settings;
+}
+
+export function getAudienceTopics(settings?: Record<string, string>): string[] {
+  const source = settings ?? getSettings();
+  return parseAudienceTopics(source.aboutAudienceTopics);
 }
 
 export function updateSettings(entries: Record<string, string>): void {
