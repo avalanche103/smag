@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
+import slugify from "slugify";
 import { readStore, updateStore } from "../db";
 import type { ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem } from "../types";
+import type { PublishedListEntry } from "../utils/publishedListPdf";
 
 export const DEFAULT_ISSUE_MATERIAL_COUNT = 10;
 export const MAX_PRIMARY_ISSUE_MATERIALS = 3;
@@ -23,8 +25,8 @@ export function sanitizeIssueMaterials(materials: IssueMaterial[]): IssueMateria
       return {
         title,
         isPrimary,
-        author: "-",
-        section: "-"
+        author: material.author?.trim() || "-",
+        section: material.section?.trim() || "-"
       } satisfies IssueMaterial;
     })
     .filter((material): material is IssueMaterial => material !== null);
@@ -293,6 +295,131 @@ export function markMessageRead(id: number): void {
       message.isRead = 1;
     }
   });
+}
+
+export function parseJournalNumber(numberLabel: string): number | null {
+  const match = numberLabel.match(/№\s*(\d+)/i) || numberLabel.match(/(\d+)/);
+  if (!match) {
+    return null;
+  }
+
+  const value = Number(match[1]);
+  return value >= 1 && value <= 12 ? value : null;
+}
+
+export function normalizeMaterialKey(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/[^a-zа-я0-9]+/gi, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+export function findIssueByJournalNumber(issueNumber: number): JournalIssue | undefined {
+  return readStore().issues.find((issue) => parseJournalNumber(issue.numberLabel) === issueNumber);
+}
+
+function isImportableEntry(entry: PublishedListEntry): boolean {
+  const title = entry.title.trim();
+  return Boolean(title) && title !== entry.author.trim();
+}
+
+export function applyPublishedListImport(year: number, entries: PublishedListEntry[]): {
+  updated: number;
+  created: number;
+  added: number;
+  skipped: number;
+} {
+  const grouped = new Map<number, PublishedListEntry[]>();
+  for (const entry of entries) {
+    if (!isImportableEntry(entry)) {
+      continue;
+    }
+
+    const bucket = grouped.get(entry.issueNumber) ?? [];
+    bucket.push(entry);
+    grouped.set(entry.issueNumber, bucket);
+  }
+
+  let updated = 0;
+  let created = 0;
+  let added = 0;
+  let skipped = 0;
+
+  updateStore((store) => {
+    let nextId = Math.max(0, ...store.issues.map((item) => item.id)) + 1;
+
+    for (const [issueNumber, issueEntries] of [...grouped.entries()].sort((left, right) => left[0] - right[0])) {
+      const existing = store.issues.find((issue) => parseJournalNumber(issue.numberLabel) === issueNumber);
+      const knownKeys = new Set(
+        (existing?.materials ?? [])
+          .map((material) => normalizeMaterialKey(material.title))
+          .filter(Boolean)
+      );
+
+      const newcomers: IssueMaterial[] = [];
+      for (const entry of issueEntries) {
+        const key = normalizeMaterialKey(entry.title);
+        if (!key || knownKeys.has(key)) {
+          skipped += 1;
+          continue;
+        }
+
+        knownKeys.add(key);
+        newcomers.push({
+          title: entry.title,
+          author: entry.author,
+          section: entry.section,
+          isPrimary: 0
+        });
+      }
+
+      if (!newcomers.length && existing) {
+        continue;
+      }
+
+      if (existing) {
+        const primaryCount = existing.materials.filter((material) => material.isPrimary === 1).length;
+        const merged = [
+          ...existing.materials,
+          ...newcomers.map((material, index) => ({
+            ...material,
+            isPrimary: primaryCount + index < MAX_PRIMARY_ISSUE_MATERIALS ? 1 : 0
+          }))
+        ];
+        existing.materials = sanitizeIssueMaterials(merged);
+        added += newcomers.length;
+        updated += 1;
+        continue;
+      }
+
+      const materials = sanitizeIssueMaterials(
+        newcomers.map((material, index) => ({
+          ...material,
+          isPrimary: index < MAX_PRIMARY_ISSUE_MATERIALS ? 1 : 0
+        }))
+      );
+      const numberLabel = `№ ${issueNumber} (${year})`;
+      const firstTitle = materials[0]?.title ?? "vypusk";
+      store.issues.push({
+        id: nextId,
+        numberLabel,
+        publishDate: `${year}-${String(issueNumber).padStart(2, "0")}-01`,
+        slug: slugify(`${numberLabel}-${firstTitle}`, { lower: true, strict: true, locale: "ru" }),
+        materials,
+        coverImage: "",
+        isPublished: 0,
+        isFeatured: 0,
+        createdAt: new Date().toISOString()
+      });
+      nextId += 1;
+      created += 1;
+      added += newcomers.length;
+    }
+  });
+
+  return { updated, created, added, skipped };
 }
 
 export function verifyAdmin(login: string, password: string): { id: number; login: string } | null {

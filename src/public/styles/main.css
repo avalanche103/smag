@@ -814,6 +814,27 @@ dd {
   overflow-x: auto;
 }
 
+.import-group {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.import-group h2 {
+  margin: 0;
+}
+
+.import-warnings {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--error);
+}
+
+.import-warnings ul {
+  margin: 8px 0 0;
+  padding-left: 1.2em;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

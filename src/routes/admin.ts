@@ -1,7 +1,3 @@
-// ...existing code...
-// ...existing code...
-// ...existing code...
-// ...existing code...
 import path from "node:path";
 import { Router } from "express";
 import slugify from "slugify";
@@ -20,16 +16,20 @@ import {
   listMessages,
   listPublishedLists,
   markMessageRead,
+  parseJournalNumber,
   saveIssue,
   serializeAudienceTopics,
   sanitizeRichHtml,
+  applyPublishedListImport,
+  normalizeMaterialKey,
   togglePublishedList,
   updatePageContent,
   updateSettings
 } from "../services/contentService";
 import { requireAdmin } from "../middleware/auth";
 import { verifyCsrfToken } from "../middleware/csrf";
-import { coverUpload, invoiceUpload, listUpload } from "../middleware/uploads";
+import { coverUpload, invoiceUpload, listUpload, pdfListUpload } from "../middleware/uploads";
+import { parsePublishedListPdf } from "../utils/publishedListPdf";
 
 function parseIssueMaterials(input: unknown): IssueMaterial[] {
   const entries = Array.isArray(input)
@@ -178,6 +178,118 @@ export default function adminRouter() {
       issue: null,
       materials: getIssueFormMaterials()
     });
+  });
+
+  router.get("/issues/import-list", (_req, res) => {
+    res.render("admin/issue-import", {
+      meta: { title: "Импорт перечня", description: "Загрузка PDF перечня опубликованного" },
+      preview: null
+    });
+  });
+
+  router.post("/issues/import-list", pdfListUpload.single("listPdf"), verifyCsrfToken, async (req, res) => {
+    if (!req.file) {
+      req.session.flash = { type: "error", message: "Выберите PDF-файл перечня." };
+      res.redirect("/admin/issues/import-list");
+      return;
+    }
+
+    try {
+      const parsed = await parsePublishedListPdf(req.file.path);
+      if (!parsed.entries.length) {
+        req.session.flash = { type: "error", message: "В PDF не удалось найти статьи. Проверьте макет перечня." };
+        res.redirect("/admin/issues/import-list");
+        return;
+      }
+
+      req.session.listImport = {
+        year: parsed.year,
+        sourceName: req.file.originalname,
+        entries: parsed.entries,
+        warnings: parsed.warnings
+      };
+      res.redirect("/admin/issues/import-list/preview");
+    } catch (error) {
+      console.error("Published list PDF parse failed:", error);
+      req.session.flash = { type: "error", message: "Не удалось прочитать PDF. Попробуйте другой файл." };
+      res.redirect("/admin/issues/import-list");
+    }
+  });
+
+  router.get("/issues/import-list/preview", (req, res) => {
+    const listImport = req.session.listImport;
+    if (!listImport) {
+      req.session.flash = { type: "error", message: "Сначала загрузите PDF перечня." };
+      res.redirect("/admin/issues/import-list");
+      return;
+    }
+
+    const groups = new Map<number, typeof listImport.entries>();
+    for (const entry of listImport.entries) {
+      const bucket = groups.get(entry.issueNumber) ?? [];
+      bucket.push(entry);
+      groups.set(entry.issueNumber, bucket);
+    }
+
+    const previewGroups = [...groups.entries()]
+      .sort((left, right) => left[0] - right[0])
+      .map(([issueNumber, entries]) => {
+        const existing = listIssues(true).find((issue) => parseJournalNumber(issue.numberLabel) === issueNumber);
+        const knownKeys = new Set(
+          (existing?.materials ?? [])
+            .map((material) => normalizeMaterialKey(material.title))
+            .filter(Boolean)
+        );
+        const marked = entries.map((entry) => {
+          const key = normalizeMaterialKey(entry.title);
+          const isDuplicate = Boolean(key && knownKeys.has(key));
+          if (key && !isDuplicate) {
+            knownKeys.add(key);
+          }
+          return { ...entry, isDuplicate };
+        });
+        const newCount = marked.filter((entry) => !entry.isDuplicate).length;
+        const skipCount = marked.filter((entry) => entry.isDuplicate).length;
+
+        return {
+          issueNumber,
+          numberLabel: existing?.numberLabel || `№ ${issueNumber} (${listImport.year})`,
+          existingId: existing?.id ?? null,
+          willCreate: !existing,
+          newCount,
+          skipCount,
+          existingCount: existing?.materials.filter((material) => material.title.trim()).length ?? 0,
+          entries: marked
+        };
+      });
+
+    res.render("admin/issue-import", {
+      meta: { title: "Предпросмотр импорта", description: "Проверка распознанных материалов" },
+      preview: {
+        year: listImport.year,
+        sourceName: listImport.sourceName,
+        warnings: listImport.warnings,
+        total: listImport.entries.length,
+        groups: previewGroups
+      }
+    });
+  });
+
+  router.post("/issues/import-list/apply", verifyCsrfToken, (req, res) => {
+    const listImport = req.session.listImport;
+    if (!listImport) {
+      req.session.flash = { type: "error", message: "Нет данных импорта. Загрузите PDF ещё раз." };
+      res.redirect("/admin/issues/import-list");
+      return;
+    }
+
+    const result = applyPublishedListImport(listImport.year, listImport.entries);
+    delete req.session.listImport;
+    req.session.flash = {
+      type: "success",
+      message: `Импорт завершён: добавлено материалов ${result.added}, пропущено копий ${result.skipped}, обновлено выпусков ${result.updated}, создано черновиков ${result.created}.`
+    };
+    res.redirect("/admin/issues");
   });
 
   router.get("/issues/:id/edit", (req, res) => {

@@ -1,0 +1,85 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Выпуски</p>
+        <h1><%= preview ? 'Предпросмотр импорта' : 'Импорт перечня PDF' %></h1>
+      </div>
+      <a class="button button-secondary" href="/admin/issues">К выпускам</a>
+    </div>
+
+    <% if (!preview) { %>
+      <form method="post" action="/admin/issues/import-list" enctype="multipart/form-data" class="admin-card stack-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <p class="form-note">Загрузите PDF «Перечень опубликованного». Статьи добавятся к выпускам по номерам. Уже существующие названия в том же номере будут пропущены — повторный перечень (те же материалы + новый номер) не создаст копии.</p>
+        <label>PDF-файл<input type="file" name="listPdf" accept="application/pdf,.pdf" required /></label>
+        <button class="button button-accent" type="submit">Распознать перечень</button>
+      </form>
+    <% } else { %>
+      <div class="admin-card stack-form">
+        <p class="form-note">Файл: <%= preview.sourceName %>. Год: <%= preview.year %>. Статей: <%= preview.total %>.</p>
+        <% if (preview.warnings && preview.warnings.length) { %>
+          <div class="import-warnings">
+            <p><strong>Предупреждения парсера</strong></p>
+            <ul>
+              <% preview.warnings.forEach((warning) => { %>
+                <li><%= warning %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+
+        <% preview.groups.forEach((group) => { %>
+          <section class="import-group">
+            <h2><%= group.numberLabel %></h2>
+            <p class="form-note">
+              В файле: <%= group.entries.length %>.
+              Новых: <%= group.newCount %>.
+              Пропущено как уже есть: <%= group.skipCount %>.
+              <% if (group.willCreate) { %>
+                Выпуск будет создан как черновик без обложки.
+              <% } %>
+            </p>
+            <div class="admin-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Рубрика</th>
+                    <th>Название</th>
+                    <th>Автор</th>
+                    <th>Замечание</th>
+                    <th>Статус</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% group.entries.forEach((entry) => { %>
+                    <tr>
+                      <td><%= entry.section %></td>
+                      <td><%= entry.title %></td>
+                      <td><%= entry.author %></td>
+                      <td><%= entry.warning || '' %></td>
+                      <td><%= entry.isDuplicate ? 'уже есть' : 'новая' %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        <% }) %>
+
+        <div class="hero-actions">
+          <a class="button button-secondary" href="/admin/issues/import-list">Загрузить другой файл</a>
+          <form method="post" action="/admin/issues/import-list/apply">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="button button-accent" type="submit">Применить импорт</button>
+          </form>
+        </div>
+      </div>
+    <% } %>
+  </section>
+</main>
+</body>
+</html>

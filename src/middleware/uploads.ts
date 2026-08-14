@@ -40,3 +40,12 @@ export const listUpload = multer({
   },
   limits: { fileSize: 15 * 1024 * 1024 }
 });
+
+export const pdfListUpload = multer({
+  storage: createStorage(env.listsDir),
+  fileFilter: (_req, file, callback) => {
+    const isPdf = file.mimetype === "application/pdf" || file.originalname.toLowerCase().endsWith(".pdf");
+    callback(null, isPdf);
+  },
+  limits: { fileSize: 15 * 1024 * 1024 }
+});
