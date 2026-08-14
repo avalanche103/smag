@@ -52,6 +52,7 @@ const formLimiter = rateLimit({
 
 app.use("/styles", express.static(path.join(env.rootDir, "src", "public", "styles")));
 app.use("/scripts", express.static(path.join(env.rootDir, "src", "public", "scripts")));
+app.use("/images", express.static(path.join(env.rootDir, "src", "public", "images")));
 app.use("/uploads", express.static(env.uploadsDir));
 app.get("/logo.jpg", (_req, res) => {
   res.sendFile(path.join(env.rootDir, "logo.jpg"));

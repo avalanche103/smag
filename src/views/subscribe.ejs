@@ -3,51 +3,119 @@
 <%- include('partials/flash', { flash }) %>
 
 <main class="section">
-  <div class="shell payment-grid">
-    <section>
+  <div class="shell subscribe-page">
+    <header class="subscribe-intro">
       <p class="eyebrow">Подписка</p>
       <h1>Оформление подписки</h1>
-      <p class="lead">Подписка на журнал — это:</p>
-      <ul class="subscribe-benefits">
-        <li>Доставка свежих выпусков прямо в офис или на e-mail</li>
-        <li>Доступ к профессиональным материалам и аналитике</li>
-        <li>Актуальные рекомендации по учету, экономике и праву в строительстве</li>
-        <li>Оперативная поддержка редакции для подписчиков</li>
-      </ul>
-      <div class="subscribe-invoices" style="margin-top:2em;display:flex;flex-direction:column;gap:1em;">
-        <% if (site.invoiceFile1) { %>
-          <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile1 %>" target="_blank" rel="noopener"><%= site.invoiceLabel1 || 'Скачать счет 1' %></a>
-        <% } %>
-        <% if (site.invoiceFile2) { %>
-          <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile2 %>" target="_blank" rel="noopener"><%= site.invoiceLabel2 || 'Скачать счет 2' %></a>
-        <% } %>
-      </div>
-    </section>
-    <aside class="info-panel">
-      <div>
-        <h2>Варианты подписки</h2>
-        <p>Выберите удобный для вас срок и способ получения журнала. Подробности уточняйте у редакции.</p>
-      </div>
-      <div>
-        <h2>Контакт для подписки</h2>
-        <p><%= site.address %></p>
-        <p><a href="mailto:<%= site.email %>"><%= site.email %></a></p>
-        <% if (site.phone) { %>
-          <p><a href="tel:<%= site.phone %>"><%= site.phone %></a></p>
-        <% } %>
-        <% if (site.phone2) { %>
-          <p><a href="tel:<%= site.phone2 %>"><%= site.phone2 %></a></p>
-        <% } %>
-      </div>
-      <div>
+      <p class="subscribe-lead">
+        Оформите подписку на печатную версию журнала «Строительство: экономика, учёт, право»
+      </p>
+    </header>
+
+    <p class="subscribe-channels-label">Доступные каналы</p>
+
+    <div class="subscribe-channels">
+      <article class="subscribe-card">
+        <h2>Прямая подписка через редакцию</h2>
+
+        <ol class="subscribe-steps">
+          <li>
+            <span class="subscribe-step-title">Скачайте счёт на нужный период</span>
+            <div class="subscribe-invoice-row">
+              <% if (site.invoiceFile1) { %>
+                <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile1 %>" download="schet-polugodie.pdf">
+                  <%= site.invoiceLabel1 || 'Счёт на полугодие' %>
+                </a>
+              <% } else { %>
+                <span class="button button-secondary subscribe-invoice-btn is-disabled">Счёт на полугодие</span>
+              <% } %>
+              <% if (site.invoiceFile2) { %>
+                <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile2 %>" download="schet-god.pdf">
+                  <%= site.invoiceLabel2 || 'Счёт на год' %>
+                </a>
+              <% } else { %>
+                <span class="button button-secondary subscribe-invoice-btn is-disabled">Счёт на год</span>
+              <% } %>
+            </div>
+          </li>
+          <li>
+            <span class="subscribe-step-title">Или запросите счёт у менеджера</span>
+            <p class="subscribe-phones">
+              <% if (site.phone2) { %>
+                <a href="tel:<%= site.phone2 %>"><%= site.phone2 %></a>
+              <% } else { %>
+                <a href="tel:+375447717102">+375 (44) 771-71-02</a>
+              <% } %>
+              <span class="contact-phones-sep" aria-hidden="true">|</span>
+              <% if (site.phone) { %>
+                <a href="tel:<%= site.phone %>"><%= site.phone %></a>
+              <% } else { %>
+                <a href="tel:+375291044008">+375 (29) 104-40-08</a>
+              <% } %>
+            </p>
+          </li>
+        </ol>
+
+        <aside class="subscribe-note" role="note">
+          <strong>В назначении платежа обязательно укажите:</strong>
+          полный адрес доставки, контактный телефон и ваш e-mail.
+        </aside>
+      </article>
+
+      <article class="subscribe-card">
+        <h2>Подписка через РУП «Белпочта»</h2>
+        <p class="subscribe-card-text">Подписные индексы:</p>
+        <ul class="subscribe-indexes">
+          <li><span>ведомственная подписка</span> <strong>748512</strong></li>
+          <li><span>индивидуальная подписка</span> <strong>74851</strong></li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="subscribe-details">
+      <article class="subscribe-card">
         <h2>Реквизиты</h2>
-        <p><%= site.requisites %></p>
-      </div>
-      <div class="hotline-box">
-        <p class="eyebrow">Горячая линия</p>
-        <p><%= site.hotlineText %></p>
-      </div>
-    </aside>
+        <p class="subscribe-requisites"><%= site.requisites %></p>
+      </article>
+
+      <article class="subscribe-card subscribe-card-hotline">
+        <h2>Горячая линия для подписчиков</h2>
+        <ul class="subscribe-hotline-meta">
+          <li><span>Эксперт</span><strong>Коковкина Т.В.</strong></li>
+          <li><span>Время</span><strong>Пн 12:00–14:00</strong></li>
+          <li>
+            <span>Телефон</span>
+            <strong>
+              <% if (site.phone) { %>
+                <a href="tel:<%= site.phone %>"><%= site.phone %></a>
+              <% } else { %>
+                <a href="tel:+375291044008">+375 29 104 40 08</a>
+              <% } %>
+            </strong>
+          </li>
+        </ul>
+        <p class="subscribe-card-text">
+          Уточняйте порядок оплаты, реквизиты и сроки получения свежего номера у редакции.
+        </p>
+      </article>
+    </div>
+
+    <footer class="subscribe-help">
+      <p class="eyebrow">Вопросы по подписке и доставке</p>
+      <p class="subscribe-phones">
+        <% if (site.phone2) { %>
+          <a href="tel:<%= site.phone2 %>"><%= site.phone2 %></a>
+        <% } else { %>
+          <a href="tel:+375447717102">+375 (44) 771-71-02</a>
+        <% } %>
+        <span class="contact-phones-sep" aria-hidden="true">·</span>
+        <% if (site.phone) { %>
+          <a href="tel:<%= site.phone %>"><%= site.phone %></a>
+        <% } else { %>
+          <a href="tel:+375291044008">+375 (29) 104-40-08</a>
+        <% } %>
+      </p>
+    </footer>
   </div>
 </main>
 

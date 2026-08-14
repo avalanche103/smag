@@ -1,32 +1,224 @@
-/* Кнопки счетов на странице подписки */
+/* Страница подписки */
 .subscribe-invoice-btn {
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
-  padding: 1em 2em;
-  font-size: 1.1em;
+  padding: 0.95em 1.4em;
+  font-size: 1rem;
   font-weight: 600;
   text-align: center;
   transition: background 0.2s;
-  margin-bottom: 0.5em;
-  box-shadow: 0 2px 8px rgba(157,34,53,0.08);
+  box-shadow: 0 2px 8px rgba(157, 34, 53, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
-.subscribe-invoice-btn:hover, .subscribe-invoice-btn:focus {
+
+.subscribe-invoice-btn:hover,
+.subscribe-invoice-btn:focus {
   background: var(--accent-dark);
   color: #fff;
 }
 
-.subscribe-benefits {
-  margin: 1.5em 0 2em 0;
-  padding-left: 1.2em;
+.subscribe-invoice-btn.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.subscribe-page {
+  display: grid;
+  gap: 28px;
+}
+
+.subscribe-intro h1 {
+  margin: 0 0 14px;
+}
+
+.subscribe-lead {
+  margin: 0;
+  max-width: 46rem;
+  font-size: 1.15rem;
+  line-height: 1.55;
   color: var(--deep);
-  font-size: 1.08em;
 }
-.subscribe-benefits li {
-  margin-bottom: 0.5em;
-  list-style: disc inside;
+
+.subscribe-channels-label {
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.75rem;
 }
+
+.subscribe-channels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+
+.subscribe-card {
+  display: grid;
+  gap: 16px;
+  padding: 28px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(36, 56, 71, 0.08);
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.subscribe-card h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.subscribe-card-text {
+  margin: 0;
+  color: var(--muted);
+}
+
+.subscribe-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 18px;
+}
+
+.subscribe-steps li {
+  padding-left: 4px;
+}
+
+.subscribe-step-title {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: var(--deep);
+}
+
+.subscribe-invoice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.subscribe-phones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: baseline;
+  margin: 0;
+  font-weight: 600;
+}
+
+.subscribe-phones a {
+  color: var(--accent-dark);
+}
+
+.subscribe-note {
+  margin: 4px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border-left: 4px solid var(--accent);
+  background: rgba(157, 34, 53, 0.08);
+  color: var(--deep);
+  line-height: 1.5;
+}
+
+.subscribe-indexes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.subscribe-indexes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(36, 56, 71, 0.04);
+}
+
+.subscribe-indexes span {
+  color: var(--muted);
+}
+
+.subscribe-indexes strong {
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  color: var(--deep);
+}
+
+.subscribe-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+.subscribe-requisites {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.6;
+  color: var(--deep);
+}
+
+.subscribe-hotline-meta {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.subscribe-hotline-meta li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(36, 56, 71, 0.04);
+}
+
+.subscribe-hotline-meta span {
+  color: var(--muted);
+}
+
+.subscribe-hotline-meta strong,
+.subscribe-hotline-meta a {
+  color: var(--deep);
+  text-align: right;
+}
+
+.subscribe-help {
+  padding: 22px 28px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(157, 34, 53, 0.18);
+}
+
+.subscribe-help .eyebrow {
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 8px;
+}
+
+.subscribe-help .subscribe-phones a {
+  color: #fff;
+}
+
+.subscribe-help .contact-phones-sep {
+  opacity: 0.7;
+  color: #fff;
+}
+
 :root {
   --bg: #f2ede3;
   --surface: #faf7f1;
@@ -89,9 +281,15 @@ select {
   position: sticky;
   top: 0;
   z-index: 20;
-  backdrop-filter: blur(16px);
-  background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(36, 56, 71, 0.1);
+  background-color: #d7ebf3;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.12)),
+    url("/images/header-sky.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  backdrop-filter: none;
 }
 
 .header-row {
@@ -1063,6 +1261,8 @@ select {
   .promo-grid,
   .about-layout,
   .footer-grid,
+  .subscribe-channels,
+  .subscribe-details,
   .admin-layout,
   .admin-cards,
   .card-grid,
