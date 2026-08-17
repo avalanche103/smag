@@ -8,16 +8,24 @@
       </span>
     </a>
 
-    <button class="nav-toggle" type="button" data-nav-toggle aria-label="Открыть меню">Меню</button>
+    <button
+      class="nav-toggle"
+      type="button"
+      data-nav-toggle
+      aria-label="Открыть меню"
+      aria-expanded="false"
+      aria-controls="site-nav"
+    >
+      <span class="nav-toggle-bars" aria-hidden="true"></span>
+    </button>
 
-    <nav class="site-nav" data-nav>
+    <nav class="site-nav" id="site-nav" data-nav>
       <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">О журнале</a>
       <a href="/issues" class="<%= path.startsWith('/issues') ? 'is-active' : '' %>">Выпуски</a>
       <a href="/published-lists" class="<%= path === '/published-lists' ? 'is-active' : '' %>">Материалы</a>
-        <!-- <a href="/payment" class="<%= path === '/payment' ? 'is-active' : '' %>">Счет и оплата</a> -->
+      <!-- <a href="/payment" class="<%= path === '/payment' ? 'is-active' : '' %>">Счет и оплата</a> -->
       <a href="/contacts" class="<%= path === '/contacts' ? 'is-active' : '' %>">Контакты</a>
-    </nav>
-
       <a class="button button-accent header-cta" href="/subscribe">Подписаться</a>
+    </nav>
   </div>
 </header>

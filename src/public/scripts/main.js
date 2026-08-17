@@ -1,9 +1,51 @@
+const header = document.querySelector('.site-header');
 const toggle = document.querySelector('[data-nav-toggle]');
 const nav = document.querySelector('[data-nav]');
 
 if (toggle && nav) {
+  const setNavOpen = (open) => {
+    nav.classList.toggle('is-open', open);
+    header?.classList.toggle('is-nav-open', open);
+    document.body.classList.toggle('is-nav-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+  };
+
   toggle.addEventListener('click', () => {
-    nav.classList.toggle('is-open');
+    setNavOpen(!nav.classList.contains('is-open'));
+  });
+
+  nav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setNavOpen(false));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setNavOpen(false);
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!nav.classList.contains('is-open')) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Node)) {
+      return;
+    }
+
+    if (toggle.contains(target) || nav.contains(target)) {
+      return;
+    }
+
+    setNavOpen(false);
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 980) {
+      setNavOpen(false);
+    }
   });
 }
 
