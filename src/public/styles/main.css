@@ -123,11 +123,9 @@
 }
 
 .subscribe-note {
-  margin: 4px 0 0;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border-left: 4px solid var(--accent);
-  background: rgba(157, 34, 53, 0.08);
+  margin: 12px 0 0;
+  padding: 14px 0 0;
+  border-top: 2px solid rgba(157, 34, 53, 0.35);
   color: var(--deep);
   line-height: 1.5;
 }
@@ -712,6 +710,55 @@ small {
   color: rgba(255, 255, 255, 0.85);
 }
 
+.hotline-promo h2 {
+  line-height: 1.25;
+  max-width: none;
+}
+
+.hotline-promo-lead {
+  margin: 0 0 18px;
+  max-width: none;
+  opacity: 0.95;
+}
+
+.hotline-promo-meta {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.hotline-promo-meta li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.hotline-promo-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.hotline-promo-icon svg {
+  display: block;
+}
+
+.hotline-promo-meta .text-link {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .hero-card-white {
   background: #fff;
 }
@@ -733,6 +780,10 @@ small {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
+}
+
+.card-grid-home {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .card-grid-wide {
@@ -792,36 +843,186 @@ small {
   margin-bottom: 18px;
 }
 
-.issue-material-list-detail li {
+.detail-materials-block {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.issue-toc {
+  display: grid;
+  gap: 14px;
+}
+
+.issue-toc-group,
+.issue-toc-qa {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.issue-toc-section {
+  margin: 0 0 8px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.issue-toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.issue-toc-list > li {
+  display: grid;
+  gap: 2px;
+  padding: 0 0 8px;
+  border-bottom: 1px solid rgba(36, 56, 71, 0.08);
+}
+
+.issue-toc-list > li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.issue-toc-list .material-title {
+  color: var(--deep);
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.issue-toc-list .material-author {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.issue-toc-qa {
+  border-top: 1px solid rgba(36, 56, 71, 0.1);
+  padding-top: 4px;
+}
+
+.issue-toc-qa-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 18px;
-  background: rgba(255, 253, 248, 0.88);
-  border: 1px solid rgba(36, 56, 71, 0.08);
-  border-radius: 18px;
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 0;
+  user-select: none;
 }
 
-.issue-material-list-detail li.is-primary {
-  border-color: rgba(175, 95, 60, 0.3);
-  background: linear-gradient(180deg, rgba(255, 247, 240, 0.92), rgba(255, 253, 248, 0.92));
+.issue-toc-qa-summary::-webkit-details-marker {
+  display: none;
 }
 
-.material-badge {
+.issue-toc-qa-summary .issue-toc-section {
+  margin: 0;
+}
+
+.issue-toc-qa-summary::after {
+  content: "";
+  width: 0.55em;
+  height: 0.55em;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 160ms ease;
   flex-shrink: 0;
-  padding: 6px 10px;
+}
+
+.issue-toc-qa[open] .issue-toc-qa-summary::after {
+  transform: rotate(-135deg);
+  margin-top: 4px;
+}
+
+.issue-toc-qa-count {
+  margin-left: auto;
+  margin-right: 10px;
+  min-width: 1.6em;
+  padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(175, 95, 60, 0.12);
-  color: var(--accent-dark);
+  background: rgba(36, 56, 71, 0.08);
+  color: var(--deep);
   font-size: 0.82rem;
   font-weight: 600;
+  text-align: center;
 }
 
-.detail-materials-block {
+.issue-toc-list-qa > li {
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.issue-pager {
   display: grid;
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(36, 56, 71, 0.1);
+}
+
+.issue-pager-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(36, 56, 71, 0.1);
+  background: rgba(255, 253, 248, 0.9);
+  transition: 160ms ease;
+}
+
+.issue-pager-link:hover {
+  border-color: rgba(157, 34, 53, 0.28);
+  transform: translateY(-1px);
+}
+
+.issue-pager-link.is-disabled {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.issue-pager-next {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.issue-pager-dir {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.issue-pager-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.issue-pager-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.issue-pager-title {
+  font-weight: 600;
+  color: var(--deep);
 }
 
 .issue-card-wide img {
@@ -1250,13 +1451,11 @@ select {
   margin-top: 0;
 }
 
-/* Визуальная “подсветка” текста про горячую линию в блоке «Для кого» */
+/* Текст про горячую линию: отделение сверху, без левой «реснички» */
 .audience-hotline-block {
-  margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border-left: 4px solid var(--accent);
-  background: rgba(157, 34, 53, 0.08);
+  margin-top: 18px;
+  padding: 16px 0 0;
+  border-top: 2px solid rgba(157, 34, 53, 0.35);
 }
 
 .audience-hotline-block .audience-intro p:last-child {
@@ -1499,6 +1698,11 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .card-grid-home {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
   .footer-grid > div:last-child {
     text-align: left;
     align-items: flex-start;
@@ -1522,8 +1726,7 @@ select {
   }
 
   .material-row,
-  .audience-topic-row,
-  .issue-material-list-detail li {
+  .audience-topic-row {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -1596,6 +1799,23 @@ select {
 
   .card-grid {
     grid-template-columns: 1fr;
+  }
+
+  .card-grid-home {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .card-grid-home .issue-material-list-compact {
+    display: none;
+  }
+
+  .card-grid-home .issue-card > div {
+    padding: 12px 10px 14px;
+  }
+
+  .card-grid-home .issue-card h3 {
+    font-size: 0.95rem;
   }
 
   .subscribe-invoice-row {

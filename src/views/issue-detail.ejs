@@ -4,6 +4,23 @@
 
 <main class="section">
   <% const allMaterials = issue.materials.filter((material) => material.title); %>
+  <%
+    const qaSectionName = 'Вопрос-ответ';
+    const normalizeSection = (value) => {
+      const section = String(value || '').trim();
+      return section && section !== '-' ? section : 'Без рубрики';
+    };
+    const groups = [];
+    const groupIndex = new Map();
+    allMaterials.forEach((material) => {
+      const section = normalizeSection(material.section);
+      if (!groupIndex.has(section)) {
+        groupIndex.set(section, groups.length);
+        groups.push({ section, materials: [] });
+      }
+      groups[groupIndex.get(section)].materials.push(material);
+    });
+  %>
   <div class="shell detail-grid">
     <div class="cover-frame">
       <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
@@ -13,8 +30,8 @@
       <h1><%= issue.numberLabel %></h1>
       <dl class="meta-grid meta-grid-stacked">
         <div>
-          <dt>Дата выпуска</dt>
-          <dd><%= dayjs(issue.publishDate).format('D MMMM YYYY') %></dd>
+          <dt>Месяц выпуска</dt>
+          <dd><%= formatIssuePeriod(issue) %></dd>
         </div>
         <div>
           <dt>Материалов в выпуске</dt>
@@ -23,21 +40,66 @@
       </dl>
       <div class="detail-materials-block">
         <p class="lead">Содержание выпуска</p>
-        <ul class="issue-material-list issue-material-list-detail">
-          <% allMaterials.forEach((material) => { %>
-            <li class="<%= material.isPrimary ? 'is-primary' : '' %>">
-              <span><%= material.title %></span>
-              <% if (material.isPrimary) { %>
-                <span class="material-badge">Основной материал</span>
-              <% } %>
-            </li>
+        <div class="issue-toc">
+          <% groups.forEach((group) => { %>
+            <% if (group.section === qaSectionName) { %>
+              <details class="issue-toc-qa">
+                <summary class="issue-toc-qa-summary">
+                  <span class="issue-toc-section"><%= group.section %></span>
+                  <span class="issue-toc-qa-count"><%= group.materials.length %></span>
+                </summary>
+                <ul class="issue-toc-list issue-toc-list-qa">
+                  <% group.materials.forEach((material) => { %>
+                    <li><%= material.title %></li>
+                  <% }) %>
+                </ul>
+              </details>
+            <% } else { %>
+              <section class="issue-toc-group">
+                <h3 class="issue-toc-section"><%= group.section %></h3>
+                <ul class="issue-toc-list">
+                  <% group.materials.forEach((material) => { %>
+                    <li>
+                      <span class="material-title"><%= material.title %></span>
+                      <% if (material.author && material.author.trim() && material.author !== '-') { %>
+                        <span class="material-author"><%= material.author %></span>
+                      <% } %>
+                    </li>
+                  <% }) %>
+                </ul>
+              </section>
+            <% } %>
           <% }) %>
-        </ul>
+        </div>
       </div>
       <div class="hero-actions">
-          <a class="button button-accent" href="/subscribe">Подписаться</a>
+        <a class="button button-accent" href="/subscribe">Подписаться</a>
         <a class="button button-secondary" href="/issues">Назад к выпускам</a>
       </div>
+      <nav class="issue-pager" aria-label="Навигация по выпускам">
+        <% if (previousIssue) { %>
+          <a class="issue-pager-link issue-pager-prev" href="/issues/<%= previousIssue.slug %>">
+            <span class="issue-pager-dir" aria-hidden="true">←</span>
+            <span class="issue-pager-copy">
+              <span class="issue-pager-label">Предыдущий</span>
+              <span class="issue-pager-title"><%= previousIssue.numberLabel %></span>
+            </span>
+          </a>
+        <% } else { %>
+          <span class="issue-pager-link is-disabled" aria-hidden="true"></span>
+        <% } %>
+        <% if (nextIssue) { %>
+          <a class="issue-pager-link issue-pager-next" href="/issues/<%= nextIssue.slug %>">
+            <span class="issue-pager-copy">
+              <span class="issue-pager-label">Следующий</span>
+              <span class="issue-pager-title"><%= nextIssue.numberLabel %></span>
+            </span>
+            <span class="issue-pager-dir" aria-hidden="true">→</span>
+          </a>
+        <% } else { %>
+          <span class="issue-pager-link is-disabled" aria-hidden="true"></span>
+        <% } %>
+      </nav>
     </div>
   </div>
 </main>

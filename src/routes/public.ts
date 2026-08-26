@@ -8,6 +8,7 @@ import "dayjs/locale/ru";
 import {
   getFeaturedIssue,
   getIssueBySlug,
+  getAdjacentIssues,
   getPrimaryIssueMaterials,
   getPageContent,
   getSettings,
@@ -75,8 +76,12 @@ export default function publicRouter(formLimiter: RequestHandler) {
       .map((material) => material.title)
       .join("; ") || `Материалы выпуска ${issue.numberLabel}`;
 
+    const { previous, next } = getAdjacentIssues(issue.slug);
+
     res.render("issue-detail", {
       issue,
+      previousIssue: previous,
+      nextIssue: next,
       meta: buildMeta(`${issue.numberLabel} | ${settings.siteTitle}`, metaDescription),
       dayjs
     });

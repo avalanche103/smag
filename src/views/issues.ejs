@@ -14,9 +14,11 @@
       <% const primaryMaterials = issue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
       <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
       <article class="issue-card">
-        <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
+        <a href="/issues/<%= issue.slug %>">
+          <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
+        </a>
         <div class="issue-card-body">
-          <span class="issue-date"><%= dayjs(issue.publishDate).format('D MMMM YYYY') %></span>
+          <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
           <h2><%= issue.numberLabel %></h2>
           <ul class="issue-material-list issue-material-list-compact">
             <% previewMaterials.forEach((material) => { %>

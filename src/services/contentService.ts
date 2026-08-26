@@ -192,6 +192,30 @@ export function getIssueBySlug(slug: string): JournalIssue | undefined {
   return readStore().issues.find((issue) => issue.slug === slug && issue.isPublished === 1);
 }
 
+export function getAdjacentIssues(slug: string): {
+  previous: JournalIssue | null;
+  next: JournalIssue | null;
+} {
+  const issues = listIssues().sort((left, right) => {
+    const leftNumber = parseJournalNumber(left.numberLabel) ?? 0;
+    const rightNumber = parseJournalNumber(right.numberLabel) ?? 0;
+    if (leftNumber !== rightNumber) {
+      return leftNumber - rightNumber;
+    }
+    return left.publishDate.localeCompare(right.publishDate);
+  });
+
+  const index = issues.findIndex((issue) => issue.slug === slug);
+  if (index < 0) {
+    return { previous: null, next: null };
+  }
+
+  return {
+    previous: index > 0 ? issues[index - 1] : null,
+    next: index < issues.length - 1 ? issues[index + 1] : null
+  };
+}
+
 export function getIssueById(id: number): JournalIssue | undefined {
   return readStore().issues.find((issue) => issue.id === id);
 }
@@ -305,6 +329,49 @@ export function parseJournalNumber(numberLabel: string): number | null {
 
   const value = Number(match[1]);
   return value >= 1 && value <= 12 ? value : null;
+}
+
+const ISSUE_MONTHS_RU = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь"
+] as const;
+
+export function parseIssueYear(numberLabel: string, publishDate?: string): number | null {
+  const fromLabel = numberLabel.match(/\((\d{4})\)/);
+  if (fromLabel) {
+    return Number(fromLabel[1]);
+  }
+
+  if (publishDate) {
+    const fromDate = publishDate.match(/^(\d{4})/);
+    if (fromDate) {
+      return Number(fromDate[1]);
+    }
+  }
+
+  return null;
+}
+
+/** Месяц выпуска по номеру журнала: №1 → Январь, №2 → Февраль и т.д. */
+export function formatIssuePeriod(issue: { numberLabel: string; publishDate?: string }): string {
+  const monthNumber = parseJournalNumber(issue.numberLabel);
+  const year = parseIssueYear(issue.numberLabel, issue.publishDate);
+
+  if (!monthNumber || !year) {
+    return issue.publishDate || issue.numberLabel;
+  }
+
+  return `${ISSUE_MONTHS_RU[monthNumber - 1]} ${year}`;
 }
 
 export function normalizeMaterialKey(title: string): string {
