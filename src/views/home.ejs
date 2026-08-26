@@ -23,7 +23,11 @@
             <% }) %>
           </ul>
         <% } %>
-        <div class="audience-intro rich-content"><%- aboutAudienceHtml %></div>
+        <% if (aboutAudienceHtml) { %>
+          <div class="audience-hotline-block">
+            <div class="audience-intro rich-content"><%- aboutAudienceHtml %></div>
+          </div>
+        <% } %>
       </div>
     </div>
   </section>

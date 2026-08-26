@@ -1247,7 +1247,20 @@ select {
 }
 
 .hero-card .audience-intro {
-  margin-top: 4px;
+  margin-top: 0;
+}
+
+/* Визуальная “подсветка” текста про горячую линию в блоке «Для кого» */
+.audience-hotline-block {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border-left: 4px solid var(--accent);
+  background: rgba(157, 34, 53, 0.08);
+}
+
+.audience-hotline-block .audience-intro p:last-child {
+  margin-bottom: 0;
 }
 
 .rich-content p,
