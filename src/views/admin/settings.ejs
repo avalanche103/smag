@@ -20,14 +20,15 @@
         <label>URL сайта<input type="url" name="siteUrl" value="<%= settings.siteUrl || '' %>" /></label>
         <label>Физический адрес<input type="text" name="address" value="<%= settings.address %>" /></label>
         <label>Email<input type="email" name="email" value="<%= settings.email %>" /></label>
-        <label>Телефон 1<input type="text" name="phone" value="<%= settings.phone %>" /></label>
-        <label>Телефон 2<input type="text" name="phone2" value="<%= settings.phone2 || '' %>" /></label>
+        <label>Телефон 1 (+375 44…)<input type="text" name="phone" value="<%= settings.phone %>" /></label>
+        <label>Телефон 2 (+375 29…, горячая линия)<input type="text" name="phone2" value="<%= settings.phone2 || '' %>" /></label>
         <label>Часы работы<input type="text" name="workingHours" value="<%= settings.workingHours %>" /></label>
         <label>Analytics ID<input type="text" name="analyticsId" value="<%= settings.analyticsId || '' %>" /></label>
       </div>
-      <label>Описание сайта<textarea name="siteDescription" rows="3"><%= settings.siteDescription %></textarea></label>
-      <label>Hero-заголовок<textarea name="heroTitle" rows="2"><%= settings.heroTitle %></textarea></label>
-      <label>Hero-текст<textarea name="heroText" rows="4"><%= settings.heroText %></textarea></label>
+
+      <%- include('./partials/rich-field', { name: 'siteDescription', label: 'Описание сайта', value: formatRichHtml(settings.siteDescription), placeholder: 'Краткое описание сайта', rows: 3 }) %>
+      <%- include('./partials/rich-field', { name: 'heroTitle', label: 'Hero-заголовок', value: formatRichHtml(settings.heroTitle), placeholder: 'Заголовок на главной', rows: 2 }) %>
+      <%- include('./partials/rich-field', { name: 'heroText', label: 'Hero-текст', value: formatRichHtml(settings.heroText), placeholder: 'Текст под заголовком на главной', rows: 4 }) %>
 
       <div class="audience-editor" data-audience-editor>
         <div class="audience-editor-head">
@@ -66,38 +67,20 @@
             <button class="button button-secondary" type="button" data-remove-audience-topic>Удалить</button>
           </div>
         </template>
-        <label>Вводный текст
-          <div class="rich-editor" data-rich-editor>
-            <div class="rich-editor-toolbar" data-rich-toolbar>
-              <button type="button" data-rich-command="bold" title="Жирный"><b>B</b></button>
-              <button type="button" data-rich-command="italic" title="Курсив"><i>I</i></button>
-              <button type="button" data-rich-command="underline" title="Подчёркивание"><u>U</u></button>
-              <button type="button" data-rich-command="insertUnorderedList" title="Маркированный список">• Список</button>
-              <button type="button" data-rich-command="insertOrderedList" title="Нумерованный список">1. Список</button>
-              <button type="button" data-rich-command="removeFormat" title="Очистить форматирование">Очистить</button>
-            </div>
-            <div
-              class="rich-editor-surface"
-              contenteditable="true"
-              data-rich-surface
-              data-placeholder="Кратко опишите аудиторию журнала"
-            ><%- aboutAudienceHtml || '' %></div>
-            <textarea name="aboutAudience" hidden data-rich-input><%= aboutAudienceHtml || '' %></textarea>
-          </div>
-        </label>
+        <%- include('./partials/rich-field', { name: 'aboutAudience', label: 'Вводный текст', value: aboutAudienceHtml || '', placeholder: 'Кратко опишите аудиторию журнала', rows: 4 }) %>
       </div>
 
       <label>Периодичность<input type="text" name="periodicity" value="<%= settings.periodicity || '' %>" /></label>
-      <label>Юрлицо / издатель<textarea name="publisher" rows="2"><%= settings.publisher %></textarea></label>
-      <label>Редакция<textarea name="editorialInfo" rows="4"><%= settings.editorialInfo %></textarea></label>
-      <label>Формат распространения<textarea name="distributionFormat" rows="3"><%= settings.distributionFormat %></textarea></label>
-      <label>Заголовок горячей линии<textarea name="hotlineTitle" rows="2"><%= settings.hotlineTitle %></textarea></label>
-      <label>Текст горячей линии<textarea name="hotlineText" rows="3"><%= settings.hotlineText %></textarea></label>
-      <label>Заголовок оплаты<textarea name="paymentTitle" rows="2"><%= settings.paymentTitle %></textarea></label>
-      <label>Описание оплаты<textarea name="paymentText" rows="4"><%= settings.paymentText %></textarea></label>
-      <label>Реквизиты<textarea name="requisites" rows="4"><%= settings.requisites || '' %></textarea></label>
+      <%- include('./partials/rich-field', { name: 'publisher', label: 'Юрлицо / издатель', value: formatRichHtml(settings.publisher), placeholder: '', rows: 2 }) %>
+      <%- include('./partials/rich-field', { name: 'editorialInfo', label: 'Редакция', value: formatRichHtml(settings.editorialInfo), placeholder: '', rows: 4 }) %>
+      <%- include('./partials/rich-field', { name: 'distributionFormat', label: 'Формат распространения', value: formatRichHtml(settings.distributionFormat), placeholder: '', rows: 3 }) %>
+      <%- include('./partials/rich-field', { name: 'hotlineTitle', label: 'Заголовок горячей линии', value: formatRichHtml(settings.hotlineTitle), placeholder: '', rows: 2 }) %>
+      <%- include('./partials/rich-field', { name: 'hotlineText', label: 'Текст горячей линии', value: formatRichHtml(settings.hotlineText), placeholder: '', rows: 3 }) %>
+      <%- include('./partials/rich-field', { name: 'paymentTitle', label: 'Заголовок оплаты', value: formatRichHtml(settings.paymentTitle), placeholder: '', rows: 2 }) %>
+      <%- include('./partials/rich-field', { name: 'paymentText', label: 'Описание оплаты', value: formatRichHtml(settings.paymentText), placeholder: '', rows: 4 }) %>
+      <%- include('./partials/rich-field', { name: 'requisites', label: 'Реквизиты', value: formatRichHtml(settings.requisites || ''), placeholder: '', rows: 4 }) %>
       <label>SEO Title главной<input type="text" name="seoHomeTitle" value="<%= settings.seoHomeTitle %>" /></label>
-      <label>SEO Description главной<textarea name="seoHomeDescription" rows="3"><%= settings.seoHomeDescription %></textarea></label>
+      <%- include('./partials/rich-field', { name: 'seoHomeDescription', label: 'SEO Description главной', value: formatRichHtml(settings.seoHomeDescription), placeholder: '', rows: 3 }) %>
       <label>Email для уведомлений
         <input type="email" name="mailTo" value="<%= settings.mailTo || '' %>" />
         <span class="form-note">Сюда приходят сообщения с формы обратной связи.</span>

@@ -39,7 +39,7 @@ const settingDefaults: Array<[string, string]> = [
   ["invoiceLabel2", "Скачать счет 2"],
   ["phone", "+375 (17) 000-00-00"],
   ["phone2", ""],
-  ["email", "info@smag.example"],
+  ["email", "prof.dialogi@yandex.by"],
   ["address", "220000, Минск, ул. Примерная, д. 10"],
   ["requisites", "ООО «Профессиональный диалог»\n\nУНП 193589657, ОКПО 505378575000\nР/с BY11SLAN30125250900000100000 в ЗАО Банк ВТБ (Беларусь), БИК SLANBY22, г. Минск, пр-т Дзержинского, 119"],
   ["workingHours", "Пн-Пт, 09:00-18:00"],
@@ -47,7 +47,7 @@ const settingDefaults: Array<[string, string]> = [
   ["seoHomeDescription", "Официальный сайт журнала для строительной отрасли Беларуси: описание, выпуски, перечни опубликованного, контакты и счет-фактура для оплаты."],
   ["siteUrl", env.siteUrl],
   ["analyticsId", env.analyticsId],
-  ["mailTo", env.mailTo]
+  ["mailTo", "prof.dialogi@yandex.by"]
 ];
 
 const pageDefaults = [

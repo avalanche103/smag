@@ -3,7 +3,7 @@
     <div>
       <p class="eyebrow">Журнал</p>
       <h2><%= site.siteTitle %></h2>
-      <p class="footer-copy"><%= site.siteDescription %></p>
+      <div class="footer-copy rich-content"><%- formatRichHtml(site.siteDescription) %></div>
       <p class="footer-copy">Свидетельство о государственной регистрации средства массовой информации от 22.01.2024 № 1984, выданное Министерством информации Республики Беларусь.</p>
     </div>
     <div>
@@ -11,7 +11,7 @@
       <h2 class="footer-title-spacer" aria-hidden="true"><%= site.siteTitle %></h2>
       <ul class="footer-list">
         <% if (site.publisher) { %>
-          <li><%= site.publisher %></li>
+          <li class="rich-content"><%- formatRichHtml(site.publisher) %></li>
         <% } %>
         <li><%= site.address %></li>
         <li><a href="mailto:<%= site.email %>"><%= site.email %></a></li>

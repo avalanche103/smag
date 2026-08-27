@@ -14,7 +14,8 @@ import {
   getSettings,
   listIssues,
   listPublishedLists,
-  saveMessage
+  saveMessage,
+  stripHtmlTags
 } from "../services/contentService";
 import { sendContactFormEmail } from "../services/mailService";
 import { verifyCsrfToken } from "../middleware/csrf";
@@ -39,7 +40,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
       page: getPageContent("home"),
       featuredIssue,
       issues,
-      meta: buildMeta(settings.seoHomeTitle || settings.siteTitle, settings.seoHomeDescription || settings.siteDescription),
+      meta: buildMeta(settings.seoHomeTitle || settings.siteTitle, stripHtmlTags(settings.seoHomeDescription || settings.siteDescription)),
       dayjs
     });
   });
@@ -49,7 +50,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
     res.render("about", {
       page: getPageContent("about"),
       featuredIssue: getFeaturedIssue(),
-      meta: buildMeta(`О журнале | ${settings.siteTitle}`, settings.siteDescription)
+      meta: buildMeta(`О журнале | ${settings.siteTitle}`, stripHtmlTags(settings.siteDescription))
     });
   });
 
@@ -141,19 +142,43 @@ export default function publicRouter(formLimiter: RequestHandler) {
     res.redirect("/subscribe");
   });
 
-  router.get("/contacts", (_req, res) => {
+  router.get("/contacts", (req, res) => {
     const settings = getSettings();
+    const left = 1 + Math.floor(Math.random() * 8);
+    const right = 1 + Math.floor(Math.random() * 8);
+    req.session.contactCaptcha = {
+      answer: left + right,
+      issuedAt: Date.now()
+    };
     res.render("contacts", {
       page: getPageContent("contacts"),
       meta: buildMeta(`Контакты | ${settings.siteTitle}`, "Контактная информация редакции и форма обратной связи."),
+      captchaQuestion: `${left} + ${right}`,
       success: false
     });
   });
 
   router.post("/contacts", formLimiter, verifyCsrfToken, async (req, res) => {
-    const { name, email, phone, message, website } = req.body as Record<string, string>;
+    const { name, email, phone, message, website, captcha } = req.body as Record<string, string>;
     if (website) {
       req.session.flash = { type: "success", message: "Сообщение отправлено." };
+      res.redirect("/contacts");
+      return;
+    }
+
+    const expected = req.session.contactCaptcha;
+    delete req.session.contactCaptcha;
+    const captchaValue = Number(String(captcha || "").trim());
+    const elapsed = expected ? Date.now() - expected.issuedAt : 0;
+    const captchaOk =
+      Boolean(expected) &&
+      Number.isFinite(captchaValue) &&
+      captchaValue === expected!.answer &&
+      elapsed >= 1200 &&
+      elapsed <= 1000 * 60 * 60;
+
+    if (!captchaOk) {
+      req.session.flash = { type: "error", message: "Проверьте ответ на проверочный вопрос и попробуйте ещё раз." };
       res.redirect("/contacts");
       return;
     }
@@ -174,15 +199,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
 
     saveMessage(trimmed.name, trimmed.email, trimmed.phone, trimmed.message);
 
-    const mailTo = (settings.mailTo || settings.email || "").trim();
-    if (!mailTo) {
-      req.session.flash = {
-        type: "error",
-        message: "Не указан email для уведомлений. Сообщение сохранено в админке."
-      };
-      res.redirect("/contacts");
-      return;
-    }
+    const mailTo = (settings.mailTo || settings.email || "prof.dialogi@yandex.by").trim();
 
     try {
       await sendContactFormEmail({
@@ -192,9 +209,13 @@ export default function publicRouter(formLimiter: RequestHandler) {
       req.session.flash = { type: "success", message: "Сообщение отправлено. Редакция свяжется с вами." };
     } catch (error) {
       console.error("Contact form email failed:", error);
+      const detail = error instanceof Error ? error.message : String(error);
+      const authFailed = /Invalid login|authentication failed|EAUTH/i.test(detail);
       req.session.flash = {
         type: "error",
-        message: "Не удалось отправить письмо. Сообщение сохранено в админке, попробуйте позже или позвоните в редакцию."
+        message: authFailed
+          ? "Не удалось авторизоваться в почте (SMTP). Проверьте пароль приложения Яндекса в .env и перезапустите сервер. Сообщение сохранено в админке."
+          : "Не удалось отправить письмо. Сообщение сохранено в админке, попробуйте позже или позвоните в редакцию."
       };
     }
 

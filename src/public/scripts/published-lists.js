@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // Фильтры
   const filterRow = document.createElement('tr');
   filterRow.innerHTML = `
-    <td><input type="text" placeholder="№ журнала" class="filter-number" style="width: 100%"></td>
-    <td><input type="text" placeholder="Рубрика" class="filter-section" style="width: 100%"></td>
-    <td><input type="text" placeholder="Название" class="filter-title" style="width: 100%"></td>
-    <td><input type="text" placeholder="Автор" class="filter-author" style="width: 100%"></td>
+    <td class="col-issue"><input type="text" placeholder="№" class="filter-number"></td>
+    <td class="col-section"><input type="text" placeholder="Рубрика" class="filter-section"></td>
+    <td class="col-title"><input type="text" placeholder="Название" class="filter-title"></td>
+    <td class="col-author"><input type="text" placeholder="Автор" class="filter-author"></td>
   `;
   table.querySelector('thead').appendChild(filterRow);
 

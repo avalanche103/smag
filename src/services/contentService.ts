@@ -105,13 +105,14 @@ export function sanitizeRichHtml(value: string): string {
     .replace(/<\/?span\b[^>]*>/gi, "")
     .replace(/\s(?:class|lang|align|dir|id)="[^"]*"/gi, "")
     .replace(/\sstyle="[^"]*"/gi, "")
-    .replace(/<(p|div|ul|ol|li|b|strong|i|em|u)\b[^>]*>/gi, "<$1>")
+    .replace(/<(p|div|br|ul|ol|li|b|strong|i|em|u)\b[^>]*>/gi, "<$1>")
     .replace(/&nbsp;/gi, " ")
     .replace(/<p>\s*<\/p>/gi, "")
+    .replace(/<div>\s*<br\s*\/?>\s*<\/div>/gi, "<p></p>")
     .trim();
 }
 
-export function formatAudienceHtml(value: unknown): string {
+export function formatRichHtml(value: unknown): string {
   if (typeof value !== "string") {
     return "";
   }
@@ -131,6 +132,28 @@ export function formatAudienceHtml(value: unknown): string {
     .filter(Boolean)
     .map((line) => `<p>${escapeHtml(line)}</p>`)
     .join("");
+}
+
+export function formatAudienceHtml(value: unknown): string {
+  return formatRichHtml(value);
+}
+
+export function stripHtmlTags(value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/p>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function getSettings(): Record<string, string> {

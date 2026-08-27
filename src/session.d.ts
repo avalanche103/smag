@@ -5,6 +5,10 @@ declare module "express-session" {
     adminId?: number;
     adminLogin?: string;
     csrfToken?: string;
+    contactCaptcha?: {
+      answer: number;
+      issuedAt: number;
+    };
     flash?: {
       type: "success" | "error";
       message: string;

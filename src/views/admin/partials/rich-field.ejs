@@ -1,0 +1,28 @@
+<%
+  const fieldName = name;
+  const fieldLabel = label;
+  const fieldHtml = typeof value === 'string' ? value : '';
+  const fieldPlaceholder = typeof placeholder === 'string' ? placeholder : '';
+  const fieldRows = Number(rows) || 3;
+  const minHeight = Math.max(72, fieldRows * 28);
+%>
+<label><%= fieldLabel %>
+  <div class="rich-editor" data-rich-editor>
+    <div class="rich-editor-toolbar" data-rich-toolbar>
+      <button type="button" data-rich-command="bold" title="Жирный"><b>B</b></button>
+      <button type="button" data-rich-command="italic" title="Курсив"><i>I</i></button>
+      <button type="button" data-rich-command="underline" title="Подчёркивание"><u>U</u></button>
+      <button type="button" data-rich-command="insertUnorderedList" title="Маркированный список">• Список</button>
+      <button type="button" data-rich-command="insertOrderedList" title="Нумерованный список">1. Список</button>
+      <button type="button" data-rich-command="removeFormat" title="Очистить форматирование">Очистить</button>
+    </div>
+    <div
+      class="rich-editor-surface"
+      contenteditable="true"
+      data-rich-surface
+      data-placeholder="<%= fieldPlaceholder %>"
+      style="min-height: <%= minHeight %>px"
+    ><%- fieldHtml %></div>
+    <textarea name="<%= fieldName %>" hidden data-rich-input><%= fieldHtml %></textarea>
+  </div>
+</label>

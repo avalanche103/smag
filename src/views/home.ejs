@@ -6,9 +6,8 @@
   <section class="hero">
     <div class="shell hero-grid">
       <div class="hero-copy">
-        <p class="eyebrow">Отраслевой журнал</p>
-        <h1><%= site.heroTitle %></h1>
-        <p class="hero-text"><%= site.heroText %></p>
+        <div class="hero-title rich-content"><%- formatRichHtml(site.heroTitle) %></div>
+        <div class="hero-text rich-content"><%- formatRichHtml(site.heroText) %></div>
         <div class="hero-actions">
           <a class="button button-accent" href="/subscribe">Подписаться</a>
           <a class="button button-secondary" href="/issues">Смотреть выпуски</a>
@@ -99,6 +98,12 @@
           Получите оперативный и квалифицированный ответ от нашего эксперта по вашему конкретному вопросу.
         </p>
         <ul class="hotline-promo-meta">
+          <%
+            const hotlineSource = stripHtmlTags(site.aboutAudience || site.hotlineText || '');
+            const hotlineScheduleMatch = hotlineSource.match(/Каждый[^.]+/i)
+              || hotlineSource.match(/(?:Пн|Вт|Ср|Чт|Пт|суббот|воскресен)[^.]*\d{1,2}:\d{2}[^.]*\d{1,2}:\d{2}/i);
+            const hotlineSchedule = (hotlineScheduleMatch ? hotlineScheduleMatch[0] : 'Каждый вторник с 14:00 до 16:00').trim().replace(/\.$/, '');
+          %>
           <li>
             <span class="hotline-promo-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
@@ -106,7 +111,7 @@
                 <path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
-            <span>Каждый вторник с 14:00 до 16:00</span>
+            <span><%= hotlineSchedule %></span>
           </li>
           <li>
             <span class="hotline-promo-icon" aria-hidden="true">
@@ -116,8 +121,9 @@
             </span>
             <span>
               Телефон:
-              <a class="text-link" href="tel:<%= (site.phone || '+375291044008').replace(/[^\d+]/g, '') %>">
-                <%= site.phone || '+375 29 104 40 08' %>
+              <% const hotlinePhone = site.phone2 || '+375 (29) 104 40 08'; %>
+              <a class="text-link" href="tel:<%= hotlinePhone.replace(/[^\d+]/g, '') %>">
+                <%= hotlinePhone %>
               </a>
             </span>
           </li>

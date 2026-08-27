@@ -4,13 +4,14 @@
 
 <main class="section">
   <div class="shell contact-grid">
-    <section>
-      <p class="eyebrow">Контакты</p>
+    <section class="contact-info">
       <h1><%= page.title %></h1>
-      <p class="lead"><%= page.lead %></p>
+      <% if (page.lead) { %>
+        <p class="lead"><%= page.lead %></p>
+      <% } %>
       <ul class="contact-list">
         <% if (site.publisher) { %>
-          <li><strong>Юрлицо:</strong> <%= site.publisher %></li>
+          <li><strong>Юрлицо:</strong> <%= stripHtmlTags(site.publisher) %></li>
         <% } %>
         <li><strong>Адрес:</strong> <%= site.address %></li>
         <li><strong>Email:</strong> <a href="mailto:<%= site.email %>"><%= site.email %></a></li>
@@ -35,27 +36,34 @@
         <% } %>
       </ul>
     </section>
-    <section class="form-card">
+    <section class="form-card contact-form-card">
       <h2>Форма обратной связи</h2>
-      <form method="post" action="/contacts" class="stack-form">
+      <form method="post" action="/contacts" class="stack-form contact-form">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off" />
-        <label>
-          Имя
-          <input type="text" name="name" required />
-        </label>
+        <div class="contact-form-row">
+          <label>
+            Имя
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            Телефон
+            <input type="tel" name="phone" required />
+          </label>
+        </div>
         <label>
           Email
           <input type="email" name="email" required />
         </label>
         <label>
-          Телефон
-          <input type="tel" name="phone" required />
-        </label>
-        <label>
           Сообщение
-          <textarea name="message" rows="5" required></textarea>
+          <textarea name="message" rows="3" required></textarea>
         </label>
+        <label class="contact-captcha">
+          Сколько будет <%= captchaQuestion %>?
+          <input type="text" name="captcha" inputmode="numeric" autocomplete="off" required aria-describedby="contact-captcha-hint" />
+        </label>
+        <p id="contact-captcha-hint" class="contact-captcha-hint">Небольшая проверка, что вы не робот</p>
         <button class="button button-accent" type="submit">Отправить сообщение</button>
       </form>
     </section>

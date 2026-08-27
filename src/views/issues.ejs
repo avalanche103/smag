@@ -3,35 +3,54 @@
 <%- include('partials/flash', { flash }) %>
 
 <main class="section">
-  <div class="shell section-head page-head">
-    <div>
-      <p class="eyebrow">Выпуски</p>
-      <h1>Актуальные и архивные номера</h1>
-    </div>
+  <div class="shell page-head">
+    <h1>Актуальные и архивные номера</h1>
   </div>
-  <div class="shell card-grid">
-    <% issues.forEach((issue) => { %>
-      <% const primaryMaterials = issue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
-      <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
-      <article class="issue-card">
-        <a href="/issues/<%= issue.slug %>">
-          <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
-        </a>
-        <div class="issue-card-body">
-          <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
-          <h2><%= issue.numberLabel %></h2>
-          <ul class="issue-material-list issue-material-list-compact">
-            <% previewMaterials.forEach((material) => { %>
-              <li><%= material.title %></li>
-            <% }) %>
-          </ul>
-          <div class="issue-card-footer">
-            <a class="button button-primary" href="/issues/<%= issue.slug %>">Подробнее</a>
-          </div>
-        </div>
-      </article>
-    <% }) %>
-  </div>
+
+  <%
+    const yearsMap = new Map();
+    issues.forEach((issue) => {
+      const year = parseIssueYear(issue.numberLabel, issue.publishDate) || 'Архив';
+      if (!yearsMap.has(year)) {
+        yearsMap.set(year, []);
+      }
+      yearsMap.get(year).push(issue);
+    });
+    const yearGroups = [...yearsMap.entries()].sort((left, right) => {
+      const leftYear = Number(left[0]);
+      const rightYear = Number(right[0]);
+      if (Number.isFinite(leftYear) && Number.isFinite(rightYear)) {
+        return rightYear - leftYear;
+      }
+      return String(right[0]).localeCompare(String(left[0]), 'ru');
+    });
+  %>
+
+  <% yearGroups.forEach(([year, yearIssues]) => { %>
+    <section class="shell issues-year-block">
+      <h2 class="issues-year-title"><%= year %></h2>
+      <div class="card-grid card-grid-issues">
+        <% yearIssues.forEach((issue) => { %>
+          <% const primaryMaterials = issue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
+          <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
+          <article class="issue-card issue-card-hover">
+            <a class="issue-card-media" href="/issues/<%= issue.slug %>">
+              <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
+              <div class="issue-card-overlay">
+                <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
+                <h3><%= issue.numberLabel %></h3>
+                <ul class="issue-material-list issue-material-list-compact">
+                  <% previewMaterials.forEach((material) => { %>
+                    <li><%= material.title %></li>
+                  <% }) %>
+                </ul>
+              </div>
+            </a>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% }) %>
 </main>
 
 <%- include('partials/footer', { site }) %>

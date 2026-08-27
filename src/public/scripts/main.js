@@ -182,7 +182,7 @@ document.querySelectorAll('[data-rich-editor]').forEach((editor) => {
 
   const syncInput = () => {
     const html = surface.innerHTML.trim();
-    input.value = html === '<br>' || html === '<div><br></div>' ? '' : surface.innerHTML;
+    input.value = html === '<br>' || html === '<div><br></div>' || html === '<p><br></p>' ? '' : surface.innerHTML;
   };
 
   toolbar.addEventListener('mousedown', (event) => {
@@ -207,6 +207,16 @@ document.querySelectorAll('[data-rich-editor]').forEach((editor) => {
 
     surface.focus();
     document.execCommand(command, false);
+    syncInput();
+  });
+
+  surface.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    document.execCommand('insertParagraph');
     syncInput();
   });
 

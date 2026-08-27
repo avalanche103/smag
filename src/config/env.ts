@@ -3,6 +3,10 @@ import path from "node:path";
 
 dotenv.config();
 
+function readEnv(name: string, fallback = ""): string {
+  return (process.env[name] ?? fallback).trim();
+}
+
 const rootDir = process.cwd();
 const projectDataDir = path.join(rootDir, "data");
 const runtimeDataDir = process.env.VERCEL ? path.join("/tmp", "smag-data") : projectDataDir;
@@ -14,13 +18,13 @@ export const env = {
   adminPassword: process.env.ADMIN_PASSWORD ?? "admin12345",
   siteUrl: process.env.SITE_URL ?? "http://localhost:3000",
   analyticsId: process.env.ANALYTICS_ID ?? "",
-  mailTo: process.env.MAIL_TO ?? "editor@example.com",
-  mailFrom: process.env.MAIL_FROM ?? process.env.SMTP_USER ?? "",
-  smtpHost: process.env.SMTP_HOST ?? "",
+  mailTo: readEnv("MAIL_TO", "prof.dialogi@yandex.by"),
+  mailFrom: readEnv("MAIL_FROM") || readEnv("SMTP_USER", "prof.dialogi@yandex.by"),
+  smtpHost: readEnv("SMTP_HOST"),
   smtpPort: Number(process.env.SMTP_PORT ?? 465),
   smtpSecure: (process.env.SMTP_SECURE ?? "true") === "true",
-  smtpUser: process.env.SMTP_USER ?? "",
-  smtpPass: process.env.SMTP_PASS ?? "",
+  smtpUser: readEnv("SMTP_USER"),
+  smtpPass: readEnv("SMTP_PASS").replace(/\s+/g, ""),
   rootDir,
   isVercel: Boolean(process.env.VERCEL),
   projectDataDir,

@@ -4,26 +4,39 @@
 
 <main class="section">
   <div class="shell page-head narrow-head">
-    <p class="eyebrow">Материалы</p>
     <h1>Опубликованные материалы</h1>
   </div>
   <div class="shell table-wrap">
-    <table>
+    <table class="published-materials-table">
       <thead>
         <tr>
-          <th>№ журнала</th>
-          <th>Рубрика</th>
-          <th>Название материала</th>
-          <th>Автор</th>
+          <th class="col-issue">№ журнала</th>
+          <th class="col-section">Рубрика</th>
+          <th class="col-title">Название материала</th>
+          <th class="col-author">Автор</th>
         </tr>
       </thead>
       <tbody>
         <% materials.forEach((m) => { %>
+          <%
+            const authors = String(m.author || '')
+              .split(/\s*,\s*/)
+              .map((name) => name.trim())
+              .filter(Boolean);
+          %>
           <tr>
-            <td><a href="/issues/<%= m.slug %>"><%= m.numberLabel %></a></td>
-            <td><%= m.section %></td>
-            <td><%= m.title %></td>
-            <td><%= m.author %></td>
+            <td class="col-issue"><a href="/issues/<%= m.slug %>"><%= m.numberLabel %></a></td>
+            <td class="col-section"><%= m.section %></td>
+            <td class="col-title"><%= m.title %></td>
+            <td class="col-author">
+              <% if (!authors.length || (authors.length === 1 && authors[0] === '-')) { %>
+                -
+              <% } else { %>
+                <% authors.forEach((name) => { %>
+                  <span class="author-line"><%= name %></span>
+                <% }) %>
+              <% } %>
+            </td>
           </tr>
         <% }) %>
       </tbody>

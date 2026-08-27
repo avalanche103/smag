@@ -8,6 +8,7 @@ import {
   deletePublishedList,
   getAllPages,
   formatAudienceHtml,
+  formatRichHtml,
   getAudienceTopics,
   getIssueFormMaterials,
   getIssueById,
@@ -85,35 +86,37 @@ export default function adminRouter() {
       meta: { title: "Настройки сайта", description: "Основные настройки и контакты" },
       settings,
       audienceTopics: getAudienceTopics(settings),
-      aboutAudienceHtml: formatAudienceHtml(settings.aboutAudience)
+      aboutAudienceHtml: formatAudienceHtml(settings.aboutAudience),
+      formatRichHtml
     });
   });
 
   router.post("/settings", verifyCsrfToken, (req, res) => {
     const body = req.body as Record<string, unknown>;
+    const rich = (key: string) => sanitizeRichHtml(String(body[key] ?? ""));
     updateSettings({
       siteTitle: String(body.siteTitle ?? ""),
-      siteDescription: String(body.siteDescription ?? ""),
-      heroTitle: String(body.heroTitle ?? ""),
-      heroText: String(body.heroText ?? ""),
-      aboutAudience: sanitizeRichHtml(String(body.aboutAudience ?? "")),
+      siteDescription: rich("siteDescription"),
+      heroTitle: rich("heroTitle"),
+      heroText: rich("heroText"),
+      aboutAudience: rich("aboutAudience"),
       aboutAudienceTopics: serializeAudienceTopics(body.audienceTopics),
       periodicity: String(body.periodicity ?? ""),
-      publisher: String(body.publisher ?? ""),
-      editorialInfo: String(body.editorialInfo ?? ""),
-      distributionFormat: String(body.distributionFormat ?? ""),
-      hotlineTitle: String(body.hotlineTitle ?? ""),
-      hotlineText: String(body.hotlineText ?? ""),
-      paymentTitle: String(body.paymentTitle ?? ""),
-      paymentText: String(body.paymentText ?? ""),
+      publisher: rich("publisher"),
+      editorialInfo: rich("editorialInfo"),
+      distributionFormat: rich("distributionFormat"),
+      hotlineTitle: rich("hotlineTitle"),
+      hotlineText: rich("hotlineText"),
+      paymentTitle: rich("paymentTitle"),
+      paymentText: rich("paymentText"),
       phone: String(body.phone ?? ""),
       phone2: String(body.phone2 ?? ""),
       email: String(body.email ?? ""),
       address: String(body.address ?? ""),
-      requisites: String(body.requisites ?? ""),
+      requisites: rich("requisites"),
       workingHours: String(body.workingHours ?? ""),
       seoHomeTitle: String(body.seoHomeTitle ?? ""),
-      seoHomeDescription: String(body.seoHomeDescription ?? ""),
+      seoHomeDescription: rich("seoHomeDescription"),
       siteUrl: String(body.siteUrl ?? ""),
       analyticsId: String(body.analyticsId ?? ""),
       mailTo: String(body.mailTo ?? "")

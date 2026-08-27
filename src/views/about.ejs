@@ -6,7 +6,6 @@
   <div class="shell about-layout">
     <div class="about-main">
       <div class="page-intro">
-        <p class="eyebrow">О журнале</p>
         <h1><%= page.title %></h1>
         <% if (page.lead) { %>
           <p class="lead"><%= page.lead %></p>
@@ -58,12 +57,16 @@
       <div>
         <h2>Издатель и редакция</h2>
         <p>ООО «Профессиональный диалог», УНП 193589657</p>
-        <p>+ 375 44 771 71 02, + 375 29 104 40 08</p>
+        <p>
+          <% if (site.phone) { %><a href="tel:<%= site.phone %>"><%= site.phone %></a><% } %>
+          <% if (site.phone && site.phone2) { %>, <% } %>
+          <% if (site.phone2) { %><a href="tel:<%= site.phone2 %>"><%= site.phone2 %></a><% } %>
+        </p>
         <p><a href="mailto:prof.dialogi@yandex.by">prof.dialogi@yandex.by</a></p>
       </div>
       <div>
         <h2>Формат распространения</h2>
-        <p><%= site.distributionFormat %></p>
+        <p class="rich-content"><%- formatRichHtml(site.distributionFormat) %></p>
       </div>
       <a class="button button-accent" href="/subscribe">Узнать подробнее</a>
     </div>

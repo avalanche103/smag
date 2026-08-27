@@ -5,10 +5,9 @@
 <main class="section">
   <div class="shell payment-grid">
     <section>
-      <p class="eyebrow">Счет и оплата</p>
       <h1><%= page.title %></h1>
       <p class="lead"><%= page.lead %></p>
-      <p><%= site.paymentText %></p>
+      <div class="rich-content"><%- formatRichHtml(site.paymentText) %></div>
       <div class="hero-actions">
         <% if (invoiceFile) { %>
           <a class="button button-accent" href="<%= invoiceFile %>" target="_blank" rel="noopener">Открыть PDF в новой вкладке</a>
@@ -36,11 +35,11 @@
       </div>
       <div>
         <h2>Реквизиты</h2>
-        <p><%= site.requisites %></p>
+        <div class="rich-content"><%- formatRichHtml(site.requisites) %></div>
       </div>
       <div class="hotline-box">
         <p class="eyebrow">Горячая линия</p>
-        <p><%= site.hotlineText %></p>
+        <div class="rich-content"><%- formatRichHtml(site.hotlineText) %></div>
       </div>
     </aside>
   </div>
