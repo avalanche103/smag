@@ -9,12 +9,20 @@ function readEnv(name: string, fallback = ""): string {
 
 const rootDir = process.cwd();
 const projectDataDir = path.join(rootDir, "data");
+const isRender = Boolean(process.env.RENDER);
 const runtimeDataDir = process.env.VERCEL ? path.join("/tmp", "smag-data") : projectDataDir;
 const isProduction = process.env.NODE_ENV === "production";
-const sessionSecret = process.env.SESSION_SECRET ?? "change-me";
+const sessionSecret = (process.env.SESSION_SECRET ?? "").trim() || "change-me";
 
-if (isProduction && sessionSecret === "change-me") {
-  throw new Error("SESSION_SECRET must be set to a strong random value in production.");
+function isWeakSessionSecret(value: string): boolean {
+  return !value || value === "change-me" || value.length < 32;
+}
+
+if (isProduction && isWeakSessionSecret(sessionSecret)) {
+  const hint = isRender
+    ? "Render: Dashboard → ваш сервис → Environment → Add Variable → SESSION_SECRET (случайная строка ≥32 символов). Можно: openssl rand -base64 32"
+    : "Задайте SESSION_SECRET в переменных окружения (случайная строка ≥32 символов).";
+  throw new Error(`SESSION_SECRET must be set to a strong random value in production. ${hint}`);
 }
 
 export const env = {
@@ -35,6 +43,7 @@ export const env = {
   smtpUser: readEnv("SMTP_USER"),
   smtpPass: readEnv("SMTP_PASS").replace(/\s+/g, ""),
   rootDir,
+  isRender,
   isVercel: Boolean(process.env.VERCEL),
   projectDataDir,
   dataDir: runtimeDataDir,

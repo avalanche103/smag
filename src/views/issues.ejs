@@ -35,7 +35,7 @@
           <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
           <article class="issue-card issue-card-hover">
             <a class="issue-card-media" href="/issues/<%= issue.slug %>">
-              <img src="<%= getCoverThumbPath(issue.coverImage) %>" alt="Обложка <%= issue.numberLabel %>" loading="lazy" decoding="async" width="400" height="560" />
+              <img src="<%= getCoverThumbPath(issue.coverImage) %>" alt="Обложка <%= issue.numberLabel %>" loading="lazy" decoding="async" />
               <div class="issue-card-overlay">
                 <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
                 <h3><%= issue.numberLabel %></h3>

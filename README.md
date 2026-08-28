@@ -29,3 +29,17 @@
 - `npm run db:seed` — создание и наполнение базы начальными данными.
 - `npm run backup` — резервное копирование базы и загруженных файлов.
 - `npm run lint` — типовая проверка TypeScript.
+
+## Деплой на Render
+
+1. Подключите репозиторий как Web Service (Node).
+2. **Build command:** `npm ci && npm run build`
+3. **Start command:** `npm start`
+4. Обязательно задайте в **Environment**:
+   - `SESSION_SECRET` — случайная строка ≥32 символов (`openssl rand -base64 32`)
+   - `SITE_URL` — URL сервиса на Render (например `https://smag.onrender.com`)
+   - `ADMIN_PASSWORD`, `ADMIN_USER_PASSWORD` — пароли админки
+   - `SMTP_*`, `MAIL_FROM`, `MAIL_TO` — для формы обратной связи
+5. Либо используйте [`render.yaml`](render.yaml) — `SESSION_SECRET` сгенерируется автоматически.
+
+Без `SESSION_SECRET` приложение не стартует в production (это намеренная защита).
