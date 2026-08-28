@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import dotenv from "dotenv";
 import path from "node:path";
 
@@ -12,18 +13,48 @@ const projectDataDir = path.join(rootDir, "data");
 const isRender = Boolean(process.env.RENDER);
 const runtimeDataDir = process.env.VERCEL ? path.join("/tmp", "smag-data") : projectDataDir;
 const isProduction = process.env.NODE_ENV === "production";
-const sessionSecret = (process.env.SESSION_SECRET ?? "").trim() || "change-me";
 
 function isWeakSessionSecret(value: string): boolean {
   return !value || value === "change-me" || value.length < 32;
 }
 
-if (isProduction && isWeakSessionSecret(sessionSecret)) {
-  const hint = isRender
-    ? "Render: Dashboard → ваш сервис → Environment → Add Variable → SESSION_SECRET (случайная строка ≥32 символов). Можно: openssl rand -base64 32"
-    : "Задайте SESSION_SECRET в переменных окружения (случайная строка ≥32 символов).";
-  throw new Error(`SESSION_SECRET must be set to a strong random value in production. ${hint}`);
+function deriveRenderSessionSecret(): string | null {
+  const serviceId = (process.env.RENDER_SERVICE_ID ?? "").trim();
+  if (!serviceId) {
+    return null;
+  }
+
+  return crypto.createHash("sha256").update(`smag-session:${serviceId}`).digest("base64");
 }
+
+function resolveSessionSecret(): string {
+  const fromEnv = (process.env.SESSION_SECRET ?? "").trim();
+  if (!isWeakSessionSecret(fromEnv)) {
+    return fromEnv;
+  }
+
+  if (isProduction && isRender) {
+    const derived = deriveRenderSessionSecret();
+    if (derived) {
+      console.warn(
+        "SESSION_SECRET is not set. Using a stable secret derived from RENDER_SERVICE_ID. " +
+          "Set SESSION_SECRET in Render Environment for explicit control."
+      );
+      return derived;
+    }
+  }
+
+  if (isProduction) {
+    const hint = isRender
+      ? "Render: Dashboard → Environment → SESSION_SECRET (openssl rand -base64 32)"
+      : "Задайте SESSION_SECRET в переменных окружения (случайная строка ≥32 символов).";
+    throw new Error(`SESSION_SECRET must be set to a strong random value in production. ${hint}`);
+  }
+
+  return fromEnv || "change-me";
+}
+
+const sessionSecret = resolveSessionSecret();
 
 export const env = {
   port: Number(process.env.PORT ?? 3000),
