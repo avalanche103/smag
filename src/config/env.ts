@@ -15,7 +15,7 @@ export const env = {
   port: Number(process.env.PORT ?? 3000),
   sessionSecret: process.env.SESSION_SECRET ?? "change-me",
   adminLogin: process.env.ADMIN_LOGIN ?? "admin",
-  adminPassword: process.env.ADMIN_PASSWORD ?? "admin12345",
+  adminPassword: process.env.ADMIN_PASSWORD ?? "admin",
   siteUrl: process.env.SITE_URL ?? "http://localhost:3000",
   analyticsId: process.env.ANALYTICS_ID ?? "",
   mailTo: readEnv("MAIL_TO", "prof.dialogi@yandex.by"),

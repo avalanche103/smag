@@ -4,6 +4,7 @@ declare module "express-session" {
   interface SessionData {
     adminId?: number;
     adminLogin?: string;
+    adminRole?: "admin" | "user";
     csrfToken?: string;
     contactCaptcha?: {
       answer: number;

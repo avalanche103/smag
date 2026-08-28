@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { readStore, updateStore } from "../db";
-import type { ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem, PublishedMaterial, PublishedMaterialRow } from "../types";
+import type { AdminRole, ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem, PublishedMaterial, PublishedMaterialRow } from "../types";
 import type { PublishedListEntry } from "../utils/publishedListPdf";
 
 export const DEFAULT_ISSUE_MATERIAL_COUNT = 10;
@@ -171,6 +171,42 @@ export function updateSettings(entries: Record<string, string>): void {
   });
 }
 
+const PAGE_EXTRA_SETTINGS_FALLBACK: Partial<Record<PageKey, Record<string, string>>> = {
+  home: {
+    heroTitle: "heroTitle",
+    heroText: "heroText",
+    seoTitle: "seoHomeTitle",
+    seoDescription: "seoHomeDescription"
+  },
+  about: {
+    periodicity: "periodicity",
+    distributionFormat: "distributionFormat"
+  },
+  contacts: {
+    workingHours: "workingHours"
+  },
+  subscribe: {
+    invoiceFile1: "invoiceFile1",
+    invoiceLabel1: "invoiceLabel1",
+    invoiceFile2: "invoiceFile2",
+    invoiceLabel2: "invoiceLabel2"
+  }
+};
+
+export function getPageExtra(page: PageContent, key: string): string {
+  const fromPage = page.extras?.[key]?.trim();
+  if (fromPage) {
+    return fromPage;
+  }
+
+  const fallbackKey = PAGE_EXTRA_SETTINGS_FALLBACK[page.pageKey]?.[key];
+  if (!fallbackKey) {
+    return "";
+  }
+
+  return getSettings()[fallbackKey]?.trim() ?? "";
+}
+
 export function getPageContent(pageKey: PageKey): PageContent {
   const page = readStore().pages.find((item) => item.pageKey === pageKey);
   if (!page) {
@@ -183,7 +219,13 @@ export function getAllPages(): PageContent[] {
   return readStore().pages.sort((left, right) => left.id - right.id);
 }
 
-export function updatePageContent(pageKey: PageKey, title: string, lead: string, body: string): void {
+export function updatePageContent(
+  pageKey: PageKey,
+  title: string,
+  lead: string,
+  body: string,
+  extras?: Record<string, string>
+): void {
   updateStore((store) => {
     const page = store.pages.find((item) => item.pageKey === pageKey);
     if (!page) {
@@ -192,6 +234,19 @@ export function updatePageContent(pageKey: PageKey, title: string, lead: string,
     page.title = title;
     page.lead = lead;
     page.body = body;
+    if (extras) {
+      page.extras = { ...(page.extras ?? {}), ...extras };
+    }
+  });
+}
+
+export function updatePageExtra(pageKey: PageKey, key: string, value: string): void {
+  updateStore((store) => {
+    const page = store.pages.find((item) => item.pageKey === pageKey);
+    if (!page) {
+      throw new Error(`Page not found: ${pageKey}`);
+    }
+    page.extras = { ...(page.extras ?? {}), [key]: value };
   });
 }
 
@@ -658,7 +713,7 @@ export function applyPublishedListImport(year: number, entries: PublishedListEnt
   return { updated, created, added, skipped };
 }
 
-export function verifyAdmin(login: string, password: string): { id: number; login: string } | null {
+export function verifyAdmin(login: string, password: string): { id: number; login: string; role: AdminRole } | null {
   const row = readStore().admins.find((admin) => admin.login === login);
 
   if (!row) {
@@ -669,5 +724,14 @@ export function verifyAdmin(login: string, password: string): { id: number; logi
     return null;
   }
 
-  return { id: row.id, login: row.login };
+  return { id: row.id, login: row.login, role: row.role ?? "admin" };
+}
+
+export function getAdminById(id: number): { id: number; login: string; role: AdminRole } | null {
+  const row = readStore().admins.find((admin) => admin.id === id);
+  if (!row) {
+    return null;
+  }
+
+  return { id: row.id, login: row.login, role: row.role ?? "admin" };
 }

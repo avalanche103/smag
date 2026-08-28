@@ -3,7 +3,7 @@ import path from "node:path";
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { env } from "./config/env";
-import type { DataStore, IssueMaterial, JournalIssue, PageContent } from "./types";
+import type { AdminRecord, AdminRole, DataStore, IssueMaterial, JournalIssue, PageContent } from "./types";
 
 fs.mkdirSync(path.dirname(env.contentFile), { recursive: true });
 fs.mkdirSync(env.uploadsDir, { recursive: true });
@@ -14,8 +14,6 @@ fs.mkdirSync(env.listsDir, { recursive: true });
 const settingDefaults: Array<[string, string]> = [
   ["siteTitle", "Строительство: Экономика, учет, право"],
   ["siteDescription", "Профессиональный журнал для бухгалтеров, экономистов, инженерно-технических и юридических служб строительных организаций Беларуси."],
-  ["heroTitle", "Профессиональная аналитика для строительной отрасли"],
-  ["heroText", "Журнал освещает экономику строительства в Беларуси, отраслевой учет, договорную практику, изменения законодательства Республики Беларусь и управленческие решения для строительных компаний."],
   ["aboutAudience", "<p>Только для действующих подписчиков работает горячая линия журнала.</p><p>Задайте свой вопрос нашему эксперту и получите персональную консультацию.</p><p>Каждый вторник с 14:00 до 16:00.</p>"],
   [
     "aboutAudienceTopics",
@@ -25,26 +23,13 @@ const settingDefaults: Array<[string, string]> = [
       "Правовое сопровождение строительной деятельности в Республике Беларусь"
     ])
   ],
-  ["periodicity", "Ежеквартально"],
   ["publisher", "ООО «Профессиональный диалог», УНП 193589657"],
-  ["editorialInfo", "ООО «Профессиональный диалог», УНП 193589657\n+ 375 44 771 71 02, + 375 29 104 40 08\nprof.dialogi@yandex.by"],
-  ["distributionFormat", "Журнал распространяется в печатной форме по подписке: напрямую через редакцию и через РУП «Белпочта»."],
-  ["hotlineTitle", "Эксклюзивно для подписчиков журнала работает горячая линия"],
   ["hotlineText", "Получите оперативный и квалифицированный ответ от нашего эксперта по вашему конкретному вопросу. Каждый вторник с 14:00 до 16:00. Телефон: +375 29 104 40 08. Эксперт: Коковкина Татьяна Валерьевна"],
-  ["paymentTitle", "Оплата и получение счета"],
-  ["paymentText", "Скачайте актуальный счет-фактуру в PDF, оплатите удобным для организации способом и свяжитесь с редакцией для подтверждения поступления платежа."],
-  ["invoiceFile1", ""],
-  ["invoiceLabel1", "Скачать счет 1"],
-  ["invoiceFile2", ""],
-  ["invoiceLabel2", "Скачать счет 2"],
   ["phone", "+375 (17) 000-00-00"],
   ["phone2", ""],
   ["email", "prof.dialogi@yandex.by"],
   ["address", "220000, Минск, ул. Примерная, д. 10"],
   ["requisites", "ООО «Профессиональный диалог»\n\nУНП 193589657, ОКПО 505378575000\nР/с BY11SLAN30125250900000100000 в ЗАО Банк ВТБ (Беларусь), БИК SLANBY22, г. Минск, пр-т Дзержинского, 119"],
-  ["workingHours", "Пн-Пт, 09:00-18:00"],
-  ["seoHomeTitle", "Журнал Строительство: Экономика, учет, право"],
-  ["seoHomeDescription", "Официальный сайт журнала для строительной отрасли Беларуси: описание, выпуски, перечни опубликованного, контакты и счет-фактура для оплаты."],
   ["siteUrl", env.siteUrl],
   ["analyticsId", env.analyticsId],
   ["mailTo", "prof.dialogi@yandex.by"]
@@ -55,29 +40,48 @@ const pageDefaults = [
     id: 1,
     pageKey: "home",
     title: "Главная",
-    lead: "Официальный сайт профессионального журнала для строительной отрасли Беларуси.",
-    body: "Журнал публикует анонсы выпусков, обложки, перечни опубликованного и актуальные сведения для подписчиков и организаций Республики Беларусь."
+    lead: "",
+    body: "",
+    extras: {
+      heroTitle: "Профессиональная аналитика для строительной отрасли",
+      heroText: "Журнал освещает экономику строительства в Беларуси, отраслевой учет, договорную практику, изменения законодательства Республики Беларусь и управленческие решения для строительных компаний.",
+      seoTitle: "Журнал Строительство: Экономика, учет, право",
+      seoDescription: "Официальный сайт журнала для строительной отрасли Беларуси: описание, выпуски, перечни опубликованного, контакты и счет-фактура для оплаты."
+    }
   },
   {
     id: 2,
     pageKey: "about",
     title: "О журнале",
     lead: "Отраслевое издание для специалистов, работающих с экономикой, учетом и правом в строительстве Беларуси.",
-    body: "Журнал помогает отслеживать изменения в регулировании Республики Беларусь, учитывать отраслевую специфику и принимать обоснованные управленческие решения."
+    body: "Журнал помогает отслеживать изменения в регулировании Республики Беларусь, учитывать отраслевую специфику и принимать обоснованные управленческие решения.",
+    extras: {
+      periodicity: "Ежеквартально",
+      distributionFormat: "Журнал распространяется в печатной форме по подписке: напрямую через редакцию и через РУП «Белпочта»."
+    }
   },
   {
     id: 3,
-    pageKey: "payment",
-    title: "Счет и оплата",
-    lead: "Скачайте счет-фактуру и свяжитесь с редакцией для уточнения деталей оплаты.",
-    body: "После оплаты направьте подтверждение на электронную почту редакции или уточните статус по телефону горячей линии."
-  },
-  {
-    id: 4,
     pageKey: "contacts",
     title: "Контакты",
     lead: "Свяжитесь с редакцией по вопросам подписки, размещения информации и оплаты.",
-    body: "Форма обратной связи передает обращения в административную панель сайта."
+    body: "",
+    extras: {
+      workingHours: "Пн-Пт, 09:00-18:00"
+    }
+  },
+  {
+    id: 4,
+    pageKey: "subscribe",
+    title: "Оформление подписки",
+    lead: "Оформите подписку на печатную версию журнала «Строительство: экономика, учёт, право».",
+    body: "После оплаты направьте подтверждение на электронную почту редакции или уточните статус по телефону горячей линии.",
+    extras: {
+      invoiceFile1: "",
+      invoiceLabel1: "Скачать счет 1",
+      invoiceFile2: "",
+      invoiceLabel2: "Скачать счет 2"
+    }
   }
 ] as const satisfies PageContent[];
 
@@ -206,8 +210,16 @@ function createInitialStore(): DataStore {
     admins: [
       {
         id: 1,
-        login: env.adminLogin,
-        passwordHash: bcrypt.hashSync(env.adminPassword, 10),
+        login: "admin",
+        passwordHash: bcrypt.hashSync("admin", 10),
+        role: "admin",
+        createdAt: timestamp
+      },
+      {
+        id: 2,
+        login: "user",
+        passwordHash: bcrypt.hashSync("user", 10),
+        role: "user",
         createdAt: timestamp
       }
     ],
@@ -229,19 +241,146 @@ function createInitialStore(): DataStore {
   };
 }
 
+function migratePaymentToSubscribe(store: DataStore): void {
+  const paymentPage = store.pages.find((page) => page.pageKey === ("payment" as PageContent["pageKey"]));
+  const subscribePage = store.pages.find((page) => page.pageKey === "subscribe");
+  if (!paymentPage || !subscribePage) {
+    return;
+  }
+
+  if (!subscribePage.body?.trim() && paymentPage.body?.trim()) {
+    subscribePage.body = paymentPage.body;
+  }
+}
+
+function migratePageExtras(store: DataStore): void {
+  migratePaymentToSubscribe(store);
+
+  const settings = store.settings;
+  const legacyValues: Partial<Record<PageContent["pageKey"], Record<string, string>>> = {
+    home: {
+      heroTitle: settings.heroTitle ?? "",
+      heroText: settings.heroText ?? "",
+      seoTitle: settings.seoHomeTitle ?? "",
+      seoDescription: settings.seoHomeDescription ?? ""
+    },
+    about: {
+      periodicity: settings.periodicity ?? "",
+      distributionFormat: settings.distributionFormat ?? ""
+    },
+    contacts: {
+      workingHours: settings.workingHours ?? ""
+    },
+    subscribe: {
+      invoiceFile1: settings.invoiceFile1 ?? "",
+      invoiceLabel1: settings.invoiceLabel1 ?? "Скачать счет 1",
+      invoiceFile2: settings.invoiceFile2 ?? "",
+      invoiceLabel2: settings.invoiceLabel2 ?? "Скачать счет 2"
+    }
+  };
+
+  for (const page of store.pages) {
+    page.extras = page.extras ?? {};
+    const defaults = legacyValues[page.pageKey];
+    if (!defaults) {
+      continue;
+    }
+
+    for (const [key, value] of Object.entries(defaults)) {
+      if (!page.extras[key]?.trim() && value.trim()) {
+        page.extras[key] = value;
+      }
+    }
+  }
+
+  const knownKeys = new Set(pageDefaults.map((page) => page.pageKey));
+  for (const template of pageDefaults) {
+    if (!store.pages.some((page) => page.pageKey === template.pageKey)) {
+      store.pages.push({ ...template, extras: { ...template.extras } });
+      continue;
+    }
+
+    const page = store.pages.find((item) => item.pageKey === template.pageKey);
+    if (!page) {
+      continue;
+    }
+
+    page.extras = page.extras ?? {};
+    for (const [key, value] of Object.entries(template.extras ?? {})) {
+      if (!page.extras[key]?.trim() && value.trim()) {
+        page.extras[key] = value;
+      }
+    }
+  }
+
+  store.pages = store.pages.filter((page) => knownKeys.has(page.pageKey));
+}
+
+function normalizeAdmins(store: DataStore): AdminRecord[] {
+  const timestamp = new Date().toISOString();
+  const admins = store.admins.map((admin) => ({
+    ...admin,
+    role: (admin.role ?? "admin") as AdminRole
+  }));
+
+  const ensureCredentials = (record: AdminRecord, password: string, role: AdminRole) => {
+    record.role = role;
+    if (!bcrypt.compareSync(password, record.passwordHash)) {
+      record.passwordHash = bcrypt.hashSync(password, 10);
+    }
+  };
+
+  const upsert = (login: string, password: string, role: AdminRole, preferredId: number) => {
+    let record = admins.find((admin) => admin.login === login);
+    if (!record) {
+      record = {
+        id: preferredId,
+        login,
+        passwordHash: bcrypt.hashSync(password, 10),
+        role,
+        createdAt: timestamp
+      };
+      admins.push(record);
+      return;
+    }
+
+    ensureCredentials(record, password, role);
+  };
+
+  upsert("admin", "admin", "admin", 1);
+  upsert("user", "user", "user", 2);
+
+  return admins.sort((left, right) => left.id - right.id);
+}
+
 function mergeDefaults(store: DataStore): DataStore {
   const initial = createInitialStore();
   const issues = (store.issues.length ? store.issues : initial.issues).map((issue) => normalizeIssue(issue as unknown as Record<string, unknown>));
+  const mergedPages = initial.pages.map((page) => {
+    const existing = store.pages.find((item) => item.pageKey === page.pageKey);
+    if (!existing) {
+      return { ...page, extras: { ...page.extras } };
+    }
 
-  return {
-    admins: store.admins.length ? store.admins : initial.admins,
+    return {
+      ...page,
+      ...existing,
+      extras: { ...page.extras, ...existing.extras }
+    };
+  });
+
+  const merged: DataStore = {
+    admins: normalizeAdmins(store.admins.length ? store : createInitialStore()),
     settings: { ...initial.settings, ...store.settings },
-    pages: initial.pages.map((page) => store.pages.find((item) => item.pageKey === page.pageKey) ?? page),
+    pages: mergedPages,
     issues,
     publishedLists: store.publishedLists.length ? store.publishedLists : initial.publishedLists,
     publishedMaterials: store.publishedMaterials ?? [],
     contactMessages: store.contactMessages ?? []
   };
+
+  migratePageExtras(merged);
+  return merged;
 }
 
 export function ensureDataFile(): void {

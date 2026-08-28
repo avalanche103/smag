@@ -5,10 +5,10 @@
 <main class="section">
   <div class="shell subscribe-page">
     <header class="subscribe-intro">
-      <h1>Оформление подписки</h1>
-      <p class="subscribe-lead">
-        Оформите подписку на печатную версию журнала «Строительство: экономика, учёт, право»
-      </p>
+      <h1><%= page.title %></h1>
+      <% if (page.lead) { %>
+        <div class="subscribe-lead rich-content"><%- formatRichHtml(page.lead) %></div>
+      <% } %>
     </header>
 
     <p class="subscribe-channels-label">Доступные каналы</p>
@@ -21,16 +21,16 @@
           <li>
             <span class="subscribe-step-title">Скачайте счёт на нужный период</span>
             <div class="subscribe-invoice-row">
-              <% if (site.invoiceFile1) { %>
-                <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile1 %>" download="schet-polugodie.pdf">
-                  <%= site.invoiceLabel1 || 'Счёт на полугодие' %>
+              <% if (getPageExtra(page, 'invoiceFile1')) { %>
+                <a class="button button-accent subscribe-invoice-btn" href="<%= getPageExtra(page, 'invoiceFile1') %>" download="schet-polugodie.pdf">
+                  <%= getPageExtra(page, 'invoiceLabel1') || 'Счёт на полугодие' %>
                 </a>
               <% } else { %>
                 <span class="button button-secondary subscribe-invoice-btn is-disabled">Счёт на полугодие</span>
               <% } %>
-              <% if (site.invoiceFile2) { %>
-                <a class="button button-accent subscribe-invoice-btn" href="<%= site.invoiceFile2 %>" download="schet-god.pdf">
-                  <%= site.invoiceLabel2 || 'Счёт на год' %>
+              <% if (getPageExtra(page, 'invoiceFile2')) { %>
+                <a class="button button-accent subscribe-invoice-btn" href="<%= getPageExtra(page, 'invoiceFile2') %>" download="schet-god.pdf">
+                  <%= getPageExtra(page, 'invoiceLabel2') || 'Счёт на год' %>
                 </a>
               <% } else { %>
                 <span class="button button-secondary subscribe-invoice-btn is-disabled">Счёт на год</span>
@@ -59,6 +59,11 @@
           <strong>В назначении платежа обязательно укажите:</strong>
           полный адрес доставки, контактный телефон и ваш e-mail.
         </aside>
+        <% if (page.body) { %>
+          <aside class="subscribe-note subscribe-note-followup" role="note">
+            <div class="rich-content"><%- formatRichHtml(page.body) %></div>
+          </aside>
+        <% } %>
       </article>
 
       <article class="subscribe-card">

@@ -1,12 +1,21 @@
 <aside class="admin-sidebar">
-  <a href="/admin" class="admin-brand">CMS журнала</a>
+  <a href="<%= admin && admin.role === 'admin' ? '/admin' : '/admin/issues' %>" class="admin-brand">CMS журнала</a>
+  <% if (admin) { %>
+    <p class="admin-user"><%= admin.login %> · <%= admin.role === 'admin' ? 'администратор' : 'пользователь' %></p>
+  <% } %>
   <nav class="admin-nav">
-    <a href="/admin">Обзор</a>
-    <a href="/admin/settings">Настройки</a>
-    <a href="/admin/pages">Страницы</a>
+    <% if (admin && admin.role === 'admin') { %>
+      <a href="/admin">Обзор</a>
+      <a href="/admin/settings">Настройки</a>
+      <a href="/admin/pages">Страницы</a>
+    <% } %>
     <a href="/admin/issues">Выпуски</a>
-    <a href="/admin/lists">Перечни</a>
     <a href="/admin/messages">Сообщения</a>
+    <% if (admin && admin.role === 'admin') { %>
+      <a href="/admin/lists">Перечни</a>
+    <% } else { %>
+      <a href="/admin/pages/subscribe">Счета подписки</a>
+    <% } %>
   </nav>
   <form method="post" action="/admin/logout">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />

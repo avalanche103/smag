@@ -1,3 +1,8 @@
+<%
+  const extras = page.extras || {};
+  const extra = (key) => extras[key] || '';
+  const readonlyInvoices = typeof invoicesOnly !== 'undefined' && invoicesOnly;
+%>
 <%- include('../partials/head', { meta, site }) %>
 <main class="admin-layout">
   <%- include('../partials/admin-nav', { csrfToken }) %>
@@ -6,16 +11,67 @@
     <div class="admin-head">
       <div>
         <p class="eyebrow">Страница</p>
-        <h1><%= page.title %></h1>
+        <h1><%= readonlyInvoices ? 'Счета подписки' : page.title %></h1>
+        <% if (readonlyInvoices) { %>
+          <p class="form-note">Загрузка PDF-счетов для страницы подписки.</p>
+        <% } %>
       </div>
     </div>
+
+    <% if (!readonlyInvoices) { %>
     <form method="post" action="/admin/pages/<%= page.pageKey %>" class="admin-card stack-form">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <label>Заголовок<input type="text" name="title" value="<%= page.title %>" required /></label>
-      <%- include('./partials/rich-field', { name: 'lead', label: 'Лид', value: formatRichHtml(page.lead), placeholder: 'Краткий вводный текст страницы', rows: 3 }) %>
-      <%- include('./partials/rich-field', { name: 'body', label: 'Основной текст', value: formatRichHtml(page.body), placeholder: 'Основной текст страницы', rows: 8 }) %>
+
+      <% if (page.pageKey === 'home') { %>
+        <%- include('./partials/rich-field', { name: 'heroTitle', label: 'Hero-заголовок', value: formatRichHtml(extra('heroTitle')), placeholder: 'Заголовок на главной', rows: 2 }) %>
+        <%- include('./partials/rich-field', { name: 'heroText', label: 'Hero-текст', value: formatRichHtml(extra('heroText')), placeholder: 'Текст под заголовком на главной', rows: 4 }) %>
+        <label>SEO Title<input type="text" name="seoTitle" value="<%= extra('seoTitle') %>" /></label>
+        <%- include('./partials/rich-field', { name: 'seoDescription', label: 'SEO Description', value: formatRichHtml(extra('seoDescription')), placeholder: '', rows: 3 }) %>
+      <% } else { %>
+        <label>Заголовок<input type="text" name="title" value="<%= page.title %>" required /></label>
+        <% if (page.pageKey !== 'subscribe') { %>
+          <%- include('./partials/rich-field', { name: 'lead', label: 'Лид', value: formatRichHtml(page.lead), placeholder: 'Краткий вводный текст страницы', rows: 3 }) %>
+        <% } %>
+      <% } %>
+
+      <% if (page.pageKey === 'about') { %>
+        <label>Периодичность<input type="text" name="periodicity" value="<%= extra('periodicity') %>" /></label>
+        <%- include('./partials/rich-field', { name: 'distributionFormat', label: 'Формат распространения', value: formatRichHtml(extra('distributionFormat')), placeholder: '', rows: 3 }) %>
+        <%- include('./partials/rich-field', { name: 'body', label: 'Основной текст', value: formatRichHtml(page.body), placeholder: 'Основной текст страницы', rows: 8 }) %>
+      <% } else if (page.pageKey === 'contacts') { %>
+        <label>Часы работы<input type="text" name="workingHours" value="<%= extra('workingHours') %>" /></label>
+      <% } else if (page.pageKey === 'subscribe') { %>
+        <%- include('./partials/rich-field', { name: 'lead', label: 'Вводный текст', value: formatRichHtml(page.lead), placeholder: 'Краткое описание в шапке страницы', rows: 3 }) %>
+        <%- include('./partials/rich-field', { name: 'body', label: 'После оплаты', value: formatRichHtml(page.body), placeholder: 'Что делать после оплаты счёта', rows: 4 }) %>
+        <p class="form-note">PDF-счета загружаются ниже.</p>
+      <% } %>
+
       <button class="button button-accent" type="submit">Сохранить</button>
     </form>
+    <% } %>
+
+    <% if (page.pageKey === 'subscribe') { %>
+      <form method="post" action="/admin/pages/subscribe/invoice1" enctype="multipart/form-data" class="admin-card stack-form" style="margin-top: 1.5em;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <h2>Счет 1</h2>
+        <p>Текущий файл: <%= extra('invoiceFile1') || 'не загружен' %></p>
+        <label>Название кнопки
+          <input type="text" name="invoiceLabel1" value="<%= extra('invoiceLabel1') || 'Скачать счет 1' %>" required />
+        </label>
+        <label>PDF-файл<input type="file" name="invoiceFile1" accept="application/pdf" /></label>
+        <button class="button button-secondary" type="submit">Сохранить счет 1</button>
+      </form>
+      <form method="post" action="/admin/pages/subscribe/invoice2" enctype="multipart/form-data" class="admin-card stack-form" style="margin-top: 1.5em;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <h2>Счет 2</h2>
+        <p>Текущий файл: <%= extra('invoiceFile2') || 'не загружен' %></p>
+        <label>Название кнопки
+          <input type="text" name="invoiceLabel2" value="<%= extra('invoiceLabel2') || 'Скачать счет 2' %>" required />
+        </label>
+        <label>PDF-файл<input type="file" name="invoiceFile2" accept="application/pdf" /></label>
+        <button class="button button-secondary" type="submit">Сохранить счет 2</button>
+      </form>
+    <% } %>
   </section>
 </main>
 <script src="/scripts/main.js" defer></script>

@@ -11,6 +11,7 @@ import {
   getAdjacentIssues,
   getPrimaryIssueMaterials,
   getPageContent,
+  getPageExtra,
   getSettings,
   listIssues,
   listPublishedMaterialsForPage,
@@ -34,14 +35,17 @@ export default function publicRouter(formLimiter: RequestHandler) {
 
   router.get("/", (_req, res) => {
     const settings = getSettings();
+    const page = getPageContent("home");
     const featuredIssue = getFeaturedIssue();
     const issues = listIssues().slice(0, 6);
+    const seoTitle = getPageExtra(page, "seoTitle") || settings.siteTitle;
+    const seoDescription = getPageExtra(page, "seoDescription") || settings.siteDescription;
 
     res.render("home", {
-      page: getPageContent("home"),
+      page,
       featuredIssue,
       issues,
-      meta: buildMeta(settings.seoHomeTitle || settings.siteTitle, stripHtmlTags(settings.seoHomeDescription || settings.siteDescription)),
+      meta: buildMeta(seoTitle, stripHtmlTags(seoDescription)),
       dayjs
     });
   });
@@ -102,17 +106,14 @@ export default function publicRouter(formLimiter: RequestHandler) {
 
 
   router.get("/payment", (_req, res) => {
-    const settings = getSettings();
-    res.render("payment", {
-      page: getPageContent("payment"),
-      meta: buildMeta(`Счет и оплата | ${settings.siteTitle}`, "Скачивание счета-фактуры и порядок оплаты."),
-      invoiceFile: settings.invoiceFile
-    });
+    res.redirect(301, "/subscribe");
   });
 
   router.get("/subscribe", (req, res) => {
     const settings = getSettings();
+    const page = getPageContent("subscribe");
     res.render("subscribe", {
+      page,
       meta: buildMeta(`Подписка | ${settings.siteTitle}`, "Оформление подписки на журнал."),
       site: settings,
       flash: req.session.flash
@@ -219,7 +220,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
   router.get("/sitemap.xml", (_req, res) => {
     const settings = getSettings();
     const base = (settings.siteUrl || process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");
-    const urls = ["", "/about", "/issues", "/published-lists", "/payment", "/contacts"];
+    const urls = ["", "/about", "/issues", "/published-lists", "/subscribe", "/contacts"];
     const issueUrls = listIssues().map((issue) => `/issues/${issue.slug}`);
     const body = [
       ...urls,

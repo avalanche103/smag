@@ -49,7 +49,7 @@
       </div>
       <div>
         <h2>Периодичность</h2>
-        <p><%= site.periodicity %></p>
+        <p><%= getPageExtra(page, 'periodicity') %></p>
       </div>
       <div>
         <h2>Издатель и редакция</h2>
@@ -63,7 +63,7 @@
       </div>
       <div>
         <h2>Формат распространения</h2>
-        <p class="rich-content"><%- formatRichHtml(site.distributionFormat) %></p>
+        <p class="rich-content"><%- formatRichHtml(getPageExtra(page, 'distributionFormat')) %></p>
       </div>
       <a class="button button-accent" href="/subscribe">Узнать подробнее</a>
     </div>

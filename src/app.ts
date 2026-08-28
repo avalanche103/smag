@@ -6,7 +6,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { env } from "./config/env";
 import { attachCsrfToken } from "./middleware/csrf";
-import { formatAudienceHtml, formatIssuePeriod, formatRichHtml, getAudienceTopics, getSettings, parseIssueYear, stripHtmlTags } from "./services/contentService";
+import { formatAudienceHtml, formatIssuePeriod, formatRichHtml, getAudienceTopics, getPageExtra, getSettings, parseIssueYear, stripHtmlTags } from "./services/contentService";
 import publicRouter from "./routes/public";
 import adminRouter from "./routes/admin";
 
@@ -67,9 +67,12 @@ app.use((req, res, next) => {
   res.locals.formatIssuePeriod = formatIssuePeriod;
   res.locals.parseIssueYear = parseIssueYear;
   res.locals.formatRichHtml = formatRichHtml;
+  res.locals.getPageExtra = getPageExtra;
   res.locals.stripHtmlTags = stripHtmlTags;
   res.locals.path = req.path;
-  res.locals.admin = req.session.adminLogin ? { login: req.session.adminLogin } : null;
+  res.locals.admin = req.session.adminLogin
+    ? { login: req.session.adminLogin, role: req.session.adminRole ?? "admin" }
+    : null;
   res.locals.csrfToken = req.session.csrfToken;
   next();
 });

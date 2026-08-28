@@ -6,8 +6,8 @@
   <section class="hero">
     <div class="shell hero-grid">
       <div class="hero-copy">
-        <div class="hero-title rich-content"><%- formatRichHtml(site.heroTitle) %></div>
-        <div class="hero-text rich-content"><%- formatRichHtml(site.heroText) %></div>
+        <div class="hero-title rich-content"><%- formatRichHtml(getPageExtra(page, 'heroTitle')) %></div>
+        <div class="hero-text rich-content"><%- formatRichHtml(getPageExtra(page, 'heroText')) %></div>
         <div class="hero-actions">
           <a class="button button-accent" href="/subscribe">Подписаться</a>
           <a class="button button-secondary" href="/issues">Смотреть выпуски</a>

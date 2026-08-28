@@ -31,8 +31,8 @@
             </span>
           </li>
         <% } %>
-        <% if (site.workingHours) { %>
-          <li><strong>Часы работы:</strong> <%= site.workingHours %></li>
+        <% if (getPageExtra(page, 'workingHours')) { %>
+          <li><strong>Часы работы:</strong> <%= getPageExtra(page, 'workingHours') %></li>
         <% } %>
       </ul>
     </section>

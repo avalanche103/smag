@@ -25,9 +25,12 @@ import {
   normalizeMaterialKey,
   togglePublishedList,
   updatePageContent,
-  updateSettings
+  updatePageExtra,
+  updateSettings,
+  verifyAdmin,
+  getAdminById
 } from "../services/contentService";
-import { requireAdmin } from "../middleware/auth";
+import { requireAuth, requireFullAdmin } from "../middleware/auth";
 import { verifyCsrfToken } from "../middleware/csrf";
 import { coverUpload, invoiceUpload, listUpload, pdfListUpload } from "../middleware/uploads";
 import { parsePublishedListPdf } from "../utils/publishedListPdf";
@@ -58,119 +61,89 @@ export default function adminRouter() {
   const router = Router();
 
   router.get("/login", (req, res) => {
-    req.session.adminId = 1;
-    req.session.adminLogin = "admin";
-    res.redirect("/admin");
-  });
-
-  router.post("/logout", requireAdmin, verifyCsrfToken, (req, res) => {
-    req.session.destroy(() => {
-      res.redirect("/admin");
-    });
-  });
-
-  router.use(requireAdmin);
-
-  router.get("/", (_req, res) => {
-    res.render("admin/dashboard", {
-      meta: { title: "Админ-панель", description: "Управление сайтом журнала" },
-      issues: listIssues(true).slice(0, 5),
-      messages: listMessages().slice(0, 5),
-      lists: listPublishedLists(false).slice(0, 5)
-    });
-  });
-
-  router.get("/settings", (_req, res) => {
-    const settings = getSettings();
-    res.render("admin/settings", {
-      meta: { title: "Настройки сайта", description: "Основные настройки и контакты" },
-      settings,
-      audienceTopics: getAudienceTopics(settings),
-      aboutAudienceHtml: formatAudienceHtml(settings.aboutAudience),
-      formatRichHtml
-    });
-  });
-
-  router.post("/settings", verifyCsrfToken, (req, res) => {
-    const body = req.body as Record<string, unknown>;
-    const rich = (key: string) => sanitizeRichHtml(String(body[key] ?? ""));
-    updateSettings({
-      siteTitle: String(body.siteTitle ?? ""),
-      siteDescription: rich("siteDescription"),
-      heroTitle: rich("heroTitle"),
-      heroText: rich("heroText"),
-      aboutAudience: rich("aboutAudience"),
-      aboutAudienceTopics: serializeAudienceTopics(body.audienceTopics),
-      periodicity: String(body.periodicity ?? ""),
-      publisher: rich("publisher"),
-      editorialInfo: rich("editorialInfo"),
-      distributionFormat: rich("distributionFormat"),
-      hotlineTitle: rich("hotlineTitle"),
-      hotlineText: rich("hotlineText"),
-      paymentTitle: rich("paymentTitle"),
-      paymentText: rich("paymentText"),
-      phone: String(body.phone ?? ""),
-      phone2: String(body.phone2 ?? ""),
-      email: String(body.email ?? ""),
-      address: String(body.address ?? ""),
-      requisites: rich("requisites"),
-      workingHours: String(body.workingHours ?? ""),
-      seoHomeTitle: String(body.seoHomeTitle ?? ""),
-      seoHomeDescription: rich("seoHomeDescription"),
-      siteUrl: String(body.siteUrl ?? ""),
-      analyticsId: String(body.analyticsId ?? ""),
-      mailTo: String(body.mailTo ?? "")
-    });
-    req.session.flash = { type: "success", message: "Настройки сохранены." };
-    res.redirect("/admin/settings");
-  });
-
-
-  router.post("/invoice1", invoiceUpload.single("invoiceFile1"), verifyCsrfToken, (req, res) => {
-    const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : req.body.currentFile1 || "";
-    const label = req.body.invoiceLabel1 || "Скачать счет 1";
-    updateSettings({ invoiceFile1: uploaded, invoiceLabel1: label });
-    req.session.flash = { type: "success", message: "Счет 1 обновлен." };
-    res.redirect("/admin/settings");
-  });
-
-  router.post("/invoice2", invoiceUpload.single("invoiceFile2"), verifyCsrfToken, (req, res) => {
-    const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : req.body.currentFile2 || "";
-    const label = req.body.invoiceLabel2 || "Скачать счет 2";
-    updateSettings({ invoiceFile2: uploaded, invoiceLabel2: label });
-    req.session.flash = { type: "success", message: "Счет 2 обновлен." };
-    res.redirect("/admin/settings");
-  });
-
-  router.get("/pages", (_req, res) => {
-    res.render("admin/pages", {
-      meta: { title: "Страницы", description: "Редактирование текстовых страниц" },
-      pages: getAllPages()
-    });
-  });
-
-  router.get("/pages/:pageKey", (req, res) => {
-    const page = getAllPages().find((item) => item.pageKey === req.params.pageKey);
-    if (!page) {
-      res.redirect("/admin/pages");
+    if (req.session.adminId && getAdminById(req.session.adminId)) {
+      const role = req.session.adminRole ?? getAdminById(req.session.adminId)?.role;
+      res.redirect(role === "admin" ? "/admin" : "/admin/issues");
       return;
     }
-    res.render("admin/page-form", {
-      meta: { title: `Редактирование: ${page.title}`, description: "Редактирование содержимого страницы" },
-      page
+
+    req.session.adminId = undefined;
+    req.session.adminLogin = undefined;
+    req.session.adminRole = undefined;
+
+    res.render("admin/login", {
+      meta: { title: "Вход", description: "Авторизация в админ-панели" }
     });
   });
 
-  router.post("/pages/:pageKey", verifyCsrfToken, (req, res) => {
-    const body = req.body as Record<string, string>;
-    updatePageContent(
-      req.params.pageKey as PageKey,
-      body.title ?? "",
-      sanitizeRichHtml(body.lead ?? ""),
-      sanitizeRichHtml(body.body ?? "")
-    );
-    req.session.flash = { type: "success", message: "Страница обновлена." };
-    res.redirect(`/admin/pages/${req.params.pageKey}`);
+  router.post("/login", verifyCsrfToken, (req, res) => {
+    const { login, password } = req.body as Record<string, string>;
+    const admin = verifyAdmin(String(login ?? "").trim(), String(password ?? ""));
+
+    if (!admin) {
+      req.session.flash = { type: "error", message: "Неверный логин или пароль." };
+      res.redirect("/admin/login");
+      return;
+    }
+
+    req.session.adminId = admin.id;
+    req.session.adminLogin = admin.login;
+    req.session.adminRole = admin.role;
+    res.redirect(admin.role === "admin" ? "/admin" : "/admin/issues");
+  });
+
+  router.post("/logout", requireAuth, verifyCsrfToken, (req, res) => {
+    req.session.destroy(() => {
+      res.redirect("/admin/login");
+    });
+  });
+
+  router.use(requireAuth);
+
+  router.get("/pages/subscribe", (req, res) => {
+    const page = getAllPages().find((item) => item.pageKey === "subscribe");
+    if (!page) {
+      res.redirect("/admin/issues");
+      return;
+    }
+
+    res.render("admin/page-form", {
+      meta: { title: "Счета подписки", description: "PDF-счета для страницы подписки" },
+      page,
+      formatRichHtml,
+      invoicesOnly: req.session.adminRole !== "admin"
+    });
+  });
+
+  router.post("/pages/subscribe/invoice1", invoiceUpload.single("invoiceFile1"), verifyCsrfToken, (req, res) => {
+    const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : getAllPages().find((page) => page.pageKey === "subscribe")?.extras?.invoiceFile1 || "";
+    const label = req.body.invoiceLabel1 || "Скачать счет 1";
+    updatePageExtra("subscribe", "invoiceFile1", uploaded);
+    updatePageExtra("subscribe", "invoiceLabel1", label);
+    req.session.flash = { type: "success", message: "Счет 1 обновлен." };
+    res.redirect("/admin/pages/subscribe");
+  });
+
+  router.post("/pages/subscribe/invoice2", invoiceUpload.single("invoiceFile2"), verifyCsrfToken, (req, res) => {
+    const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : getAllPages().find((page) => page.pageKey === "subscribe")?.extras?.invoiceFile2 || "";
+    const label = req.body.invoiceLabel2 || "Скачать счет 2";
+    updatePageExtra("subscribe", "invoiceFile2", uploaded);
+    updatePageExtra("subscribe", "invoiceLabel2", label);
+    req.session.flash = { type: "success", message: "Счет 2 обновлен." };
+    res.redirect("/admin/pages/subscribe");
+  });
+
+  router.get("/messages", (_req, res) => {
+    res.render("admin/messages", {
+      meta: { title: "Сообщения", description: "Обращения из формы обратной связи" },
+      messages: listMessages()
+    });
+  });
+
+  router.post("/messages/:id/read", verifyCsrfToken, (req, res) => {
+    markMessageRead(Number(req.params.id));
+    req.session.flash = { type: "success", message: "Сообщение отмечено как прочитанное." };
+    res.redirect("/admin/messages");
   });
 
   router.get("/issues", (_req, res) => {
@@ -339,6 +312,103 @@ export default function adminRouter() {
     res.redirect("/admin/issues");
   });
 
+  router.use(requireFullAdmin);
+
+  router.get("/", (_req, res) => {
+    res.render("admin/dashboard", {
+      meta: { title: "Админ-панель", description: "Управление сайтом журнала" },
+      issues: listIssues(true).slice(0, 5),
+      messages: listMessages().slice(0, 5),
+      lists: listPublishedLists(false).slice(0, 5)
+    });
+  });
+
+  router.get("/settings", (_req, res) => {
+    const settings = getSettings();
+    res.render("admin/settings", {
+      meta: { title: "Настройки сайта", description: "Основные настройки и контакты" },
+      settings,
+      audienceTopics: getAudienceTopics(settings),
+      aboutAudienceHtml: formatAudienceHtml(settings.aboutAudience),
+      formatRichHtml
+    });
+  });
+
+  router.post("/settings", verifyCsrfToken, (req, res) => {
+    const body = req.body as Record<string, unknown>;
+    const rich = (key: string) => sanitizeRichHtml(String(body[key] ?? ""));
+    updateSettings({
+      siteTitle: String(body.siteTitle ?? ""),
+      siteDescription: rich("siteDescription"),
+      aboutAudience: rich("aboutAudience"),
+      aboutAudienceTopics: serializeAudienceTopics(body.audienceTopics),
+      publisher: rich("publisher"),
+      hotlineText: rich("hotlineText"),
+      phone: String(body.phone ?? ""),
+      phone2: String(body.phone2 ?? ""),
+      email: String(body.email ?? ""),
+      address: String(body.address ?? ""),
+      requisites: rich("requisites"),
+      siteUrl: String(body.siteUrl ?? ""),
+      analyticsId: String(body.analyticsId ?? ""),
+      mailTo: String(body.mailTo ?? "")
+    });
+    req.session.flash = { type: "success", message: "Настройки сохранены." };
+    res.redirect("/admin/settings");
+  });
+
+  router.get("/pages", (_req, res) => {
+    res.render("admin/pages", {
+      meta: { title: "Страницы", description: "Редактирование текстовых страниц" },
+      pages: getAllPages()
+    });
+  });
+
+  router.get("/pages/:pageKey", (req, res) => {
+    const page = getAllPages().find((item) => item.pageKey === req.params.pageKey);
+    if (!page) {
+      res.redirect("/admin/pages");
+      return;
+    }
+    res.render("admin/page-form", {
+      meta: { title: `Редактирование: ${page.title}`, description: "Редактирование содержимого страницы" },
+      page,
+      formatRichHtml,
+      invoicesOnly: false
+    });
+  });
+
+  router.post("/pages/:pageKey", verifyCsrfToken, (req, res) => {
+    const pageKey = req.params.pageKey as PageKey;
+    const body = req.body as Record<string, string>;
+    const rich = (key: string) => sanitizeRichHtml(body[key] ?? "");
+
+    if (pageKey === "home") {
+      updatePageContent(pageKey, "Главная", "", "", {
+        heroTitle: rich("heroTitle"),
+        heroText: rich("heroText"),
+        seoTitle: body.seoTitle ?? "",
+        seoDescription: rich("seoDescription")
+      });
+    } else if (pageKey === "about") {
+      updatePageContent(pageKey, body.title ?? "", rich("lead"), rich("body"), {
+        periodicity: body.periodicity ?? "",
+        distributionFormat: rich("distributionFormat")
+      });
+    } else if (pageKey === "contacts") {
+      updatePageContent(pageKey, body.title ?? "", rich("lead"), "", {
+        workingHours: body.workingHours ?? ""
+      });
+    } else if (pageKey === "subscribe") {
+      updatePageContent(pageKey, body.title ?? "", rich("lead"), rich("body"));
+    } else {
+      updatePageContent(pageKey, body.title ?? "", rich("lead"), rich("body"));
+    }
+
+    req.session.flash = { type: "success", message: "Страница обновлена." };
+    res.redirect(`/admin/pages/${pageKey}`);
+  });
+
   router.post("/issues/:id/delete", verifyCsrfToken, (req, res) => {
     deleteIssue(Number(req.params.id));
     req.session.flash = { type: "success", message: "Выпуск удален." };
@@ -379,19 +449,6 @@ export default function adminRouter() {
     deletePublishedList(Number(req.params.id));
     req.session.flash = { type: "success", message: "Перечень удален." };
     res.redirect("/admin/lists");
-  });
-
-  router.get("/messages", (_req, res) => {
-    res.render("admin/messages", {
-      meta: { title: "Сообщения", description: "Обращения из формы обратной связи" },
-      messages: listMessages()
-    });
-  });
-
-  router.post("/messages/:id/read", verifyCsrfToken, (req, res) => {
-    markMessageRead(Number(req.params.id));
-    req.session.flash = { type: "success", message: "Сообщение отмечено как прочитанное." };
-    res.redirect("/admin/messages");
   });
 
   return router;

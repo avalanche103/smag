@@ -1,4 +1,4 @@
-export type PageKey = "home" | "about" | "payment" | "contacts";
+export type PageKey = "home" | "about" | "contacts" | "subscribe";
 
 export interface IssueMaterial {
   title: string;
@@ -69,12 +69,16 @@ export interface PageContent {
   title: string;
   lead: string;
   body: string;
+  extras?: Record<string, string>;
 }
+
+export type AdminRole = "admin" | "user";
 
 export interface AdminRecord {
   id: number;
   login: string;
   passwordHash: string;
+  role: AdminRole;
   createdAt: string;
 }
 

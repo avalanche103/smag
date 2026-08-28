@@ -1,6 +1,3 @@
-
-  <!-- Управление счетами для подписки -->
-
 <%- include('../partials/head', { meta, site }) %>
 <main class="admin-layout">
   <%- include('../partials/admin-nav', { csrfToken }) %>
@@ -9,38 +6,42 @@
     <div class="admin-head">
       <div>
         <p class="eyebrow">Настройки</p>
-        <h1>Основные данные сайта</h1>
+        <h1>Общие данные сайта</h1>
+        <p class="form-note">Здесь только поля, которые влияют на несколько страниц или весь сайт. Контент отдельных страниц редактируется в разделе «Страницы».</p>
       </div>
     </div>
 
     <form method="post" action="/admin/settings" class="admin-card stack-form">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <h2>Бренд и SEO</h2>
       <div class="form-grid-two">
         <label>Название сайта<input type="text" name="siteTitle" value="<%= settings.siteTitle %>" required /></label>
         <label>URL сайта<input type="url" name="siteUrl" value="<%= settings.siteUrl || '' %>" /></label>
+        <label>Analytics ID<input type="text" name="analyticsId" value="<%= settings.analyticsId || '' %>" /></label>
+      </div>
+      <%- include('./partials/rich-field', { name: 'siteDescription', label: 'Описание сайта', value: formatRichHtml(settings.siteDescription), placeholder: 'Краткое описание для подвала и meta description', rows: 3 }) %>
+
+      <h2>Контакты</h2>
+      <div class="form-grid-two">
         <label>Физический адрес<input type="text" name="address" value="<%= settings.address %>" /></label>
         <label>Email<input type="email" name="email" value="<%= settings.email %>" /></label>
         <label>Телефон 1 (+375 44…)<input type="text" name="phone" value="<%= settings.phone %>" /></label>
         <label>Телефон 2 (+375 29…, горячая линия)<input type="text" name="phone2" value="<%= settings.phone2 || '' %>" /></label>
-        <label>Часы работы<input type="text" name="workingHours" value="<%= settings.workingHours %>" /></label>
-        <label>Analytics ID<input type="text" name="analyticsId" value="<%= settings.analyticsId || '' %>" /></label>
       </div>
+      <%- include('./partials/rich-field', { name: 'publisher', label: 'Юрлицо / издатель', value: formatRichHtml(settings.publisher), placeholder: '', rows: 2 }) %>
+      <%- include('./partials/rich-field', { name: 'requisites', label: 'Реквизиты', value: formatRichHtml(settings.requisites || ''), placeholder: 'Используются на страницах оплаты и подписки', rows: 4 }) %>
+      <label>Email для уведомлений
+        <input type="email" name="mailTo" value="<%= settings.mailTo || '' %>" />
+        <span class="form-note">Сюда приходят сообщения с формы обратной связи.</span>
+      </label>
 
-      <%- include('./partials/rich-field', { name: 'siteDescription', label: 'Описание сайта', value: formatRichHtml(settings.siteDescription), placeholder: 'Краткое описание сайта', rows: 3 }) %>
-      <%- include('./partials/rich-field', { name: 'heroTitle', label: 'Hero-заголовок', value: formatRichHtml(settings.heroTitle), placeholder: 'Заголовок на главной', rows: 2 }) %>
-      <%- include('./partials/rich-field', { name: 'heroText', label: 'Hero-текст', value: formatRichHtml(settings.heroText), placeholder: 'Текст под заголовком на главной', rows: 4 }) %>
-
+      <h2>Блок «Для кого»</h2>
       <div class="audience-editor" data-audience-editor>
-        <div class="audience-editor-head">
-          <div>
-            <label>Блок «Для кого»</label>
-            <p class="form-note">Сначала пункты списка, ниже — вводный текст. Можно добавлять и удалять строки.</p>
-          </div>
-        </div>
         <div class="materials-editor-head">
           <div>
             <label>Пункты списка</label>
-            <p class="form-note">Эти строки выводятся в блоке «Для кого» на главной и на странице «О журнале».</p>
+            <p class="form-note">Выводятся на главной и на странице «О журнале».</p>
           </div>
           <div class="materials-editor-actions">
             <button class="button button-secondary" type="button" data-add-audience-topic>Добавить пункт</button>
@@ -70,50 +71,11 @@
         <%- include('./partials/rich-field', { name: 'aboutAudience', label: 'Вводный текст', value: aboutAudienceHtml || '', placeholder: 'Кратко опишите аудиторию журнала', rows: 4 }) %>
       </div>
 
-      <label>Периодичность<input type="text" name="periodicity" value="<%= settings.periodicity || '' %>" /></label>
-      <%- include('./partials/rich-field', { name: 'publisher', label: 'Юрлицо / издатель', value: formatRichHtml(settings.publisher), placeholder: '', rows: 2 }) %>
-      <%- include('./partials/rich-field', { name: 'editorialInfo', label: 'Редакция', value: formatRichHtml(settings.editorialInfo), placeholder: '', rows: 4 }) %>
-      <%- include('./partials/rich-field', { name: 'distributionFormat', label: 'Формат распространения', value: formatRichHtml(settings.distributionFormat), placeholder: '', rows: 3 }) %>
-      <%- include('./partials/rich-field', { name: 'hotlineTitle', label: 'Заголовок горячей линии', value: formatRichHtml(settings.hotlineTitle), placeholder: '', rows: 2 }) %>
-      <%- include('./partials/rich-field', { name: 'hotlineText', label: 'Текст горячей линии', value: formatRichHtml(settings.hotlineText), placeholder: '', rows: 3 }) %>
-      <%- include('./partials/rich-field', { name: 'paymentTitle', label: 'Заголовок оплаты', value: formatRichHtml(settings.paymentTitle), placeholder: '', rows: 2 }) %>
-      <%- include('./partials/rich-field', { name: 'paymentText', label: 'Описание оплаты', value: formatRichHtml(settings.paymentText), placeholder: '', rows: 4 }) %>
-      <%- include('./partials/rich-field', { name: 'requisites', label: 'Реквизиты', value: formatRichHtml(settings.requisites || ''), placeholder: '', rows: 4 }) %>
-      <label>SEO Title главной<input type="text" name="seoHomeTitle" value="<%= settings.seoHomeTitle %>" /></label>
-      <%- include('./partials/rich-field', { name: 'seoHomeDescription', label: 'SEO Description главной', value: formatRichHtml(settings.seoHomeDescription), placeholder: '', rows: 3 }) %>
-      <label>Email для уведомлений
-        <input type="email" name="mailTo" value="<%= settings.mailTo || '' %>" />
-        <span class="form-note">Сюда приходят сообщения с формы обратной связи.</span>
-      </label>
+      <h2>Горячая линия</h2>
+      <%- include('./partials/rich-field', { name: 'hotlineText', label: 'Текст горячей линии', value: formatRichHtml(settings.hotlineText), placeholder: 'Используется на главной и странице подписки', rows: 3 }) %>
+
       <button class="button button-accent" type="submit">Сохранить настройки</button>
     </form>
-
-
-    <!-- Управление счетами для подписки (перемещено вниз) -->
-    <div style="margin-top: 2.5em;">
-      <form method="post" action="/admin/invoice1" enctype="multipart/form-data" class="admin-card stack-form">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <h2>Счет 1</h2>
-        <p>Текущий файл: <%= settings.invoiceFile1 || 'не загружен' %></p>
-        <label>Название кнопки
-          <input type="text" name="invoiceLabel1" value="<%= settings.invoiceLabel1 || 'Скачать счет 1' %>" required />
-        </label>
-        <label>PDF-файл<input type="file" name="invoiceFile1" accept="application/pdf" /></label>
-        <button class="button button-secondary" type="submit">Сохранить счет 1</button>
-      </form>
-      <form method="post" action="/admin/invoice2" enctype="multipart/form-data" class="admin-card stack-form" style="margin-top:1.5em;">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <h2>Счет 2</h2>
-        <p>Текущий файл: <%= settings.invoiceFile2 || 'не загружен' %></p>
-        <label>Название кнопки
-          <input type="text" name="invoiceLabel2" value="<%= settings.invoiceLabel2 || 'Скачать счет 2' %>" required />
-        </label>
-        <label>PDF-файл<input type="file" name="invoiceFile2" accept="application/pdf" /></label>
-        <button class="button button-secondary" type="submit">Сохранить счет 2</button>
-      </form>
-    </div>
-
-
   </section>
 </main>
 <script src="/scripts/main.js" defer></script>
