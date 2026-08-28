@@ -224,6 +224,7 @@ function createInitialStore(): DataStore {
         isVisible: 1
       }
     ],
+    publishedMaterials: [],
     contactMessages: []
   };
 }
@@ -238,6 +239,7 @@ function mergeDefaults(store: DataStore): DataStore {
     pages: initial.pages.map((page) => store.pages.find((item) => item.pageKey === page.pageKey) ?? page),
     issues,
     publishedLists: store.publishedLists.length ? store.publishedLists : initial.publishedLists,
+    publishedMaterials: store.publishedMaterials ?? [],
     contactMessages: store.contactMessages ?? []
   };
 }

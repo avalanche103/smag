@@ -6,7 +6,7 @@
   <div class="shell payment-grid">
     <section>
       <h1><%= page.title %></h1>
-      <p class="lead"><%= page.lead %></p>
+      <div class="lead rich-content"><%- formatRichHtml(page.lead) %></div>
       <div class="rich-content"><%- formatRichHtml(site.paymentText) %></div>
       <div class="hero-actions">
         <% if (invoiceFile) { %>
@@ -20,7 +20,7 @@
     <aside class="info-panel">
       <div>
         <h2>Порядок оплаты</h2>
-        <p><%= page.body %></p>
+        <div class="rich-content"><%- formatRichHtml(page.body) %></div>
       </div>
       <div>
         <h2>Контакт по оплате</h2>

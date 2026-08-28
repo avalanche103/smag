@@ -25,7 +25,13 @@
               .filter(Boolean);
           %>
           <tr>
-            <td class="col-issue"><a href="/issues/<%= m.slug %>"><%= m.numberLabel %></a></td>
+            <td class="col-issue">
+              <% if (m.slug) { %>
+                <a href="/issues/<%= m.slug %>"><%= m.numberLabel %></a>
+              <% } else { %>
+                <%= m.numberLabel %>
+              <% } %>
+            </td>
             <td class="col-section"><%= m.section %></td>
             <td class="col-title"><%= m.title %></td>
             <td class="col-author">

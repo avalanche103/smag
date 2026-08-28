@@ -162,8 +162,13 @@ export default function adminRouter() {
   });
 
   router.post("/pages/:pageKey", verifyCsrfToken, (req, res) => {
-    const { title, lead, body } = req.body as Record<string, string>;
-    updatePageContent(req.params.pageKey as PageKey, title ?? "", lead ?? "", body ?? "");
+    const body = req.body as Record<string, string>;
+    updatePageContent(
+      req.params.pageKey as PageKey,
+      body.title ?? "",
+      sanitizeRichHtml(body.lead ?? ""),
+      sanitizeRichHtml(body.body ?? "")
+    );
     req.session.flash = { type: "success", message: "Страница обновлена." };
     res.redirect(`/admin/pages/${req.params.pageKey}`);
   });

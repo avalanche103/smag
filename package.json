@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "db:seed": "ts-node --files src/scripts/seed.ts",
     "backup": "ts-node --files src/scripts/backup.ts",
+    "import:archive-materials": "ts-node --files scripts/import-archive-materials.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

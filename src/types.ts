@@ -43,6 +43,26 @@ export interface PublishedListItem {
   isVisible: number;
 }
 
+export interface PublishedMaterial {
+  id: number;
+  issueNumber: number;
+  year: number;
+  numberLabel: string;
+  section: string;
+  title: string;
+  author: string;
+}
+
+export interface PublishedMaterialRow {
+  numberLabel: string;
+  slug?: string;
+  section: string;
+  title: string;
+  author: string;
+  sortYear: number;
+  sortIssue: number;
+}
+
 export interface PageContent {
   id: number;
   pageKey: PageKey;
@@ -64,5 +84,6 @@ export interface DataStore {
   pages: PageContent[];
   issues: JournalIssue[];
   publishedLists: PublishedListItem[];
+  publishedMaterials: PublishedMaterial[];
   contactMessages: ContactMessage[];
 }

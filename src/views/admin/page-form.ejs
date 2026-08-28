@@ -12,11 +12,12 @@
     <form method="post" action="/admin/pages/<%= page.pageKey %>" class="admin-card stack-form">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <label>Заголовок<input type="text" name="title" value="<%= page.title %>" required /></label>
-      <label>Лид<textarea name="lead" rows="3"><%= page.lead %></textarea></label>
-      <label>Основной текст<textarea name="body" rows="8"><%= page.body %></textarea></label>
+      <%- include('./partials/rich-field', { name: 'lead', label: 'Лид', value: formatRichHtml(page.lead), placeholder: 'Краткий вводный текст страницы', rows: 3 }) %>
+      <%- include('./partials/rich-field', { name: 'body', label: 'Основной текст', value: formatRichHtml(page.body), placeholder: 'Основной текст страницы', rows: 8 }) %>
       <button class="button button-accent" type="submit">Сохранить</button>
     </form>
   </section>
 </main>
+<script src="/scripts/main.js" defer></script>
 </body>
 </html>

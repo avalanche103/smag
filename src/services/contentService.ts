@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { readStore, updateStore } from "../db";
-import type { ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem } from "../types";
+import type { ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem, PublishedMaterial, PublishedMaterialRow } from "../types";
 import type { PublishedListEntry } from "../utils/publishedListPdf";
 
 export const DEFAULT_ISSUE_MATERIAL_COUNT = 10;
@@ -413,6 +413,152 @@ export function findIssueByJournalNumber(issueNumber: number): JournalIssue | un
 function isImportableEntry(entry: PublishedListEntry): boolean {
   const title = entry.title.trim();
   return Boolean(title) && title !== entry.author.trim();
+}
+
+function normalizeArchiveAuthor(entry: PublishedListEntry): { title: string; author: string } {
+  if (entry.author && entry.author.trim() && entry.author.trim() !== "-") {
+    return { title: entry.title.trim(), author: entry.author.trim() };
+  }
+
+  const match = entry.title.match(/^(.*)\s*\(([^()]{2,120})\)\s*$/);
+  if (match && /[А-ЯЁA-Z][а-яёa-z-]+\s+[А-ЯЁA-Z]\.?/.test(match[2])) {
+    return { title: match[1].trim(), author: match[2].trim() };
+  }
+
+  return { title: entry.title.trim(), author: "-" };
+}
+
+function publishedMaterialKey(year: number, issueNumber: number, title: string): string {
+  return `${year}:${issueNumber}:${normalizeMaterialKey(title)}`;
+}
+
+export function listPublishedMaterialsForPage(): PublishedMaterialRow[] {
+  const store = readStore();
+  const seen = new Set<string>();
+  const rows: PublishedMaterialRow[] = [];
+
+  for (const issue of store.issues.filter((item) => item.isPublished === 1)) {
+    const year = parseIssueYear(issue.numberLabel, issue.publishDate) ?? 0;
+    const issueNumber = parseJournalNumber(issue.numberLabel) ?? 0;
+
+    for (const material of issue.materials) {
+      const title = material.title?.trim();
+      if (!title) {
+        continue;
+      }
+
+      const key = publishedMaterialKey(year, issueNumber, title);
+      if (seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      rows.push({
+        numberLabel: issue.numberLabel,
+        slug: issue.slug,
+        section: material.section?.trim() || "-",
+        title,
+        author: material.author?.trim() || "-",
+        sortYear: year,
+        sortIssue: issueNumber
+      });
+    }
+  }
+
+  for (const material of store.publishedMaterials ?? []) {
+    const key = publishedMaterialKey(material.year, material.issueNumber, material.title);
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    rows.push({
+      numberLabel: material.numberLabel,
+      section: material.section?.trim() || "-",
+      title: material.title,
+      author: material.author?.trim() || "-",
+      sortYear: material.year,
+      sortIssue: material.issueNumber
+    });
+  }
+
+  return rows.sort((left, right) => {
+    if (right.sortYear !== left.sortYear) {
+      return right.sortYear - left.sortYear;
+    }
+
+    if (right.sortIssue !== left.sortIssue) {
+      return right.sortIssue - left.sortIssue;
+    }
+
+    return left.title.localeCompare(right.title, "ru");
+  });
+}
+
+export function applyArchivePublishedMaterialsImport(
+  year: number,
+  entries: PublishedListEntry[]
+): { added: number; skipped: number } {
+  let added = 0;
+  let skipped = 0;
+
+  updateStore((store) => {
+    if (!store.publishedMaterials) {
+      store.publishedMaterials = [];
+    }
+
+    const seen = new Set(
+      store.publishedMaterials.map((item) => publishedMaterialKey(item.year, item.issueNumber, item.title))
+    );
+
+    for (const issue of store.issues) {
+      const issueYear = parseIssueYear(issue.numberLabel, issue.publishDate);
+      const issueNumber = parseJournalNumber(issue.numberLabel);
+      if (!issueYear || !issueNumber) {
+        continue;
+      }
+
+      for (const material of issue.materials) {
+        const title = material.title?.trim();
+        if (!title) {
+          continue;
+        }
+
+        seen.add(publishedMaterialKey(issueYear, issueNumber, title));
+      }
+    }
+
+    let nextId = Math.max(0, ...(store.publishedMaterials.map((item) => item.id)), 0) + 1;
+
+    for (const entry of entries) {
+      if (!isImportableEntry(entry)) {
+        skipped += 1;
+        continue;
+      }
+
+      const normalized = normalizeArchiveAuthor(entry);
+      const key = publishedMaterialKey(year, entry.issueNumber, normalized.title);
+      if (seen.has(key)) {
+        skipped += 1;
+        continue;
+      }
+
+      seen.add(key);
+      store.publishedMaterials.push({
+        id: nextId,
+        issueNumber: entry.issueNumber,
+        year,
+        numberLabel: `№ ${entry.issueNumber} (${year})`,
+        section: entry.section?.trim() || "-",
+        title: normalized.title,
+        author: normalized.author
+      });
+      nextId += 1;
+      added += 1;
+    }
+  });
+
+  return { added, skipped };
 }
 
 export function applyPublishedListImport(year: number, entries: PublishedListEntry[]): {

@@ -13,6 +13,7 @@ import {
   getPageContent,
   getSettings,
   listIssues,
+  listPublishedMaterialsForPage,
   listPublishedLists,
   saveMessage,
   stripHtmlTags
@@ -90,18 +91,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
 
   router.get("/published-lists", (_req, res) => {
     const settings = getSettings();
-    const issues = listIssues();
-    // Собираем все материалы из всех выпусков
-    const materials = issues.flatMap(issue =>
-      (issue.materials || []).map(material => ({
-        numberLabel: issue.numberLabel,
-        slug: issue.slug,
-        publishDate: issue.publishDate,
-        section: material.section && material.section.trim() ? material.section : '-',
-        title: material.title || '',
-        author: material.author && material.author.trim() ? material.author : '-'
-      }))
-    ).filter(m => m.title);
+    const materials = listPublishedMaterialsForPage();
 
     res.render("published-lists", {
       materials,
