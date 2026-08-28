@@ -210,15 +210,15 @@ function createInitialStore(): DataStore {
     admins: [
       {
         id: 1,
-        login: "admin",
-        passwordHash: bcrypt.hashSync("admin", 10),
+        login: env.adminLogin,
+        passwordHash: bcrypt.hashSync(env.adminPassword, 10),
         role: "admin",
         createdAt: timestamp
       },
       {
         id: 2,
-        login: "user",
-        passwordHash: bcrypt.hashSync("user", 10),
+        login: env.adminUserLogin,
+        passwordHash: bcrypt.hashSync(env.adminUserPassword, 10),
         role: "user",
         createdAt: timestamp
       }
@@ -317,40 +317,12 @@ function migratePageExtras(store: DataStore): void {
 }
 
 function normalizeAdmins(store: DataStore): AdminRecord[] {
-  const timestamp = new Date().toISOString();
-  const admins = store.admins.map((admin) => ({
-    ...admin,
-    role: (admin.role ?? "admin") as AdminRole
-  }));
-
-  const ensureCredentials = (record: AdminRecord, password: string, role: AdminRole) => {
-    record.role = role;
-    if (!bcrypt.compareSync(password, record.passwordHash)) {
-      record.passwordHash = bcrypt.hashSync(password, 10);
-    }
-  };
-
-  const upsert = (login: string, password: string, role: AdminRole, preferredId: number) => {
-    let record = admins.find((admin) => admin.login === login);
-    if (!record) {
-      record = {
-        id: preferredId,
-        login,
-        passwordHash: bcrypt.hashSync(password, 10),
-        role,
-        createdAt: timestamp
-      };
-      admins.push(record);
-      return;
-    }
-
-    ensureCredentials(record, password, role);
-  };
-
-  upsert("admin", "admin", "admin", 1);
-  upsert("user", "user", "user", 2);
-
-  return admins.sort((left, right) => left.id - right.id);
+  return store.admins
+    .map((admin) => ({
+      ...admin,
+      role: (admin.role ?? "admin") as AdminRole
+    }))
+    .sort((left, right) => left.id - right.id);
 }
 
 function mergeDefaults(store: DataStore): DataStore {
@@ -383,14 +355,17 @@ function mergeDefaults(store: DataStore): DataStore {
   return merged;
 }
 
-export function ensureDataFile(): void {
+let storeCache: DataStore | null = null;
+
+function loadStoreFromDisk(): DataStore {
   if (!fs.existsSync(env.contentFile)) {
     if (fs.existsSync(env.seedContentFile)) {
       fs.copyFileSync(env.seedContentFile, env.contentFile);
     } else {
-      fs.writeFileSync(env.contentFile, JSON.stringify(createInitialStore(), null, 2), "utf-8");
+      const initial = createInitialStore();
+      fs.writeFileSync(env.contentFile, JSON.stringify(initial, null, 2), "utf-8");
+      return initial;
     }
-    return;
   }
 
   const current = JSON.parse(fs.readFileSync(env.contentFile, "utf-8")) as DataStore;
@@ -401,15 +376,26 @@ export function ensureDataFile(): void {
   if (normalized !== currentSerialized) {
     fs.writeFileSync(env.contentFile, JSON.stringify(merged, null, 2), "utf-8");
   }
+
+  return merged;
+}
+
+export function ensureDataFile(): void {
+  if (!storeCache) {
+    storeCache = loadStoreFromDisk();
+  }
 }
 
 export function readStore(): DataStore {
-  ensureDataFile();
-  return JSON.parse(fs.readFileSync(env.contentFile, "utf-8")) as DataStore;
+  if (!storeCache) {
+    storeCache = loadStoreFromDisk();
+  }
+  return storeCache;
 }
 
 export function writeStore(store: DataStore): void {
   fs.writeFileSync(env.contentFile, JSON.stringify(store, null, 2), "utf-8");
+  storeCache = store;
 }
 
 export function updateStore<T>(updater: (store: DataStore) => T): T {
@@ -419,4 +405,4 @@ export function updateStore<T>(updater: (store: DataStore) => T): T {
   return result;
 }
 
-ensureDataFile();
+storeCache = loadStoreFromDisk();

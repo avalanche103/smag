@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { readStore, updateStore } from "../db";
 import type { AdminRole, ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem, PublishedMaterial, PublishedMaterialRow } from "../types";
@@ -99,17 +100,19 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+const richHtmlOptions: sanitizeHtml.IOptions = {
+  allowedTags: ["p", "div", "br", "ul", "ol", "li", "b", "strong", "i", "em", "u", "a"],
+  allowedAttributes: {
+    a: ["href", "title", "target", "rel"]
+  },
+  allowedSchemes: ["http", "https", "mailto", "tel"],
+  transformTags: {
+    a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" })
+  }
+};
+
 export function sanitizeRichHtml(value: string): string {
-  return value
-    .replace(/<\/?o:p\b[^>]*>/gi, "")
-    .replace(/<\/?span\b[^>]*>/gi, "")
-    .replace(/\s(?:class|lang|align|dir|id)="[^"]*"/gi, "")
-    .replace(/\sstyle="[^"]*"/gi, "")
-    .replace(/<(p|div|br|ul|ol|li|b|strong|i|em|u)\b[^>]*>/gi, "<$1>")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/<p>\s*<\/p>/gi, "")
-    .replace(/<div>\s*<br\s*\/?>\s*<\/div>/gi, "<p></p>")
-    .trim();
+  return sanitizeHtml(value, richHtmlOptions).trim();
 }
 
 export function formatRichHtml(value: unknown): string {

@@ -1,17 +1,22 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
   "builds": [
     {
       "src": "dist/server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "src/public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "dist/server.js"
-    }
-  ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "."
+    { "src": "/styles/(.*)", "dest": "/src/public/styles/$1" },
+    { "src": "/scripts/(.*)", "dest": "/src/public/scripts/$1" },
+    { "src": "/images/(.*)", "dest": "/src/public/images/$1" },
+    { "src": "/logo.jpg", "dest": "/logo.jpg" },
+    { "src": "/(.*)", "dest": "dist/server.js" }
+  ]
 }

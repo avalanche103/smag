@@ -22,14 +22,14 @@
             <span class="subscribe-step-title">Скачайте счёт на нужный период</span>
             <div class="subscribe-invoice-row">
               <% if (getPageExtra(page, 'invoiceFile1')) { %>
-                <a class="button button-accent subscribe-invoice-btn" href="<%= getPageExtra(page, 'invoiceFile1') %>" download="schet-polugodie.pdf">
+                <a class="button button-accent subscribe-invoice-btn" href="<%= typeof invoiceDownloadPath === 'function' ? invoiceDownloadPath(getPageExtra(page, 'invoiceFile1')) : getPageExtra(page, 'invoiceFile1') %>" download="schet-polugodie.pdf">
                   <%= getPageExtra(page, 'invoiceLabel1') || 'Счёт на полугодие' %>
                 </a>
               <% } else { %>
                 <span class="button button-secondary subscribe-invoice-btn is-disabled">Счёт на полугодие</span>
               <% } %>
               <% if (getPageExtra(page, 'invoiceFile2')) { %>
-                <a class="button button-accent subscribe-invoice-btn" href="<%= getPageExtra(page, 'invoiceFile2') %>" download="schet-god.pdf">
+                <a class="button button-accent subscribe-invoice-btn" href="<%= typeof invoiceDownloadPath === 'function' ? invoiceDownloadPath(getPageExtra(page, 'invoiceFile2')) : getPageExtra(page, 'invoiceFile2') %>" download="schet-god.pdf">
                   <%= getPageExtra(page, 'invoiceLabel2') || 'Счёт на год' %>
                 </a>
               <% } else { %>

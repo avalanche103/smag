@@ -1,24 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { getAdminById } from "../services/contentService";
 import type { AdminRole } from "../types";
-
-function syncSessionAdmin(req: Request): boolean {
-  if (!req.session.adminId) {
-    return false;
-  }
-
-  const admin = getAdminById(req.session.adminId);
-  if (!admin) {
-    delete req.session.adminId;
-    delete req.session.adminLogin;
-    delete req.session.adminRole;
-    return false;
-  }
-
-  req.session.adminLogin = admin.login;
-  req.session.adminRole = admin.role;
-  return true;
-}
 
 export function getSessionRole(req: Request): AdminRole | undefined {
   return req.session.adminRole;
@@ -29,7 +10,7 @@ export function isFullAdmin(req: Request): boolean {
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  if (!syncSessionAdmin(req)) {
+  if (!req.session.adminId || !req.session.adminLogin) {
     res.redirect("/admin/login");
     return;
   }
@@ -38,7 +19,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
 }
 
 export function requireFullAdmin(req: Request, res: Response, next: NextFunction): void {
-  if (!syncSessionAdmin(req)) {
+  if (!req.session.adminId || !req.session.adminLogin) {
     res.redirect("/admin/login");
     return;
   }

@@ -16,17 +16,21 @@ function createStorage(targetDir: string) {
   });
 }
 
+function hasAllowedExtension(filename: string, extensions: Set<string>): boolean {
+  return extensions.has(path.extname(filename).toLowerCase());
+}
+
 export const coverUpload = multer({
   storage: createStorage(env.coversDir),
   fileFilter: (_req, file, callback) => {
-    callback(null, /image\/(jpeg|png|webp)/.test(file.mimetype));
+    callback(null, /image\/(jpeg|png|webp)/.test(file.mimetype) && hasAllowedExtension(file.originalname, new Set([".jpg", ".jpeg", ".png", ".webp"])));
   },
   limits: { fileSize: 8 * 1024 * 1024 }
 });
 
 export const invoiceUpload = multer({
   storage: createStorage(env.invoicesDir),
-  fileFilter: (_req, file, callback) => callback(null, file.mimetype === "application/pdf"),
+  fileFilter: (_req, file, callback) => callback(null, file.mimetype === "application/pdf" && hasAllowedExtension(file.originalname, new Set([".pdf"]))),
   limits: { fileSize: 15 * 1024 * 1024 }
 });
 
@@ -35,7 +39,8 @@ export const listUpload = multer({
   fileFilter: (_req, file, callback) => {
     callback(
       null,
-      file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+        hasAllowedExtension(file.originalname, new Set([".xlsx"]))
     );
   },
   limits: { fileSize: 15 * 1024 * 1024 }
@@ -45,7 +50,7 @@ export const pdfListUpload = multer({
   storage: createStorage(env.listsDir),
   fileFilter: (_req, file, callback) => {
     const isPdf = file.mimetype === "application/pdf" || file.originalname.toLowerCase().endsWith(".pdf");
-    callback(null, isPdf);
+    callback(null, isPdf && hasAllowedExtension(file.originalname, new Set([".pdf"])));
   },
   limits: { fileSize: 15 * 1024 * 1024 }
 });

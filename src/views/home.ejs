@@ -49,7 +49,7 @@
           </div>
         </div>
         <div class="cover-frame">
-          <img src="<%= featuredIssue.coverImage %>" alt="Обложка <%= featuredIssue.numberLabel %>" />
+          <img src="<%= featuredIssue.coverImage %>" alt="Обложка <%= featuredIssue.numberLabel %>" fetchpriority="high" decoding="async" width="640" height="900" />
         </div>
       </div>
     </section>
@@ -70,7 +70,7 @@
           <% const primaryMaterials = issue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
           <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
           <article class="issue-card">
-            <img src="<%= issue.coverImage %>" alt="Обложка <%= issue.numberLabel %>" />
+            <img src="<%= getCoverThumbPath(issue.coverImage) %>" alt="Обложка <%= issue.numberLabel %>" loading="lazy" decoding="async" width="400" height="560" />
             <div class="issue-card-body">
               <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
               <h3><%= issue.numberLabel %></h3>

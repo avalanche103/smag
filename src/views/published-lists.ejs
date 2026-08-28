@@ -47,9 +47,20 @@
         <% }) %>
       </tbody>
     </table>
+    <% if (pagination && pagination.totalPages > 1) { %>
+      <nav class="pager" aria-label="Пагинация материалов">
+        <% if (pagination.currentPage > 1) { %>
+          <a class="button button-secondary" href="/published-lists?page=<%= pagination.currentPage - 1 %>">Назад</a>
+        <% } %>
+        <span class="pager-status">Страница <%= pagination.currentPage %> из <%= pagination.totalPages %></span>
+        <% if (pagination.currentPage < pagination.totalPages) { %>
+          <a class="button button-secondary" href="/published-lists?page=<%= pagination.currentPage + 1 %>">Далее</a>
+        <% } %>
+      </nav>
+    <% } %>
   </div>
 </main>
 
 <link rel="stylesheet" href="/styles/published-lists.css">
-<script src="/scripts/published-lists.js"></script>
+<script src="/scripts/published-lists.js" defer></script>
 <%- include('partials/footer', { site }) %>

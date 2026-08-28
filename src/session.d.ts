@@ -14,17 +14,6 @@ declare module "express-session" {
       type: "success" | "error";
       message: string;
     };
-    listImport?: {
-      year: number;
-      sourceName: string;
-      entries: Array<{
-        section: string;
-        title: string;
-        author: string;
-        issueNumber: number;
-        warning?: string;
-      }>;
-      warnings: string[];
-    };
+    importPreviewId?: string;
   }
 }

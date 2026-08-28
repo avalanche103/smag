@@ -1,7 +1,8 @@
 import path from "node:path";
+import fs from "node:fs";
 import { Router } from "express";
-import slugify from "slugify";
-import type { IssueMaterial, PageKey } from "../types";
+import rateLimit from "express-rate-limit";
+import slugify from "slugify";import type { IssueMaterial, PageKey } from "../types";
 import {
   createPublishedList,
   deleteIssue,
@@ -27,14 +28,16 @@ import {
   updatePageContent,
   updatePageExtra,
   updateSettings,
-  verifyAdmin,
-  getAdminById
+  verifyAdmin
 } from "../services/contentService";
 import { requireAuth, requireFullAdmin } from "../middleware/auth";
 import { verifyCsrfToken } from "../middleware/csrf";
 import { coverUpload, invoiceUpload, listUpload, pdfListUpload } from "../middleware/uploads";
-import { parsePublishedListPdf } from "../utils/publishedListPdf";
-
+import { writeAuditLog } from "../utils/auditLog";
+import { validateUploadedFile } from "../utils/fileValidation";
+import { processCoverImage } from "../utils/imageProcessing";
+import { deleteImportPreview, readImportPreview, saveImportPreview } from "../utils/importPreviewStore";
+import { parsePublishedListPdfInWorker } from "../utils/pdfParseJob";
 function parseIssueMaterials(input: unknown): IssueMaterial[] {
   const entries = Array.isArray(input)
     ? input
@@ -59,11 +62,16 @@ function parseIssueMaterials(input: unknown): IssueMaterial[] {
 
 export default function adminRouter() {
   const router = Router();
-
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: "Слишком много попыток входа. Попробуйте позже."
+  });
   router.get("/login", (req, res) => {
-    if (req.session.adminId && getAdminById(req.session.adminId)) {
-      const role = req.session.adminRole ?? getAdminById(req.session.adminId)?.role;
-      res.redirect(role === "admin" ? "/admin" : "/admin/issues");
+    if (req.session.adminId && req.session.adminLogin) {
+      res.redirect(req.session.adminRole === "admin" ? "/admin" : "/admin/issues");
       return;
     }
 
@@ -76,7 +84,7 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/login", verifyCsrfToken, (req, res) => {
+  router.post("/login", loginLimiter, verifyCsrfToken, (req, res) => {
     const { login, password } = req.body as Record<string, string>;
     const admin = verifyAdmin(String(login ?? "").trim(), String(password ?? ""));
 
@@ -86,10 +94,18 @@ export default function adminRouter() {
       return;
     }
 
-    req.session.adminId = admin.id;
-    req.session.adminLogin = admin.login;
-    req.session.adminRole = admin.role;
-    res.redirect(admin.role === "admin" ? "/admin" : "/admin/issues");
+    req.session.regenerate((error) => {
+      if (error) {
+        req.session.flash = { type: "error", message: "Не удалось создать сессию. Попробуйте снова." };
+        res.redirect("/admin/login");
+        return;
+      }
+
+      req.session.adminId = admin.id;
+      req.session.adminLogin = admin.login;
+      req.session.adminRole = admin.role;
+      res.redirect(admin.role === "admin" ? "/admin" : "/admin/issues");
+    });
   });
 
   router.post("/logout", requireAuth, verifyCsrfToken, (req, res) => {
@@ -115,20 +131,40 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/pages/subscribe/invoice1", invoiceUpload.single("invoiceFile1"), verifyCsrfToken, (req, res) => {
+  router.post("/pages/subscribe/invoice1", invoiceUpload.single("invoiceFile1"), verifyCsrfToken, async (req, res) => {
+    if (req.file) {
+      const valid = await validateUploadedFile(req.file.path, "invoice");
+      if (!valid) {
+        fs.unlinkSync(req.file.path);
+        req.session.flash = { type: "error", message: "Недопустимый формат файла счёта." };
+        res.redirect("/admin/pages/subscribe");
+        return;
+      }
+    }
     const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : getAllPages().find((page) => page.pageKey === "subscribe")?.extras?.invoiceFile1 || "";
     const label = req.body.invoiceLabel1 || "Скачать счет 1";
     updatePageExtra("subscribe", "invoiceFile1", uploaded);
     updatePageExtra("subscribe", "invoiceLabel1", label);
+    writeAuditLog({ adminLogin: req.session.adminLogin ?? "unknown", action: "upload_invoice", details: "invoice1" });
     req.session.flash = { type: "success", message: "Счет 1 обновлен." };
     res.redirect("/admin/pages/subscribe");
   });
 
-  router.post("/pages/subscribe/invoice2", invoiceUpload.single("invoiceFile2"), verifyCsrfToken, (req, res) => {
+  router.post("/pages/subscribe/invoice2", invoiceUpload.single("invoiceFile2"), verifyCsrfToken, async (req, res) => {
+    if (req.file) {
+      const valid = await validateUploadedFile(req.file.path, "invoice");
+      if (!valid) {
+        fs.unlinkSync(req.file.path);
+        req.session.flash = { type: "error", message: "Недопустимый формат файла счёта." };
+        res.redirect("/admin/pages/subscribe");
+        return;
+      }
+    }
     const uploaded = req.file ? `/uploads/invoices/${req.file.filename}` : getAllPages().find((page) => page.pageKey === "subscribe")?.extras?.invoiceFile2 || "";
     const label = req.body.invoiceLabel2 || "Скачать счет 2";
     updatePageExtra("subscribe", "invoiceFile2", uploaded);
     updatePageExtra("subscribe", "invoiceLabel2", label);
+    writeAuditLog({ adminLogin: req.session.adminLogin ?? "unknown", action: "upload_invoice", details: "invoice2" });
     req.session.flash = { type: "success", message: "Счет 2 обновлен." };
     res.redirect("/admin/pages/subscribe");
   });
@@ -175,20 +211,32 @@ export default function adminRouter() {
       return;
     }
 
+    const valid = await validateUploadedFile(req.file.path, "pdfList");
+    if (!valid) {
+      fs.unlinkSync(req.file.path);
+      req.session.flash = { type: "error", message: "Недопустимый формат PDF-файла." };
+      res.redirect("/admin/issues/import-list");
+      return;
+    }
+
     try {
-      const parsed = await parsePublishedListPdf(req.file.path);
+      const parsed = await parsePublishedListPdfInWorker(req.file.path);
       if (!parsed.entries.length) {
         req.session.flash = { type: "error", message: "В PDF не удалось найти статьи. Проверьте макет перечня." };
         res.redirect("/admin/issues/import-list");
         return;
       }
 
-      req.session.listImport = {
+      if (req.session.importPreviewId) {
+        deleteImportPreview(req.session.importPreviewId);
+      }
+
+      req.session.importPreviewId = saveImportPreview({
         year: parsed.year,
         sourceName: req.file.originalname,
         entries: parsed.entries,
         warnings: parsed.warnings
-      };
+      });
       res.redirect("/admin/issues/import-list/preview");
     } catch (error) {
       console.error("Published list PDF parse failed:", error);
@@ -198,7 +246,7 @@ export default function adminRouter() {
   });
 
   router.get("/issues/import-list/preview", (req, res) => {
-    const listImport = req.session.listImport;
+    const listImport = req.session.importPreviewId ? readImportPreview(req.session.importPreviewId) : null;
     if (!listImport) {
       req.session.flash = { type: "error", message: "Сначала загрузите PDF перечня." };
       res.redirect("/admin/issues/import-list");
@@ -212,10 +260,11 @@ export default function adminRouter() {
       groups.set(entry.issueNumber, bucket);
     }
 
+    const allIssues = listIssues(true);
     const previewGroups = [...groups.entries()]
       .sort((left, right) => left[0] - right[0])
       .map(([issueNumber, entries]) => {
-        const existing = listIssues(true).find((issue) => parseJournalNumber(issue.numberLabel) === issueNumber);
+        const existing = allIssues.find((issue) => parseJournalNumber(issue.numberLabel) === issueNumber);
         const knownKeys = new Set(
           (existing?.materials ?? [])
             .map((material) => normalizeMaterialKey(material.title))
@@ -257,7 +306,7 @@ export default function adminRouter() {
   });
 
   router.post("/issues/import-list/apply", verifyCsrfToken, (req, res) => {
-    const listImport = req.session.listImport;
+    const listImport = req.session.importPreviewId ? readImportPreview(req.session.importPreviewId) : null;
     if (!listImport) {
       req.session.flash = { type: "error", message: "Нет данных импорта. Загрузите PDF ещё раз." };
       res.redirect("/admin/issues/import-list");
@@ -265,7 +314,15 @@ export default function adminRouter() {
     }
 
     const result = applyPublishedListImport(listImport.year, listImport.entries);
-    delete req.session.listImport;
+    if (req.session.importPreviewId) {
+      deleteImportPreview(req.session.importPreviewId);
+      delete req.session.importPreviewId;
+    }
+    writeAuditLog({
+      adminLogin: req.session.adminLogin ?? "unknown",
+      action: "import_published_list",
+      details: `${listImport.sourceName}: added ${result.added}`
+    });
     req.session.flash = {
       type: "success",
       message: `Импорт завершён: добавлено материалов ${result.added}, пропущено копий ${result.skipped}, обновлено выпусков ${result.updated}, создано черновиков ${result.created}.`
@@ -286,9 +343,29 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/issues", coverUpload.single("coverImage"), verifyCsrfToken, (req, res) => {
+  router.post("/issues", coverUpload.single("coverImage"), verifyCsrfToken, async (req, res) => {
     const body = req.body as Record<string, unknown>;
-    const uploadedCover = req.file ? `/uploads/covers/${req.file.filename}` : body.existingCover;
+    let uploadedCover = typeof body.existingCover === "string" ? body.existingCover : "";
+
+    if (req.file) {
+      const valid = await validateUploadedFile(req.file.path, "cover");
+      if (!valid) {
+        fs.unlinkSync(req.file.path);
+        req.session.flash = { type: "error", message: "Недопустимый формат изображения обложки." };
+        res.redirect(body.id ? `/admin/issues/${body.id}/edit` : "/admin/issues/new");
+        return;
+      }
+
+      try {
+        const processed = await processCoverImage(req.file.path, req.file.filename);
+        uploadedCover = processed.publicPath;
+      } catch (error) {
+        console.error("Cover processing failed:", error);
+        req.session.flash = { type: "error", message: "Не удалось обработать обложку." };
+        res.redirect(body.id ? `/admin/issues/${body.id}/edit` : "/admin/issues/new");
+        return;
+      }
+    }
     const materials = parseIssueMaterials(body.materials);
     const firstMaterial = materials.find((material) => material.title.trim())?.title ?? "vypusk";
     const numberLabel = typeof body.numberLabel === "string" ? body.numberLabel : "";
@@ -303,9 +380,15 @@ export default function adminRouter() {
       publishDate: typeof body.publishDate === "string" ? body.publishDate : "",
       slug,
       materials,
-      coverImage: typeof uploadedCover === "string" ? uploadedCover : "",
+      coverImage: uploadedCover,
       isPublished: body.isPublished ? 1 : 0,
       isFeatured: body.isFeatured ? 1 : 0
+    });
+
+    writeAuditLog({
+      adminLogin: req.session.adminLogin ?? "unknown",
+      action: body.id ? "update_issue" : "create_issue",
+      details: numberLabel
     });
 
     req.session.flash = { type: "success", message: body.id ? "Выпуск обновлен." : "Выпуск создан." };
@@ -353,6 +436,7 @@ export default function adminRouter() {
       analyticsId: String(body.analyticsId ?? ""),
       mailTo: String(body.mailTo ?? "")
     });
+    writeAuditLog({ adminLogin: req.session.adminLogin ?? "unknown", action: "update_settings" });
     req.session.flash = { type: "success", message: "Настройки сохранены." };
     res.redirect("/admin/settings");
   });
@@ -406,11 +490,17 @@ export default function adminRouter() {
     }
 
     req.session.flash = { type: "success", message: "Страница обновлена." };
+    writeAuditLog({ adminLogin: req.session.adminLogin ?? "unknown", action: "update_page", details: pageKey });
     res.redirect(`/admin/pages/${pageKey}`);
   });
 
   router.post("/issues/:id/delete", verifyCsrfToken, (req, res) => {
     deleteIssue(Number(req.params.id));
+    writeAuditLog({
+      adminLogin: req.session.adminLogin ?? "unknown",
+      action: "delete_issue",
+      details: String(req.params.id)
+    });
     req.session.flash = { type: "success", message: "Выпуск удален." };
     res.redirect("/admin/issues");
   });
@@ -422,9 +512,17 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/lists", listUpload.single("listFile"), verifyCsrfToken, (req, res) => {
+  router.post("/lists", listUpload.single("listFile"), verifyCsrfToken, async (req, res) => {
     if (!req.file) {
       req.session.flash = { type: "error", message: "Выберите Excel-файл для импорта." };
+      res.redirect("/admin/lists");
+      return;
+    }
+
+    const valid = await validateUploadedFile(req.file.path, "list");
+    if (!valid) {
+      fs.unlinkSync(req.file.path);
+      req.session.flash = { type: "error", message: "Недопустимый формат Excel-файла." };
       res.redirect("/admin/lists");
       return;
     }

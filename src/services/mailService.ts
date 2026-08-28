@@ -21,6 +21,15 @@ function escapeText(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function sanitizeHeaderValue(value: string): string {
+  return value.replace(/[\r\n]/g, " ").trim();
+}
+
+function sanitizeEmail(value: string): string {
+  const trimmed = value.trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) ? trimmed : "";
+}
+
 export async function sendContactFormEmail(input: {
   to: string;
   name: string;
@@ -32,7 +41,7 @@ export async function sendContactFormEmail(input: {
     throw new Error("SMTP не настроен. Укажите SMTP_HOST, SMTP_USER, SMTP_PASS и MAIL_FROM.");
   }
 
-  const subject = `Сообщение с сайта: ${input.name}`;
+  const subject = `Сообщение с сайта: ${sanitizeHeaderValue(input.name)}`;
   const text = [
     "Новое сообщение с формы обратной связи",
     "",
@@ -57,7 +66,7 @@ export async function sendContactFormEmail(input: {
   await transporter.sendMail({
     from: env.mailFrom,
     to: input.to,
-    replyTo: input.email,
+    replyTo: sanitizeEmail(input.email) || undefined,
     subject,
     text,
     html
