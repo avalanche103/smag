@@ -16,6 +16,7 @@
     { "src": "/styles/(.*)", "dest": "/src/public/styles/$1" },
     { "src": "/scripts/(.*)", "dest": "/src/public/scripts/$1" },
     { "src": "/images/(.*)", "dest": "/src/public/images/$1" },
+    { "src": "/favicon.ico", "dest": "/src/public/images/favicon.png" },
     { "src": "/logo.jpg", "dest": "/logo.jpg" },
     { "src": "/(.*)", "dest": "dist/server.js" }
   ]

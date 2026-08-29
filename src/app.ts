@@ -89,6 +89,9 @@ app.use("/uploads/lists", express.static(env.listsDir, uploadStaticOptions));
 app.get("/logo.jpg", (_req, res) => {
   res.sendFile(path.join(env.rootDir, "logo.jpg"));
 });
+app.get("/favicon.ico", (_req, res) => {
+  res.sendFile(path.join(env.rootDir, "src", "public", "images", "favicon.png"));
+});
 app.use(attachCsrfToken);
 
 app.use((req, res, next) => {
