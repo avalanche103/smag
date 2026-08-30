@@ -107,6 +107,7 @@ app.use((req, res, next) => {
   res.locals.getPublishedMaterialSections = getPublishedMaterialSections;
   res.locals.getCoverThumbPath = getCoverThumbPath;
   res.locals.path = req.path;
+  res.locals.assetVersion = env.assetVersion;
   res.locals.admin = req.session.adminLogin
     ? { login: req.session.adminLogin, role: req.session.adminRole ?? "admin" }
     : null;

@@ -7,9 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles/main.css" />
+    <link rel="stylesheet" href="/styles/main.css?v=<%= assetVersion %>" />
     <% if (typeof path === 'string' && path.startsWith('/published-lists')) { %>
-      <link rel="stylesheet" href="/styles/published-lists.css" />
+      <link rel="stylesheet" href="/styles/published-lists.css?v=<%= assetVersion %>" />
     <% } %>
     <% if (site.analyticsId) { %>
       <script async src="https://www.googletagmanager.com/gtag/js?id=<%= site.analyticsId %>"></script>

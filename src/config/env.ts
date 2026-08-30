@@ -60,6 +60,7 @@ export const env = {
   port: Number(process.env.PORT ?? 3000),
   isProduction,
   sessionSecret,
+  assetVersion: (process.env.RENDER_GIT_COMMIT ?? process.env.ASSET_VERSION ?? "dev").slice(0, 12),
   adminLogin: process.env.ADMIN_LOGIN ?? "admin",
   adminPassword: process.env.ADMIN_PASSWORD ?? "admin",
   adminUserLogin: process.env.ADMIN_USER_LOGIN ?? "user",
