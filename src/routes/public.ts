@@ -16,6 +16,7 @@ import {
   getSettings,
   listIssues,
   listPublishedMaterialsForPage,
+  filterPublishedMaterials,
   saveMessage,
   stripHtmlTags
 } from "../services/contentService";
@@ -155,21 +156,46 @@ export default function publicRouter(formLimiter: RequestHandler) {
 
   router.get("/published-lists", (req, res) => {
     const settings = getSettings();
+    const filters = {
+      number: String(req.query.number ?? "").trim(),
+      section: String(req.query.section ?? "").trim(),
+      title: String(req.query.title ?? "").trim(),
+      author: String(req.query.author ?? "").trim()
+    };
+    const hasFilters = Object.values(filters).some(Boolean);
+    const filteredMaterials = filterPublishedMaterials(listPublishedMaterialsForPage(), filters);
     const pageNumber = Math.max(1, Number.parseInt(String(req.query.page ?? "1"), 10) || 1);
-    const allMaterials = listPublishedMaterialsForPage();
-    const totalPages = Math.max(1, Math.ceil(allMaterials.length / PUBLISHED_LISTS_PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filteredMaterials.length / PUBLISHED_LISTS_PAGE_SIZE));
     const currentPage = Math.min(pageNumber, totalPages);
-    const materials = allMaterials.slice(
+    const materials = filteredMaterials.slice(
       (currentPage - 1) * PUBLISHED_LISTS_PAGE_SIZE,
       currentPage * PUBLISHED_LISTS_PAGE_SIZE
     );
 
+    const filterQuery = new URLSearchParams();
+    if (filters.number) {
+      filterQuery.set("number", filters.number);
+    }
+    if (filters.section) {
+      filterQuery.set("section", filters.section);
+    }
+    if (filters.title) {
+      filterQuery.set("title", filters.title);
+    }
+    if (filters.author) {
+      filterQuery.set("author", filters.author);
+    }
+    const filterQueryString = filterQuery.toString();
+
     res.render("published-lists", {
       materials,
+      filters,
+      hasFilters,
+      filterQueryString,
       pagination: {
         currentPage,
         totalPages,
-        totalItems: allMaterials.length,
+        totalItems: filteredMaterials.length,
         pageSize: PUBLISHED_LISTS_PAGE_SIZE
       },
       meta: withSiteMeta(settings, {

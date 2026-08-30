@@ -2,88 +2,138 @@
 <%- include('partials/header', { path, site }) %>
 <%- include('partials/flash', { flash }) %>
 
-<main class="section">
+<main class="section published-lists-page">
   <div class="shell page-head narrow-head">
     <h1>Опубликованные материалы</h1>
   </div>
-  <div class="shell table-wrap">
-    <table class="published-materials-table">
-      <thead>
-        <tr>
-          <th class="col-issue">№ журнала</th>
-          <th class="col-section">Рубрика</th>
-          <th class="col-title">Название материала</th>
-          <th class="col-author">Автор</th>
-        </tr>
-        <tr class="published-materials-filters">
-          <td class="col-issue"><input type="text" placeholder="№" class="filter-number" aria-label="Фильтр по номеру журнала"></td>
-          <td class="col-section">
-            <%
-              let sectionList = [];
-              try {
-                sectionList = getPublishedMaterialSections();
-              } catch (err) {
-                sectionList = [...new Set(materials.map((m) => m.section).filter((s) => s && s !== "-"))].sort((a, b) =>
-                  a.localeCompare(b, "ru")
-                );
-              }
-            %>
-            <select class="filter-section" aria-label="Фильтр по рубрике">
-              <option value="">Все рубрики</option>
-              <% sectionList.forEach((section) => { %>
-                <option value="<%= section %>"><%= section %></option>
-              <% }) %>
-            </select>
-          </td>
-          <td class="col-title"><input type="text" placeholder="Название" class="filter-title" aria-label="Фильтр по названию"></td>
-          <td class="col-author"><input type="text" placeholder="Автор" class="filter-author" aria-label="Фильтр по автору"></td>
-        </tr>
-      </thead>
-      <tbody>
-        <% materials.forEach((m) => { %>
-          <%
-            const authors = String(m.author || '')
-              .split(/\s*,\s*/)
-              .map((name) => name.trim())
-              .filter(Boolean);
-          %>
+  <div class="shell">
+    <%
+      let sectionList = [];
+      try {
+        sectionList = getPublishedMaterialSections();
+      } catch (err) {
+        sectionList = [...new Set(materials.map((m) => m.section).filter((s) => s && s !== "-"))].sort((a, b) =>
+          a.localeCompare(b, "ru")
+        );
+      }
+      const activeFilters = (typeof filters !== "undefined" && filters)
+        ? filters
+        : { number: "", section: "", title: "", author: "" };
+      const filtersOpen = !!(activeFilters.number || activeFilters.section || activeFilters.title || activeFilters.author);
+      const hasActiveFilters = typeof hasFilters !== "undefined" ? hasFilters : filtersOpen;
+      const buildPublishedListsPageUrl = (page) => {
+        const params = new URLSearchParams();
+        if (activeFilters.number) params.set("number", activeFilters.number);
+        if (activeFilters.section) params.set("section", activeFilters.section);
+        if (activeFilters.title) params.set("title", activeFilters.title);
+        if (activeFilters.author) params.set("author", activeFilters.author);
+        if (page > 1) params.set("page", String(page));
+        const query = params.toString();
+        return query ? `/published-lists?${query}` : "/published-lists";
+      };
+    %>
+    <details class="published-materials-filters-panel"<%= filtersOpen ? " open" : "" %>>
+      <summary>Фильтры</summary>
+      <form class="published-materials-filters" method="get" action="/published-lists">
+        <input
+          type="text"
+          name="number"
+          placeholder="№ журнала"
+          class="filter-number"
+          aria-label="Фильтр по номеру журнала"
+          value="<%= activeFilters.number %>"
+        >
+        <select class="filter-section" name="section" aria-label="Фильтр по рубрике">
+          <option value="">Все рубрики</option>
+          <% sectionList.forEach((section) => { %>
+            <option value="<%= section %>"<%= activeFilters.section === section ? " selected" : "" %>><%= section %></option>
+          <% }) %>
+        </select>
+        <input
+          type="text"
+          name="title"
+          placeholder="Название"
+          class="filter-title"
+          aria-label="Фильтр по названию"
+          value="<%= activeFilters.title %>"
+        >
+        <input
+          type="text"
+          name="author"
+          placeholder="Автор"
+          class="filter-author"
+          aria-label="Фильтр по автору"
+          value="<%= activeFilters.author %>"
+        >
+      </form>
+    </details>
+    <div class="table-wrap published-materials-wrap">
+      <table class="published-materials-table">
+        <thead>
           <tr>
-            <td class="col-issue">
-              <% if (m.slug) { %>
-                <a href="/issues/<%= m.slug %>"><%= m.numberLabel %></a>
-              <% } else { %>
-                <%= m.numberLabel %>
-              <% } %>
-            </td>
-            <td class="col-section"><%= m.section %></td>
-            <td class="col-title"><%= m.title %></td>
-            <td class="col-author">
-              <% if (!authors.length || (authors.length === 1 && authors[0] === '-')) { %>
-                -
-              <% } else { %>
-                <% authors.forEach((name) => { %>
-                  <span class="author-line"><%= name %></span>
-                <% }) %>
-              <% } %>
-            </td>
+            <th class="col-issue">№ журнала</th>
+            <th class="col-section">Рубрика</th>
+            <th class="col-title">Название материала</th>
+            <th class="col-author">Автор</th>
           </tr>
-        <% }) %>
-      </tbody>
-    </table>
-    <% if (pagination && pagination.totalPages > 1) { %>
-      <nav class="pager" aria-label="Пагинация материалов">
-        <% if (pagination.currentPage > 1) { %>
-          <a class="button button-secondary" href="/published-lists?page=<%= pagination.currentPage - 1 %>">Назад</a>
-        <% } %>
-        <span class="pager-status">Страница <%= pagination.currentPage %> из <%= pagination.totalPages %></span>
-        <% if (pagination.currentPage < pagination.totalPages) { %>
-          <a class="button button-secondary" href="/published-lists?page=<%= pagination.currentPage + 1 %>">Далее</a>
-        <% } %>
-      </nav>
-    <% } %>
+        </thead>
+        <tbody>
+          <% if (!materials.length) { %>
+            <tr class="published-materials-empty">
+              <td colspan="4">
+                <% if (hasActiveFilters) { %>
+                  По выбранным фильтрам материалы не найдены. Измените условия поиска или
+                  <a href="/published-lists">сбросьте фильтры</a>.
+                <% } else { %>
+                  Материалы пока не опубликованы.
+                <% } %>
+              </td>
+            </tr>
+          <% } %>
+          <% materials.forEach((m) => { %>
+            <%
+              const authors = String(m.author || '')
+                .split(/\s*,\s*/)
+                .map((name) => name.trim())
+                .filter(Boolean);
+            %>
+            <tr>
+              <td class="col-issue" data-label="№ журнала">
+                <% if (m.slug) { %>
+                  <a href="/issues/<%= m.slug %>"><%= m.numberLabel %></a>
+                <% } else { %>
+                  <%= m.numberLabel %>
+                <% } %>
+              </td>
+              <td class="col-section" data-label="Рубрика"><%= m.section %></td>
+              <td class="col-title" data-label="Название"><%= m.title %></td>
+              <td class="col-author" data-label="Автор">
+                <% if (!authors.length || (authors.length === 1 && authors[0] === '-')) { %>
+                  -
+                <% } else { %>
+                  <% authors.forEach((name) => { %>
+                    <span class="author-line"><%= name %></span>
+                  <% }) %>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% if (pagination && pagination.totalPages > 1) { %>
+        <nav class="pager" aria-label="Пагинация материалов">
+          <% if (pagination.currentPage > 1) { %>
+            <a class="button button-secondary" href="<%= buildPublishedListsPageUrl(pagination.currentPage - 1) %>">Назад</a>
+          <% } %>
+          <span class="pager-status">Страница <%= pagination.currentPage %> из <%= pagination.totalPages %></span>
+          <% if (pagination.currentPage < pagination.totalPages) { %>
+            <a class="button button-secondary" href="<%= buildPublishedListsPageUrl(pagination.currentPage + 1) %>">Далее</a>
+          <% } %>
+        </nav>
+      <% } %>
+    </div>
   </div>
 </main>
 
-<link rel="stylesheet" href="/styles/published-lists.css">
 <script src="/scripts/published-lists.js" defer></script>
 <%- include('partials/footer', { site }) %>

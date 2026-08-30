@@ -3,12 +3,37 @@ const toggle = document.querySelector('[data-nav-toggle]');
 const nav = document.querySelector('[data-nav]');
 
 if (toggle && nav) {
+  const focusableSelector = 'a[href], button:not([disabled])';
+  let lastFocused = null;
+
+  const getFocusableItems = () =>
+    Array.from(nav.querySelectorAll(focusableSelector)).filter((element) => {
+      if (!(element instanceof HTMLElement)) {
+        return false;
+      }
+
+      return element.offsetParent !== null || element === document.activeElement;
+    });
+
   const setNavOpen = (open) => {
     nav.classList.toggle('is-open', open);
     header?.classList.toggle('is-nav-open', open);
     document.body.classList.toggle('is-nav-open', open);
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+
+    if (open) {
+      lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const firstLink = getFocusableItems()[0];
+      if (firstLink instanceof HTMLElement) {
+        firstLink.focus();
+      }
+      return;
+    }
+
+    if (lastFocused instanceof HTMLElement) {
+      lastFocused.focus();
+    }
   };
 
   toggle.addEventListener('click', () => {
@@ -22,6 +47,35 @@ if (toggle && nav) {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       setNavOpen(false);
+      return;
+    }
+
+    if (event.key !== 'Tab' || !nav.classList.contains('is-open')) {
+      return;
+    }
+
+    const focusableItems = getFocusableItems();
+    if (!focusableItems.length) {
+      return;
+    }
+
+    const firstItem = focusableItems[0];
+    const lastItem = focusableItems[focusableItems.length - 1];
+    const activeElement = document.activeElement;
+
+    if (event.shiftKey && activeElement === firstItem) {
+      event.preventDefault();
+      if (lastItem instanceof HTMLElement) {
+        lastItem.focus();
+      }
+      return;
+    }
+
+    if (!event.shiftKey && activeElement === lastItem) {
+      event.preventDefault();
+      if (firstItem instanceof HTMLElement) {
+        firstItem.focus();
+      }
     }
   });
 

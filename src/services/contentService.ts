@@ -600,6 +600,31 @@ export function getPublishedMaterialSections(): string[] {
   );
 }
 
+export interface PublishedMaterialFilters {
+  number?: string;
+  section?: string;
+  title?: string;
+  author?: string;
+}
+
+export function filterPublishedMaterials(
+  materials: PublishedMaterialRow[],
+  filters: PublishedMaterialFilters
+): PublishedMaterialRow[] {
+  const number = String(filters.number ?? "").trim().toLowerCase();
+  const section = String(filters.section ?? "").trim().toLowerCase();
+  const title = String(filters.title ?? "").trim().toLowerCase();
+  const author = String(filters.author ?? "").trim().toLowerCase();
+
+  return materials.filter((material) => {
+    const matchesNumber = !number || material.numberLabel.toLowerCase().includes(number);
+    const matchesSection = !section || material.section.toLowerCase() === section;
+    const matchesTitle = !title || material.title.toLowerCase().includes(title);
+    const matchesAuthor = !author || material.author.toLowerCase().includes(author);
+    return matchesNumber && matchesSection && matchesTitle && matchesAuthor;
+  });
+}
+
 export function applyArchivePublishedMaterialsImport(
   year: number,
   entries: PublishedListEntry[]
