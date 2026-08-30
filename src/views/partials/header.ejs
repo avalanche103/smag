@@ -18,13 +18,14 @@
     >
       <span class="nav-toggle-bars" aria-hidden="true"></span>
     </button>
-
-    <nav class="site-nav" id="site-nav" data-nav>
-      <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">О журнале</a>
-      <a href="/issues" class="<%= path.startsWith('/issues') ? 'is-active' : '' %>">Выпуски</a>
-      <a href="/published-lists" class="<%= path === '/published-lists' ? 'is-active' : '' %>">Материалы</a>
-      <a href="/contacts" class="<%= path === '/contacts' ? 'is-active' : '' %>">Контакты</a>
-      <a class="button button-accent header-cta" href="/subscribe">Подписаться</a>
-    </nav>
   </div>
+
+  <nav class="site-nav" id="site-nav" data-nav>
+    <a href="/" class="site-nav-home <%= path === '/' ? 'is-active' : '' %>">Главная</a>
+    <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">О журнале</a>
+    <a href="/issues" class="<%= path.startsWith('/issues') ? 'is-active' : '' %>">Выпуски</a>
+    <a href="/published-lists" class="<%= path === '/published-lists' ? 'is-active' : '' %>">Материалы</a>
+    <a href="/contacts" class="<%= path === '/contacts' ? 'is-active' : '' %>">Контакты</a>
+    <a class="button button-accent header-cta" href="/subscribe">Подписаться</a>
+  </nav>
 </header>

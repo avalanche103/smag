@@ -4,16 +4,64 @@ const nav = document.querySelector('[data-nav]');
 
 if (toggle && nav) {
   const focusableSelector = 'a[href], button:not([disabled])';
+  const mobileNavQuery = window.matchMedia('(max-width: 980px)');
   let lastFocused = null;
   let lockedScrollY = 0;
+  const navHome = {
+    parent: nav.parentElement,
+    next: nav.nextSibling
+  };
+
+  const isMobileNav = () => mobileNavQuery.matches;
 
   const syncHeaderMetrics = () => {
     if (!(header instanceof HTMLElement)) {
       return;
     }
 
+    const headerRect = header.getBoundingClientRect();
     document.documentElement.style.setProperty('--site-header-height', `${header.offsetHeight}px`);
-    document.documentElement.style.setProperty('--site-nav-top', `${header.getBoundingClientRect().bottom}px`);
+    document.documentElement.style.setProperty('--site-nav-top', `${headerRect.bottom}px`);
+    if (nav.classList.contains('is-open') && isMobileNav()) {
+      nav.style.top = `${headerRect.bottom}px`;
+    }
+  };
+
+  const lockPageScroll = () => {
+    lockedScrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+  };
+
+  const unlockPageScroll = () => {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, lockedScrollY);
+  };
+
+  const mountMobileNav = () => {
+    if (!isMobileNav()) {
+      return;
+    }
+
+    syncHeaderMetrics();
+    document.body.appendChild(nav);
+    nav.style.top = `${header?.getBoundingClientRect().bottom ?? 0}px`;
+  };
+
+  const restoreMobileNav = () => {
+    nav.style.top = '';
+    if (!navHome.parent || navHome.parent.contains(nav)) {
+      return;
+    }
+
+    navHome.parent.insertBefore(nav, navHome.next);
   };
 
   const getFocusableItems = () =>
@@ -26,43 +74,43 @@ if (toggle && nav) {
     });
 
   const setNavOpen = (open) => {
-    nav.classList.toggle('is-open', open);
-    header?.classList.toggle('is-nav-open', open);
-    document.body.classList.toggle('is-nav-open', open);
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
-
     if (open) {
-      lockedScrollY = window.scrollY;
-      syncHeaderMetrics();
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${lockedScrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
+      lockPageScroll();
+      mountMobileNav();
+      nav.classList.add('is-open');
+      header?.classList.add('is-nav-open');
+      document.body.classList.add('is-nav-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Закрыть меню');
 
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       const firstLink = getFocusableItems()[0];
       if (firstLink instanceof HTMLElement) {
-        firstLink.focus();
+        firstLink.focus({ preventScroll: true });
       }
       return;
     }
 
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
-    window.scrollTo(0, lockedScrollY);
+    nav.classList.remove('is-open');
+    header?.classList.remove('is-nav-open');
+    document.body.classList.remove('is-nav-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Открыть меню');
+    restoreMobileNav();
+    unlockPageScroll();
 
     if (lastFocused instanceof HTMLElement) {
-      lastFocused.focus();
+      lastFocused.focus({ preventScroll: true });
     }
   };
 
   syncHeaderMetrics();
-  window.addEventListener('resize', syncHeaderMetrics);
+  window.addEventListener('resize', () => {
+    syncHeaderMetrics();
+    if (!isMobileNav() && nav.classList.contains('is-open')) {
+      restoreMobileNav();
+    }
+  });
 
   toggle.addEventListener('click', () => {
     setNavOpen(!nav.classList.contains('is-open'));
@@ -94,7 +142,7 @@ if (toggle && nav) {
     if (event.shiftKey && activeElement === firstItem) {
       event.preventDefault();
       if (lastItem instanceof HTMLElement) {
-        lastItem.focus();
+        lastItem.focus({ preventScroll: true });
       }
       return;
     }
@@ -102,7 +150,7 @@ if (toggle && nav) {
     if (!event.shiftKey && activeElement === lastItem) {
       event.preventDefault();
       if (firstItem instanceof HTMLElement) {
-        firstItem.focus();
+        firstItem.focus({ preventScroll: true });
       }
     }
   });
@@ -124,8 +172,17 @@ if (toggle && nav) {
     setNavOpen(false);
   });
 
+  mobileNavQuery.addEventListener('change', () => {
+    if (!isMobileNav()) {
+      restoreMobileNav();
+      if (nav.classList.contains('is-open')) {
+        setNavOpen(false);
+      }
+    }
+  });
+
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 980) {
+    if (window.innerWidth > 980 && nav.classList.contains('is-open')) {
       setNavOpen(false);
     }
   });
