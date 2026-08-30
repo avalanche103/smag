@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .env
+.env.deploy
+.env.production
 data/*.sqlite
 data/backups/
 data/uploads/lists/**

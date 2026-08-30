@@ -6,13 +6,24 @@ if (toggle && nav) {
   const focusableSelector = 'a[href], button:not([disabled])';
   const mobileNavQuery = window.matchMedia('(max-width: 980px)');
   let lastFocused = null;
-  let lockedScrollY = 0;
+  let ignoreDocumentCloseUntil = 0;
+  let scrollLockY = 0;
   const navHome = {
     parent: nav.parentElement,
     next: nav.nextSibling
   };
 
   const isMobileNav = () => mobileNavQuery.matches;
+
+  const positionMobileNav = () => {
+    if (!(header instanceof HTMLElement) || !nav.classList.contains('is-open') || !isMobileNav()) {
+      return;
+    }
+
+    const top = Math.max(0, Math.round(header.getBoundingClientRect().bottom));
+    nav.style.top = `${top}px`;
+    nav.style.maxHeight = `calc(100dvh - ${top}px - env(safe-area-inset-bottom, 0px))`;
+  };
 
   const syncHeaderMetrics = () => {
     if (!(header instanceof HTMLElement)) {
@@ -22,27 +33,31 @@ if (toggle && nav) {
     const headerRect = header.getBoundingClientRect();
     document.documentElement.style.setProperty('--site-header-height', `${header.offsetHeight}px`);
     document.documentElement.style.setProperty('--site-nav-top', `${headerRect.bottom}px`);
-    if (nav.classList.contains('is-open') && isMobileNav()) {
-      nav.style.top = `${headerRect.bottom}px`;
-    }
+    positionMobileNav();
   };
 
-  const lockPageScroll = () => {
-    lockedScrollY = window.scrollY;
+  const lockScroll = () => {
+    if (!isMobileNav()) {
+      return;
+    }
+
+    scrollLockY = window.scrollY;
     document.body.style.position = 'fixed';
-    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.top = `-${scrollLockY}px`;
     document.body.style.left = '0';
     document.body.style.right = '0';
     document.body.style.width = '100%';
   };
 
-  const unlockPageScroll = () => {
+  const unlockScroll = () => {
+    const previousScroll = scrollLockY;
+    scrollLockY = 0;
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.left = '';
     document.body.style.right = '';
     document.body.style.width = '';
-    window.scrollTo(0, lockedScrollY);
+    window.scrollTo(0, previousScroll);
   };
 
   const mountMobileNav = () => {
@@ -50,13 +65,18 @@ if (toggle && nav) {
       return;
     }
 
-    syncHeaderMetrics();
-    document.body.appendChild(nav);
-    nav.style.top = `${header?.getBoundingClientRect().bottom ?? 0}px`;
+    if (navHome.parent && navHome.parent.contains(nav)) {
+      document.body.appendChild(nav);
+    }
+
+    nav.classList.add('is-portal');
   };
 
   const restoreMobileNav = () => {
+    nav.classList.remove('is-portal');
     nav.style.top = '';
+    nav.style.maxHeight = '';
+
     if (!navHome.parent || navHome.parent.contains(nav)) {
       return;
     }
@@ -70,20 +90,34 @@ if (toggle && nav) {
         return false;
       }
 
-      return element.offsetParent !== null || element === document.activeElement;
+      return nav.classList.contains('is-open');
     });
 
   const setNavOpen = (open) => {
     if (open) {
-      lockPageScroll();
-      mountMobileNav();
+      if (isMobileNav()) {
+        mountMobileNav();
+        lockScroll();
+      }
+
       nav.classList.add('is-open');
       header?.classList.add('is-nav-open');
       document.body.classList.add('is-nav-open');
       toggle.setAttribute('aria-expanded', 'true');
       toggle.setAttribute('aria-label', 'Закрыть меню');
 
+      const syncOpenPosition = () => {
+        syncHeaderMetrics();
+        positionMobileNav();
+      };
+
+      syncOpenPosition();
+      requestAnimationFrame(syncOpenPosition);
+      requestAnimationFrame(() => requestAnimationFrame(syncOpenPosition));
+
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      ignoreDocumentCloseUntil = Date.now() + 400;
+
       const firstLink = getFocusableItems()[0];
       if (firstLink instanceof HTMLElement) {
         firstLink.focus({ preventScroll: true });
@@ -97,7 +131,7 @@ if (toggle && nav) {
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Открыть меню');
     restoreMobileNav();
-    unlockPageScroll();
+    unlockScroll();
 
     if (lastFocused instanceof HTMLElement) {
       lastFocused.focus({ preventScroll: true });
@@ -105,14 +139,12 @@ if (toggle && nav) {
   };
 
   syncHeaderMetrics();
-  window.addEventListener('resize', () => {
-    syncHeaderMetrics();
-    if (!isMobileNav() && nav.classList.contains('is-open')) {
-      restoreMobileNav();
-    }
-  });
+  window.addEventListener('resize', syncHeaderMetrics);
+  window.addEventListener('scroll', syncHeaderMetrics, { passive: true });
 
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     setNavOpen(!nav.classList.contains('is-open'));
   });
 
@@ -121,7 +153,7 @@ if (toggle && nav) {
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && nav.classList.contains('is-open')) {
       setNavOpen(false);
       return;
     }
@@ -156,7 +188,7 @@ if (toggle && nav) {
   });
 
   document.addEventListener('click', (event) => {
-    if (!nav.classList.contains('is-open')) {
+    if (!nav.classList.contains('is-open') || Date.now() < ignoreDocumentCloseUntil) {
       return;
     }
 
@@ -172,18 +204,22 @@ if (toggle && nav) {
     setNavOpen(false);
   });
 
+  window.addEventListener('resize', () => {
+    syncHeaderMetrics();
+    if (!isMobileNav()) {
+      restoreMobileNav();
+    }
+    if (window.innerWidth > 980 && nav.classList.contains('is-open')) {
+      setNavOpen(false);
+    }
+  });
+
   mobileNavQuery.addEventListener('change', () => {
     if (!isMobileNav()) {
       restoreMobileNav();
       if (nav.classList.contains('is-open')) {
         setNavOpen(false);
       }
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 980 && nav.classList.contains('is-open')) {
-      setNavOpen(false);
     }
   });
 }

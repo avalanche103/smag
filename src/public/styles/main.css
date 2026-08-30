@@ -328,7 +328,7 @@ select {
   backdrop-filter: none;
 }
 
-.header-row {
+.header-shell {
   display: flex;
   align-items: center;
   gap: 18px;
@@ -342,6 +342,7 @@ select {
   gap: 14px;
   margin-right: auto;
   min-width: 0;
+  flex: 0 1 auto;
 }
 
 .brand-copy {
@@ -423,6 +424,7 @@ small {
   display: flex;
   align-items: center;
   gap: 18px;
+  margin-left: auto;
 }
 
 .site-nav a:not(.button) {
@@ -670,15 +672,13 @@ small {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
   gap: 28px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .about-main {
   display: flex;
   flex-direction: column;
   gap: 22px;
-  align-self: stretch;
-  min-height: 100%;
 }
 
 .page-intro .lead,
@@ -695,22 +695,19 @@ small {
 }
 
 .about-cover {
-  display: flex;
-  flex: 1 1 auto;
-  min-height: 360px;
+  width: min(100%, 320px);
   aspect-ratio: 64 / 90;
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
-  background: #1f3140;
+  background: linear-gradient(180deg, #fff, #f1ece3);
 }
 
 .about-cover img {
   display: block;
   width: 100%;
   height: 100%;
-  flex: 1 1 auto;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center top;
 }
 
@@ -1862,9 +1859,12 @@ select {
     z-index: 26;
   }
 
-  .header-row {
+  .site-header.is-nav-open .header-shell {
     position: relative;
-    z-index: 2;
+    z-index: 27;
+  }
+
+  .header-shell {
     flex-wrap: nowrap;
     align-items: center;
     gap: 12px;
@@ -1875,7 +1875,7 @@ select {
   .brand {
     margin-right: 0;
     flex: 1 1 auto;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .brand-line-secondary {
@@ -1913,10 +1913,10 @@ select {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    flex: 0 0 44px;
     width: 44px;
     height: 44px;
-    margin-left: auto;
+    margin-left: 12px;
     padding: 0;
     border: 1px solid rgba(36, 56, 71, 0.14);
     background: rgba(255, 253, 248, 0.92);
@@ -1924,12 +1924,15 @@ select {
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
+    touch-action: manipulation;
+    position: relative;
+    z-index: 28;
   }
 
   .site-nav {
     display: flex;
     position: fixed;
-    z-index: 25;
+    z-index: 27;
     top: var(--site-nav-top, var(--site-header-height, 64px));
     left: 0;
     right: 0;
@@ -1962,6 +1965,10 @@ select {
     pointer-events: auto;
     opacity: 1;
     transform: none;
+  }
+
+  .site-nav.is-portal {
+    z-index: 30;
   }
 
   .site-nav a:not(.button) {
@@ -2061,7 +2068,7 @@ select {
   }
 
   .about-cover {
-    min-height: 240px;
+    width: min(100%, 280px);
   }
 }
 

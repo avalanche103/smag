@@ -43,3 +43,55 @@
 5. Либо используйте [`render.yaml`](render.yaml) — `SESSION_SECRET` сгенерируется автоматически.
 
 Без `SESSION_SECRET` приложение не стартует в production (это намеренная защита).
+
+## Деплой на hoster.by (ISPmanager)
+
+Хостинг: [vh134.hoster.by:1500](https://vh134.hoster.by:1500/), пользователь `h215910`, SSH `vh134.hoster.by:22`.
+
+### 1. Сайт в панели
+
+1. **Сайты** → создать или выбрать домен.
+2. Обработчик: **Node.js**, версия LTS (20 или 22).
+3. Стартовый файл: `dist/server.js`, режим: **порт** (панель задаёт `PORT`).
+4. При необходимости включить SSL и редирект HTTP → HTTPS.
+
+### 2. Секреты и production-переменные
+
+```powershell
+copy .env.deploy.example .env.deploy
+copy .env.production.example .env.production
+```
+
+Заполните:
+
+- **`.env.deploy`** — `DEPLOY_DOMAIN` (ваш домен), при необходимости пароль SSH.
+- **`.env.production`** — `SESSION_SECRET` (≥32 символа), `SITE_URL` (`https://ваш-домен`), пароли админки, `SMTP_PASS`.
+
+Файлы `.env.deploy` и `.env.production` в `.gitignore`, в репозиторий не попадают.
+
+SSH-ключ (удобнее пароля):
+
+```powershell
+ssh-copy-id -p 22 h215910@vh134.hoster.by
+```
+
+### 3. Выгрузка
+
+```powershell
+npm run deploy
+```
+
+Скрипт упакует проект, загрузит по SSH, выполнит `npm ci`, `npm run build` на сервере и скопирует `.env.production`.
+
+### 4. Первый запуск
+
+После деплоя в ISPmanager: **Сайты** → домен → **Изменить** → **Сохранить** (перезапуск Node.js).
+
+Если каталог `data/` пустой:
+
+```bash
+cd ~/www/ВАШ-ДОМЕН
+npm run db:seed
+```
+
+Проверка: открыть сайт и `/admin`.

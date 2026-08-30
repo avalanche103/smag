@@ -12,7 +12,9 @@
     "recompress:covers": "ts-node --files src/scripts/recompress-covers.ts",
     "backup": "ts-node --files src/scripts/backup.ts",
     "import:archive-materials": "ts-node --files scripts/import-archive-materials.ts",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "deploy": "node scripts/deploy.mjs",
+    "setup:ssl": "node scripts/setup-ssl.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -48,6 +50,7 @@
     "@types/nodemailer": "^8.0.1",
     "@types/sanitize-html": "^2.16.1",
     "nodemon": "^3.1.14",
+    "ssh2": "^1.17.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.8.2"

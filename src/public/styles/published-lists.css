@@ -106,7 +106,7 @@
 @media (max-width: 720px) {
   .published-materials-filters-panel {
     position: sticky;
-    top: env(safe-area-inset-top, 0px);
+    top: calc(var(--site-header-height, 64px) + 8px);
     z-index: 15;
     margin-bottom: 16px;
     padding: 12px 0 10px;
@@ -139,7 +139,6 @@
   .published-materials-filters {
     grid-template-columns: 1fr;
   }
-
   .published-materials-filters input,
   .published-materials-filters select {
     font-size: 16px;

@@ -1,5 +1,5 @@
 <header class="site-header">
-  <div class="shell header-row">
+  <div class="shell header-shell">
     <a class="brand" href="/">
       <span class="brand-copy" aria-label="<%= site.siteTitle %>">
         <span class="brand-line brand-line-primary">СТРОИТЕЛЬСТВО:</span>
@@ -18,14 +18,14 @@
     >
       <span class="nav-toggle-bars" aria-hidden="true"></span>
     </button>
-  </div>
 
-  <nav class="site-nav" id="site-nav" data-nav>
-    <a href="/" class="site-nav-home <%= path === '/' ? 'is-active' : '' %>">Главная</a>
-    <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">О журнале</a>
-    <a href="/issues" class="<%= path.startsWith('/issues') ? 'is-active' : '' %>">Выпуски</a>
-    <a href="/published-lists" class="<%= path === '/published-lists' ? 'is-active' : '' %>">Материалы</a>
-    <a href="/contacts" class="<%= path === '/contacts' ? 'is-active' : '' %>">Контакты</a>
-    <a class="button button-accent header-cta" href="/subscribe">Подписаться</a>
-  </nav>
+    <nav class="site-nav" id="site-nav" data-nav>
+      <a href="/" class="site-nav-home <%= path === '/' ? 'is-active' : '' %>">Главная</a>
+      <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">О журнале</a>
+      <a href="/issues" class="<%= path.startsWith('/issues') ? 'is-active' : '' %>">Выпуски</a>
+      <a href="/published-lists" class="<%= path === '/published-lists' ? 'is-active' : '' %>">Материалы</a>
+      <a href="/contacts" class="<%= path === '/contacts' ? 'is-active' : '' %>">Контакты</a>
+      <a class="button button-accent header-cta" href="/subscribe">Подписаться</a>
+    </nav>
+  </div>
 </header>
