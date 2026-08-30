@@ -12,6 +12,8 @@ services:
         generateValue: true
       - key: SITE_URL
         sync: false
+      - key: ANALYTICS_ID
+        value: G-WEQ22GE40X
       - key: ADMIN_LOGIN
         sync: false
       - key: ADMIN_PASSWORD

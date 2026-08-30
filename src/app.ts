@@ -38,7 +38,7 @@ app.use(
         styleSrc: ["'self'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:", "http:"],
-        connectSrc: ["'self'", "https://www.google-analytics.com", "https://www.googletagmanager.com"],
+        connectSrc: ["'self'", "https://www.google-analytics.com", "https://region1.google-analytics.com", "https://www.googletagmanager.com"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"]
@@ -96,7 +96,10 @@ app.use(attachCsrfToken);
 
 app.use((req, res, next) => {
   const settings = getSettings();
-  res.locals.site = settings;
+  res.locals.site = {
+    ...settings,
+    analyticsId: settings.analyticsId?.trim() || env.analyticsId
+  };
   res.locals.audienceTopics = getAudienceTopics(settings);
   res.locals.aboutAudienceHtml = formatAudienceHtml(settings.aboutAudience);
   res.locals.formatIssuePeriod = formatIssuePeriod;
