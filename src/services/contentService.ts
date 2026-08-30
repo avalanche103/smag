@@ -38,6 +38,40 @@ export function getPrimaryIssueMaterials(issue: JournalIssue): IssueMaterial[] {
   return (primaryMaterials.length ? primaryMaterials : issue.materials).slice(0, MAX_PRIMARY_ISSUE_MATERIALS);
 }
 
+const QA_SECTION_NAME = "Вопрос-ответ";
+const QA_HOME_LABEL = "Вопрос - ответ";
+
+function normalizeIssueSection(value: unknown): string {
+  const section = String(value || "").trim();
+  return section && section !== "-" ? section : "Без рубрики";
+}
+
+export function getHomeIssueMaterialLines(issue: JournalIssue): string[] {
+  const materials = issue.materials.filter((material) => material.title?.trim());
+  const groups: { section: string; materials: IssueMaterial[] }[] = [];
+  const groupIndex = new Map<string, number>();
+
+  materials.forEach((material) => {
+    const section = normalizeIssueSection(material.section);
+    if (!groupIndex.has(section)) {
+      groupIndex.set(section, groups.length);
+      groups.push({ section, materials: [] });
+    }
+    groups[groupIndex.get(section)!].materials.push(material);
+  });
+
+  const lines: string[] = [];
+  groups.forEach((group) => {
+    if (group.section === QA_SECTION_NAME) {
+      lines.push(QA_HOME_LABEL);
+      return;
+    }
+    group.materials.forEach((material) => lines.push(material.title));
+  });
+
+  return lines;
+}
+
 export function getIssueFormMaterials(issue?: JournalIssue): IssueMaterial[] {
   const materials = [...(issue?.materials ?? [])].map((material) => ({ ...material }));
 
@@ -499,7 +533,7 @@ export function listPublishedMaterialsForPage(): PublishedMaterialRow[] {
     const year = parseIssueYear(issue.numberLabel, issue.publishDate) ?? 0;
     const issueNumber = parseJournalNumber(issue.numberLabel) ?? 0;
 
-    for (const material of issue.materials) {
+    for (const [materialIndex, material] of issue.materials.entries()) {
       const title = material.title?.trim();
       if (!title) {
         continue;
@@ -518,12 +552,13 @@ export function listPublishedMaterialsForPage(): PublishedMaterialRow[] {
         title,
         author: material.author?.trim() || "-",
         sortYear: year,
-        sortIssue: issueNumber
+        sortIssue: issueNumber,
+        sortOrder: materialIndex
       });
     }
   }
 
-  for (const material of store.publishedMaterials ?? []) {
+  for (const [materialIndex, material] of (store.publishedMaterials ?? []).entries()) {
     const key = publishedMaterialKey(material.year, material.issueNumber, material.title);
     if (seen.has(key)) {
       continue;
@@ -536,7 +571,8 @@ export function listPublishedMaterialsForPage(): PublishedMaterialRow[] {
       title: material.title,
       author: material.author?.trim() || "-",
       sortYear: material.year,
-      sortIssue: material.issueNumber
+      sortIssue: material.issueNumber,
+      sortOrder: materialIndex
     });
   }
 
@@ -549,8 +585,19 @@ export function listPublishedMaterialsForPage(): PublishedMaterialRow[] {
       return right.sortIssue - left.sortIssue;
     }
 
+    if (left.sortOrder !== right.sortOrder) {
+      return left.sortOrder - right.sortOrder;
+    }
+
     return left.title.localeCompare(right.title, "ru");
   });
+}
+
+export function getPublishedMaterialSections(): string[] {
+  const materials = listPublishedMaterialsForPage();
+  return [...new Set(materials.map((item) => item.section).filter((section) => section && section !== "-"))].sort(
+    (left, right) => left.localeCompare(right, "ru")
+  );
 }
 
 export function applyArchivePublishedMaterialsImport(

@@ -15,6 +15,29 @@
           <th class="col-title">Название материала</th>
           <th class="col-author">Автор</th>
         </tr>
+        <tr class="published-materials-filters">
+          <td class="col-issue"><input type="text" placeholder="№" class="filter-number" aria-label="Фильтр по номеру журнала"></td>
+          <td class="col-section">
+            <%
+              let sectionList = [];
+              try {
+                sectionList = getPublishedMaterialSections();
+              } catch (err) {
+                sectionList = [...new Set(materials.map((m) => m.section).filter((s) => s && s !== "-"))].sort((a, b) =>
+                  a.localeCompare(b, "ru")
+                );
+              }
+            %>
+            <select class="filter-section" aria-label="Фильтр по рубрике">
+              <option value="">Все рубрики</option>
+              <% sectionList.forEach((section) => { %>
+                <option value="<%= section %>"><%= section %></option>
+              <% }) %>
+            </select>
+          </td>
+          <td class="col-title"><input type="text" placeholder="Название" class="filter-title" aria-label="Фильтр по названию"></td>
+          <td class="col-author"><input type="text" placeholder="Автор" class="filter-author" aria-label="Фильтр по автору"></td>
+        </tr>
       </thead>
       <tbody>
         <% materials.forEach((m) => { %>

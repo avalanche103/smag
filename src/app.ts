@@ -9,7 +9,7 @@ import rateLimit from "express-rate-limit";
 import FileStoreFactory from "session-file-store";
 import { env } from "./config/env";
 import { attachCsrfToken } from "./middleware/csrf";
-import { formatAudienceHtml, formatIssuePeriod, formatRichHtml, getAudienceTopics, getPageExtra, getSettings, parseIssueYear, stripHtmlTags } from "./services/contentService";
+import { formatAudienceHtml, formatIssuePeriod, formatRichHtml, getAudienceTopics, getPageExtra, getPublishedMaterialSections, getSettings, parseIssueYear, stripHtmlTags } from "./services/contentService";
 import { getCoverThumbPath } from "./utils/imageProcessing";
 import publicRouter from "./routes/public";
 import adminRouter from "./routes/admin";
@@ -104,6 +104,7 @@ app.use((req, res, next) => {
   res.locals.formatRichHtml = formatRichHtml;
   res.locals.getPageExtra = getPageExtra;
   res.locals.stripHtmlTags = stripHtmlTags;
+  res.locals.getPublishedMaterialSections = getPublishedMaterialSections;
   res.locals.getCoverThumbPath = getCoverThumbPath;
   res.locals.path = req.path;
   res.locals.admin = req.session.adminLogin

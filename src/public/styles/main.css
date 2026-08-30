@@ -853,6 +853,19 @@ small {
   background: linear-gradient(180deg, #fff, #f1ece3);
 }
 
+.cover-frame-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.cover-frame-link:hover,
+.cover-frame-link:focus-visible {
+  box-shadow: 0 14px 32px rgba(36, 56, 71, 0.14);
+  transform: translateY(-2px);
+}
+
 .cover-frame img,
 .issue-card img,
 .thumb-preview {
@@ -866,10 +879,6 @@ small {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
-}
-
-.card-grid-home {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .card-grid-wide {
@@ -1408,6 +1417,15 @@ td {
   font-size: 1.2rem;
 }
 
+.issue-overlay-label {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .issue-card-overlay .issue-material-list {
   margin: 0;
   padding-left: 1.1em;
@@ -1668,7 +1686,7 @@ select {
   margin-top: 0;
 }
 
-/* ????? ??? ??????? ?????: ????????? ??????, ??? ????? «????????» */
+/* ????? ??? ??????? ?????: ????????? ??????, ??? ????? Â«????????Â» */
 .audience-hotline-block {
   margin-top: 18px;
   padding: 16px 0 0;
@@ -1948,11 +1966,6 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .card-grid-home {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-  }
-
   .footer-grid > div:last-child {
     text-align: left;
     align-items: flex-start;
@@ -2050,23 +2063,6 @@ select {
 
   .card-grid {
     grid-template-columns: 1fr;
-  }
-
-  .card-grid-home {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .card-grid-home .issue-material-list-compact {
-    display: none;
-  }
-
-  .card-grid-home .issue-card > div {
-    padding: 12px 10px 14px;
-  }
-
-  .card-grid-home .issue-card h3 {
-    font-size: 0.95rem;
   }
 
   .subscribe-invoice-row {

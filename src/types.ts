@@ -61,6 +61,7 @@ export interface PublishedMaterialRow {
   author: string;
   sortYear: number;
   sortIssue: number;
+  sortOrder: number;
 }
 
 export interface PageContent {

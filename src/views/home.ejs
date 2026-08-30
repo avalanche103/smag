@@ -32,25 +32,47 @@
   </section>
 
   <% if (featuredIssue) { %>
-    <% const featuredPrimaryMaterials = featuredIssue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
-    <% const featuredMaterials = (featuredPrimaryMaterials.length ? featuredPrimaryMaterials : featuredIssue.materials.filter((material) => material.title)).slice(0, 3); %>
+    <%
+      const qaSectionName = 'Вопрос-ответ';
+      const qaHomeLabel = 'Вопрос - ответ';
+      const featuredMaterialLines = [];
+      const materials = featuredIssue.materials.filter((material) => material.title && String(material.title).trim());
+      const groups = [];
+      const groupIndex = new Map();
+      materials.forEach((material) => {
+        const raw = String(material.section || '').trim();
+        const section = raw && raw !== '-' ? raw : 'Без рубрики';
+        if (!groupIndex.has(section)) {
+          groupIndex.set(section, groups.length);
+          groups.push({ section, materials: [] });
+        }
+        groups[groupIndex.get(section)].materials.push(material);
+      });
+      groups.forEach((group) => {
+        if (group.section === qaSectionName) {
+          featuredMaterialLines.push(qaHomeLabel);
+          return;
+        }
+        group.materials.forEach((material) => featuredMaterialLines.push(material.title));
+      });
+    %>
     <section class="section">
       <div class="shell latest-grid">
         <div>
           <p class="eyebrow">Последний номер</p>
           <h2><%= featuredIssue.numberLabel %></h2>
           <ul class="issue-material-list issue-material-list-featured issue-material-list-accent">
-            <% featuredMaterials.forEach((material) => { %>
-              <li><%= material.title %></li>
+            <% featuredMaterialLines.forEach((line) => { %>
+              <li><%= line %></li>
             <% }) %>
           </ul>
           <div class="hero-actions">
             <a class="button button-primary" href="/issues/<%= featuredIssue.slug %>">Подробнее</a>
           </div>
         </div>
-        <div class="cover-frame">
+        <a class="cover-frame cover-frame-link" href="/issues/<%= featuredIssue.slug %>">
           <img src="<%= featuredIssue.coverImage %>" alt="Обложка <%= featuredIssue.numberLabel %>" fetchpriority="high" decoding="async" />
-        </div>
+        </a>
       </div>
     </section>
   <% } %>
@@ -65,24 +87,26 @@
         </div>
         <a class="text-link" href="/issues">Все выпуски</a>
       </div>
-      <div class="card-grid card-grid-home">
+      <div class="card-grid card-grid-issues">
         <% archiveIssues.forEach((issue) => { %>
           <% const primaryMaterials = issue.materials.filter((material) => material.title && material.isPrimary).slice(0, 3); %>
           <% const previewMaterials = (primaryMaterials.length ? primaryMaterials : issue.materials.filter((material) => material.title)).slice(0, 3); %>
-          <article class="issue-card">
-            <img src="<%= getCoverThumbPath(issue.coverImage) %>" alt="Обложка <%= issue.numberLabel %>" loading="lazy" decoding="async" />
-            <div class="issue-card-body">
-              <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
-              <h3><%= issue.numberLabel %></h3>
-              <ul class="issue-material-list issue-material-list-compact">
-                <% previewMaterials.forEach((material) => { %>
-                  <li><%= material.title %></li>
-                <% }) %>
-              </ul>
-              <div class="issue-card-footer">
-                <a class="text-link" href="/issues/<%= issue.slug %>">Подробнее</a>
+          <article class="issue-card issue-card-hover">
+            <a class="issue-card-media" href="/issues/<%= issue.slug %>">
+              <img src="<%= getCoverThumbPath(issue.coverImage) %>" alt="Обложка <%= issue.numberLabel %>" loading="lazy" decoding="async" />
+              <div class="issue-card-overlay">
+                <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
+                <h3><%= issue.numberLabel %></h3>
+                <% if (previewMaterials.length) { %>
+                  <p class="issue-overlay-label">Основные материалы</p>
+                  <ul class="issue-material-list issue-material-list-compact">
+                    <% previewMaterials.forEach((material) => { %>
+                      <li><%= material.title %></li>
+                    <% }) %>
+                  </ul>
+                <% } %>
               </div>
-            </div>
+            </a>
           </article>
         <% }) %>
       </div>

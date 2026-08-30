@@ -39,11 +39,14 @@
               <div class="issue-card-overlay">
                 <span class="issue-date"><%= formatIssuePeriod(issue) %></span>
                 <h3><%= issue.numberLabel %></h3>
-                <ul class="issue-material-list issue-material-list-compact">
-                  <% previewMaterials.forEach((material) => { %>
-                    <li><%= material.title %></li>
-                  <% }) %>
-                </ul>
+                <% if (previewMaterials.length) { %>
+                  <p class="issue-overlay-label">Основные материалы</p>
+                  <ul class="issue-material-list issue-material-list-compact">
+                    <% previewMaterials.forEach((material) => { %>
+                      <li><%= material.title %></li>
+                    <% }) %>
+                  </ul>
+                <% } %>
               </div>
             </a>
           </article>

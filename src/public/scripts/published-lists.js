@@ -1,43 +1,40 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const table = document.querySelector('.table-wrap table');
+document.addEventListener("DOMContentLoaded", function () {
+  const table = document.querySelector(".published-materials-table");
   if (!table) {
     return;
   }
 
-  const tbody = table.querySelector('tbody');
+  const tbody = table.querySelector("tbody");
   if (!tbody) {
     return;
   }
 
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-
-  const filterRow = document.createElement('tr');
-  filterRow.innerHTML = `
-    <td class="col-issue"><input type="text" placeholder="№" class="filter-number"></td>
-    <td class="col-section"><input type="text" placeholder="Рубрика" class="filter-section"></td>
-    <td class="col-title"><input type="text" placeholder="Название" class="filter-title"></td>
-    <td class="col-author"><input type="text" placeholder="Автор" class="filter-author"></td>
-  `;
-  table.querySelector('thead')?.appendChild(filterRow);
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const numberInput = table.querySelector(".filter-number");
+  const sectionSelect = table.querySelector(".filter-section");
+  const titleInput = table.querySelector(".filter-title");
+  const authorInput = table.querySelector(".filter-author");
 
   function filterTable() {
-    const number = table.querySelector('.filter-number')?.value.toLowerCase() ?? '';
-    const section = table.querySelector('.filter-section')?.value.toLowerCase() ?? '';
-    const title = table.querySelector('.filter-title')?.value.toLowerCase() ?? '';
-    const author = table.querySelector('.filter-author')?.value.toLowerCase() ?? '';
+    const number = numberInput?.value.toLowerCase() ?? "";
+    const section = sectionSelect?.value.toLowerCase() ?? "";
+    const title = titleInput?.value.toLowerCase() ?? "";
+    const author = authorInput?.value.toLowerCase() ?? "";
 
-    rows.forEach(row => {
-      const cells = row.querySelectorAll('td');
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll("td");
+      const sectionText = cells[1]?.textContent.trim().toLowerCase() ?? "";
       const match =
         cells[0]?.textContent.toLowerCase().includes(number) &&
-        cells[1]?.textContent.toLowerCase().includes(section) &&
+        (!section || sectionText === section) &&
         cells[2]?.textContent.toLowerCase().includes(title) &&
         cells[3]?.textContent.toLowerCase().includes(author);
-      row.style.display = match ? '' : 'none';
+      row.style.display = match ? "" : "none";
     });
   }
 
-  table.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', filterTable);
+  [numberInput, titleInput, authorInput].forEach((input) => {
+    input?.addEventListener("input", filterTable);
   });
+  sectionSelect?.addEventListener("change", filterTable);
 });
