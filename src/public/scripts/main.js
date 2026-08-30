@@ -5,6 +5,16 @@ const nav = document.querySelector('[data-nav]');
 if (toggle && nav) {
   const focusableSelector = 'a[href], button:not([disabled])';
   let lastFocused = null;
+  let lockedScrollY = 0;
+
+  const syncHeaderMetrics = () => {
+    if (!(header instanceof HTMLElement)) {
+      return;
+    }
+
+    document.documentElement.style.setProperty('--site-header-height', `${header.offsetHeight}px`);
+    document.documentElement.style.setProperty('--site-nav-top', `${header.getBoundingClientRect().bottom}px`);
+  };
 
   const getFocusableItems = () =>
     Array.from(nav.querySelectorAll(focusableSelector)).filter((element) => {
@@ -23,6 +33,14 @@ if (toggle && nav) {
     toggle.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
 
     if (open) {
+      lockedScrollY = window.scrollY;
+      syncHeaderMetrics();
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+
       lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       const firstLink = getFocusableItems()[0];
       if (firstLink instanceof HTMLElement) {
@@ -31,10 +49,20 @@ if (toggle && nav) {
       return;
     }
 
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, lockedScrollY);
+
     if (lastFocused instanceof HTMLElement) {
       lastFocused.focus();
     }
   };
+
+  syncHeaderMetrics();
+  window.addEventListener('resize', syncHeaderMetrics);
 
   toggle.addEventListener('click', () => {
     setNavOpen(!nav.classList.contains('is-open'));
