@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
 import slugify from "slugify";import type { IssueMaterial, PageKey } from "../types";
 import {
@@ -108,11 +108,14 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/logout", requireAuth, verifyCsrfToken, (req, res) => {
+  const logout = (req: Request, res: Response) => {
     req.session.destroy(() => {
       res.redirect("/admin/login");
     });
-  });
+  };
+
+  router.get("/logout", requireAuth, logout);
+  router.post("/logout", requireAuth, verifyCsrfToken, logout);
 
   router.use(requireAuth);
 

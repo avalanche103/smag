@@ -17,8 +17,5 @@
       <a href="/admin/pages/subscribe">Счета подписки</a>
     <% } %>
   </nav>
-  <form method="post" action="/admin/logout">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-    <button class="button button-secondary admin-logout" type="submit">Выйти</button>
-  </form>
+  <a class="button button-secondary admin-logout" href="/admin/logout">Выйти</a>
 </aside>
