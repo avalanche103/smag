@@ -91,12 +91,14 @@ export default function publicRouter(formLimiter: RequestHandler) {
   router.get("/about", (_req, res) => {
     const settings = getSettings();
     const page = getPageContent("about");
+    const seoTitle = getPageExtra(page, "seoTitle") || page.title || "О журнале";
+    const seoDescription = getPageExtra(page, "seoDescription") || page.lead || settings.siteDescription;
     res.render("about", {
       page,
       featuredIssue: getFeaturedIssue(),
       meta: withSiteMeta(settings, {
-        title: "О журнале",
-        description: stripHtmlTags(page.lead || settings.siteDescription),
+        title: seoTitle,
+        description: stripHtmlTags(seoDescription),
         path: "/about",
         jsonLd: buildOrganizationJsonLd(settings, siteBase(settings))
       })
@@ -244,12 +246,15 @@ export default function publicRouter(formLimiter: RequestHandler) {
   router.get("/subscribe", (req, res) => {
     const settings = getSettings();
     const page = getPageContent("subscribe");
+    const seoTitle = getPageExtra(page, "seoTitle") || "Подписка";
+    const seoDescription =
+      getPageExtra(page, "seoDescription") || page.lead || "Оформление подписки на печатную версию журнала.";
     res.render("subscribe", {
       page,
       invoiceDownloadPath,
       meta: withSiteMeta(settings, {
-        title: "Подписка",
-        description: "Оформление подписки на печатную версию журнала.",
+        title: seoTitle,
+        description: stripHtmlTags(seoDescription),
         path: "/subscribe"
       }),
       site: settings,
@@ -271,6 +276,7 @@ export default function publicRouter(formLimiter: RequestHandler) {
 
   router.get("/contacts", (req, res) => {
     const settings = getSettings();
+    const page = getPageContent("contacts");
     const left = 1 + Math.floor(Math.random() * 8);
     const right = 1 + Math.floor(Math.random() * 8);
     req.session.contactCaptcha = {
@@ -278,10 +284,14 @@ export default function publicRouter(formLimiter: RequestHandler) {
       issuedAt: Date.now()
     };
     res.render("contacts", {
-      page: getPageContent("contacts"),
+      page,
       meta: withSiteMeta(settings, {
-        title: "Контакты",
-        description: "Контактная информация редакции и форма обратной связи.",
+        title: getPageExtra(page, "seoTitle") || "Контакты",
+        description: stripHtmlTags(
+          getPageExtra(page, "seoDescription") ||
+            page.lead ||
+            "Контактная информация редакции и форма обратной связи."
+        ),
         path: "/contacts"
       }),
       captchaQuestion: `${left} + ${right}`,
@@ -354,7 +364,20 @@ export default function publicRouter(formLimiter: RequestHandler) {
   });
 
   router.get("/robots.txt", (_req, res) => {
-    res.type("text/plain").send("User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n");
+    const settings = getSettings();
+    const base = siteBase(settings);
+    res
+      .type("text/plain")
+      .send(
+        [
+          "User-agent: *",
+          "Allow: /",
+          "Disallow: /admin",
+          "Disallow: /admin/",
+          `Sitemap: ${base}/sitemap.xml`,
+          ""
+        ].join("\n")
+      );
   });
 
   router.get("/sitemap.xml", (_req, res) => {

@@ -2,6 +2,34 @@
 <%- include('partials/header', { path, site }) %>
 <%- include('partials/flash', { flash }) %>
 
+<%
+  const channelsLabel = getPageExtra(page, 'channelsLabel') || 'Доступные каналы';
+  const directTitle = getPageExtra(page, 'directTitle') || 'Прямая подписка через редакцию';
+  const step1Text = getPageExtra(page, 'step1Text') || 'Скачайте счёт на нужный период';
+  const step2Text = getPageExtra(page, 'step2Text') || 'Или запросите счёт у менеджера';
+  const paymentNoteLabel = getPageExtra(page, 'paymentNoteLabel') || 'В назначении платежа обязательно укажите:';
+  const paymentNoteText = getPageExtra(page, 'paymentNoteText') || 'полный адрес доставки, контактный телефон и ваш e-mail.';
+  const belpochtaTitle = getPageExtra(page, 'belpochtaTitle') || 'Подписка через РУП «Белпочта»';
+  const belpochtaIntro = getPageExtra(page, 'belpochtaIntro') || 'Подписные индексы:';
+  const index1Label = getPageExtra(page, 'index1Label') || 'ведомственная подписка';
+  const index1Value = getPageExtra(page, 'index1Value') || '748512';
+  const index2Label = getPageExtra(page, 'index2Label') || 'индивидуальная подписка';
+  const index2Value = getPageExtra(page, 'index2Value') || '74851';
+  const requisitesTitle = getPageExtra(page, 'requisitesTitle') || 'Реквизиты';
+  const hotlineTitle = getPageExtra(page, 'hotlineTitle') || 'Горячая линия для подписчиков';
+  const hotlineExpert = getPageExtra(page, 'hotlineExpert') || 'Коковкина Т.В.';
+  const hotlineNote = getPageExtra(page, 'hotlineNote') || 'Консультации для подписчиков, оформивших издание через РУП «Белпочта», предоставляются после предъявления документа, подтверждающего действующую подписку';
+  const helpTitle = getPageExtra(page, 'helpTitle') || 'Вопросы по подписке и доставке';
+  const hotlineSource = stripHtmlTags(site.aboutAudience || site.hotlineText || '');
+  const hotlineScheduleMatch = hotlineSource.match(/Каждый[^.]+/i)
+    || hotlineSource.match(/(?:Пн|Вт|Ср|Чт|Пт|суббот|воскресен)[^.]*\d{1,2}:\d{2}[^.]*\d{1,2}:\d{2}/i);
+  const hotlineSchedule = (getPageExtra(page, 'hotlineSchedule')
+    || (hotlineScheduleMatch ? hotlineScheduleMatch[0] : 'Каждый вторник с 14:00 до 16:00')).trim().replace(/\.$/, '');
+  const hotlinePhone = site.phone2 || '+375 (29) 104 40 08';
+  const invoiceLabel1 = getPageExtra(page, 'invoiceLabel1') || 'Счёт на полугодие';
+  const invoiceLabel2 = getPageExtra(page, 'invoiceLabel2') || 'Счёт на год';
+%>
+
 <main class="section">
   <div class="shell subscribe-page">
     <header class="subscribe-intro">
@@ -11,34 +39,34 @@
       <% } %>
     </header>
 
-    <p class="subscribe-channels-label">Доступные каналы</p>
+    <p class="subscribe-channels-label"><%= channelsLabel %></p>
 
     <div class="subscribe-channels">
       <article class="subscribe-card">
-        <h2>Прямая подписка через редакцию</h2>
+        <h2><%= directTitle %></h2>
 
         <ol class="subscribe-steps">
           <li>
-            <span class="subscribe-step-title">Скачайте счёт на нужный период</span>
+            <span class="subscribe-step-title"><%= step1Text %></span>
             <div class="subscribe-invoice-row">
               <% if (getPageExtra(page, 'invoiceFile1')) { %>
                 <a class="button button-accent subscribe-invoice-btn" href="<%= typeof invoiceDownloadPath === 'function' ? invoiceDownloadPath(getPageExtra(page, 'invoiceFile1')) : getPageExtra(page, 'invoiceFile1') %>" download="schet-polugodie.pdf">
-                  <%= getPageExtra(page, 'invoiceLabel1') || 'Счёт на полугодие' %>
+                  <%= invoiceLabel1 %>
                 </a>
               <% } else { %>
-                <span class="button button-secondary subscribe-invoice-btn is-disabled">Счёт на полугодие</span>
+                <span class="button button-secondary subscribe-invoice-btn is-disabled"><%= invoiceLabel1 %></span>
               <% } %>
               <% if (getPageExtra(page, 'invoiceFile2')) { %>
                 <a class="button button-accent subscribe-invoice-btn" href="<%= typeof invoiceDownloadPath === 'function' ? invoiceDownloadPath(getPageExtra(page, 'invoiceFile2')) : getPageExtra(page, 'invoiceFile2') %>" download="schet-god.pdf">
-                  <%= getPageExtra(page, 'invoiceLabel2') || 'Счёт на год' %>
+                  <%= invoiceLabel2 %>
                 </a>
               <% } else { %>
-                <span class="button button-secondary subscribe-invoice-btn is-disabled">Счёт на год</span>
+                <span class="button button-secondary subscribe-invoice-btn is-disabled"><%= invoiceLabel2 %></span>
               <% } %>
             </div>
           </li>
           <li>
-            <span class="subscribe-step-title">Или запросите счёт у менеджера</span>
+            <span class="subscribe-step-title"><%= step2Text %></span>
             <p class="subscribe-phones">
               <% if (site.phone) { %>
                 <a href="tel:<%= site.phone %>"><%= site.phone %></a>
@@ -56,8 +84,8 @@
         </ol>
 
         <aside class="subscribe-note" role="note">
-          <strong>В назначении платежа обязательно укажите:</strong>
-          полный адрес доставки, контактный телефон и ваш e-mail.
+          <strong><%= paymentNoteLabel %></strong>
+          <%= paymentNoteText %>
         </aside>
         <% if (page.body) { %>
           <aside class="subscribe-note subscribe-note-followup" role="note">
@@ -67,48 +95,41 @@
       </article>
 
       <article class="subscribe-card">
-        <h2>Подписка через РУП «Белпочта»</h2>
-        <p class="subscribe-card-text">Подписные индексы:</p>
+        <h2><%= belpochtaTitle %></h2>
+        <p class="subscribe-card-text"><%= belpochtaIntro %></p>
         <ul class="subscribe-indexes">
-          <li><span>ведомственная подписка</span> <strong>748512</strong></li>
-          <li><span>индивидуальная подписка</span> <strong>74851</strong></li>
+          <li><span><%= index1Label %></span> <strong><%= index1Value %></strong></li>
+          <li><span><%= index2Label %></span> <strong><%= index2Value %></strong></li>
         </ul>
       </article>
     </div>
 
     <div class="subscribe-details">
       <article class="subscribe-card">
-        <h2>Реквизиты</h2>
+        <h2><%= requisitesTitle %></h2>
         <div class="subscribe-requisites rich-content"><%- formatRichHtml(site.requisites) %></div>
       </article>
 
       <article class="subscribe-card subscribe-card-hotline">
-        <h2>Горячая линия для подписчиков</h2>
-        <%
-          const hotlineSource = stripHtmlTags(site.aboutAudience || site.hotlineText || '');
-          const hotlineScheduleMatch = hotlineSource.match(/Каждый[^.]+/i)
-            || hotlineSource.match(/(?:Пн|Вт|Ср|Чт|Пт|суббот|воскресен)[^.]*\d{1,2}:\d{2}[^.]*\d{1,2}:\d{2}/i);
-          const hotlineSchedule = (hotlineScheduleMatch ? hotlineScheduleMatch[0] : 'Каждый вторник с 14:00 до 16:00').trim().replace(/\.$/, '');
-        %>
+        <h2><%= hotlineTitle %></h2>
         <ul class="subscribe-hotline-meta">
-          <li><span>Эксперт</span><strong>Коковкина Т.В.</strong></li>
+          <li><span>Эксперт</span><strong><%= hotlineExpert %></strong></li>
           <li><span>Время</span><strong><%= hotlineSchedule %></strong></li>
           <li>
             <span>Телефон</span>
             <strong>
-              <% const hotlinePhone = site.phone2 || '+375 (29) 104 40 08'; %>
               <a href="tel:<%= hotlinePhone %>"><%= hotlinePhone %></a>
             </strong>
           </li>
         </ul>
         <p class="subscribe-card-text">
-          Консультации для подписчиков, оформивших издание через РУП «Белпочта», предоставляются после предъявления документа, подтверждающего действующую подписку
+          <%= hotlineNote %>
         </p>
       </article>
     </div>
 
     <footer class="subscribe-help">
-      <p class="eyebrow">Вопросы по подписке и доставке</p>
+      <p class="eyebrow"><%= helpTitle %></p>
       <p class="subscribe-phones">
         <% if (site.phone) { %>
           <a href="tel:<%= site.phone %>"><%= site.phone %></a>

@@ -11,7 +11,7 @@
     <% if (typeof path === 'string' && path.startsWith('/published-lists')) { %>
       <link rel="stylesheet" href="/styles/published-lists.css?v=<%= assetVersion %>" />
     <% } %>
-    <% if (site.analyticsId) { %>
+    <% if (site.analyticsId && !(typeof path === 'string' && path.startsWith('/admin'))) { %>
       <script async src="https://www.googletagmanager.com/gtag/js?id=<%= site.analyticsId %>"></script>
       <script nonce="<%= cspNonce %>">
         window.dataLayer = window.dataLayer || [];

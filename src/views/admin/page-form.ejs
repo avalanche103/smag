@@ -38,12 +38,40 @@
         <label>Периодичность<input type="text" name="periodicity" value="<%= extra('periodicity') %>" /></label>
         <%- include('./partials/rich-field', { name: 'distributionFormat', label: 'Формат распространения', value: formatRichHtml(extra('distributionFormat')), placeholder: '', rows: 3 }) %>
         <%- include('./partials/rich-field', { name: 'body', label: 'Основной текст', value: formatRichHtml(page.body), placeholder: 'Основной текст страницы', rows: 8 }) %>
+        <label>SEO Title<input type="text" name="seoTitle" value="<%= extra('seoTitle') %>" placeholder="Если пусто — используется заголовок страницы" /></label>
+        <%- include('./partials/rich-field', { name: 'seoDescription', label: 'SEO Description', value: formatRichHtml(extra('seoDescription')), placeholder: 'Если пусто — берётся лид или описание сайта', rows: 3 }) %>
       <% } else if (page.pageKey === 'contacts') { %>
         <label>Часы работы<input type="text" name="workingHours" value="<%= extra('workingHours') %>" /></label>
+        <label>SEO Title<input type="text" name="seoTitle" value="<%= extra('seoTitle') %>" placeholder="Если пусто — Контакты" /></label>
+        <%- include('./partials/rich-field', { name: 'seoDescription', label: 'SEO Description', value: formatRichHtml(extra('seoDescription')), placeholder: 'Если пусто — стандартное описание', rows: 3 }) %>
       <% } else if (page.pageKey === 'subscribe') { %>
         <%- include('./partials/rich-field', { name: 'lead', label: 'Вводный текст', value: formatRichHtml(page.lead), placeholder: 'Краткое описание в шапке страницы', rows: 3 }) %>
+        <label>Подпись над каналами<input type="text" name="channelsLabel" value="<%= extra('channelsLabel') || 'Доступные каналы' %>" /></label>
+        <label>Заголовок прямой подписки<input type="text" name="directTitle" value="<%= extra('directTitle') || 'Прямая подписка через редакцию' %>" /></label>
+        <label>Шаг 1 — текст («Скачайте счёт…»)<input type="text" name="step1Text" value="<%= extra('step1Text') || 'Скачайте счёт на нужный период' %>" /></label>
+        <label>Шаг 2 — текст («Или запросите счёт…»)<input type="text" name="step2Text" value="<%= extra('step2Text') || 'Или запросите счёт у менеджера' %>" /></label>
+        <label>Примечание — жирный заголовок<input type="text" name="paymentNoteLabel" value="<%= extra('paymentNoteLabel') || 'В назначении платежа обязательно укажите:' %>" /></label>
+        <label>Примечание — текст<textarea name="paymentNoteText" rows="2"><%= extra('paymentNoteText') || 'полный адрес доставки, контактный телефон и ваш e-mail.' %></textarea></label>
         <%- include('./partials/rich-field', { name: 'body', label: 'После оплаты', value: formatRichHtml(page.body), placeholder: 'Что делать после оплаты счёта', rows: 4 }) %>
-        <p class="form-note">PDF-счета загружаются ниже.</p>
+        <label>Заголовок Белпочты<input type="text" name="belpochtaTitle" value="<%= extra('belpochtaTitle') || 'Подписка через РУП «Белпочта»' %>" /></label>
+        <label>Подпись к индексам<input type="text" name="belpochtaIntro" value="<%= extra('belpochtaIntro') || 'Подписные индексы:' %>" /></label>
+        <div class="form-grid-two">
+          <label>Индекс 1 — название<input type="text" name="index1Label" value="<%= extra('index1Label') || 'ведомственная подписка' %>" /></label>
+          <label>Индекс 1 — значение<input type="text" name="index1Value" value="<%= extra('index1Value') || '748512' %>" /></label>
+          <label>Индекс 2 — название<input type="text" name="index2Label" value="<%= extra('index2Label') || 'индивидуальная подписка' %>" /></label>
+          <label>Индекс 2 — значение<input type="text" name="index2Value" value="<%= extra('index2Value') || '74851' %>" /></label>
+        </div>
+        <label>Заголовок реквизитов<input type="text" name="requisitesTitle" value="<%= extra('requisitesTitle') || 'Реквизиты' %>" /></label>
+        <label>Заголовок горячей линии<input type="text" name="hotlineTitle" value="<%= extra('hotlineTitle') || 'Горячая линия для подписчиков' %>" /></label>
+        <div class="form-grid-two">
+          <label>Эксперт<input type="text" name="hotlineExpert" value="<%= extra('hotlineExpert') || 'Коковкина Т.В.' %>" /></label>
+          <label>Время<input type="text" name="hotlineSchedule" value="<%= extra('hotlineSchedule') || '' %>" placeholder="Если пусто — берётся из настроек" /></label>
+        </div>
+        <label>Текст под горячей линией<textarea name="hotlineNote" rows="3"><%= extra('hotlineNote') || 'Консультации для подписчиков, оформивших издание через РУП «Белпочта», предоставляются после предъявления документа, подтверждающего действующую подписку' %></textarea></label>
+        <label>Подпись нижнего блока<input type="text" name="helpTitle" value="<%= extra('helpTitle') || 'Вопросы по подписке и доставке' %>" /></label>
+        <label>SEO Title<input type="text" name="seoTitle" value="<%= extra('seoTitle') %>" placeholder="Если пусто — Подписка" /></label>
+        <%- include('./partials/rich-field', { name: 'seoDescription', label: 'SEO Description', value: formatRichHtml(extra('seoDescription')), placeholder: 'Если пусто — стандартное описание', rows: 3 }) %>
+        <p class="form-note">PDF-счета загружаются ниже. Телефоны — в разделе Настройки.</p>
       <% } %>
 
       <button class="button button-accent" type="submit">Сохранить</button>

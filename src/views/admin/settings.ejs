@@ -18,9 +18,9 @@
       <div class="form-grid-two">
         <label>Название сайта<input type="text" name="siteTitle" value="<%= settings.siteTitle %>" required /></label>
         <label>URL сайта<input type="url" name="siteUrl" value="<%= settings.siteUrl || '' %>" /></label>
-        <label>Analytics ID<input type="text" name="analyticsId" value="<%= settings.analyticsId || '' %>" /></label>
       </div>
       <%- include('./partials/rich-field', { name: 'siteDescription', label: 'Описание сайта', value: formatRichHtml(settings.siteDescription), placeholder: 'Краткое описание для подвала и meta description', rows: 3 }) %>
+      <p class="form-note">SEO title/description отдельных страниц — в разделе «Страницы». Индексация админки закрыта в robots.txt и meta robots.</p>
 
       <h2>Контакты</h2>
       <div class="form-grid-two">

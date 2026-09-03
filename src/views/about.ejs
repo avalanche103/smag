@@ -17,7 +17,7 @@
       </div>
       <% if (featuredIssue?.coverImage) { %>
         <div class="about-cover">
-          <img src="<%= getCoverThumbPath(featuredIssue.coverImage) %>" alt="Обложка <%= featuredIssue.numberLabel %>" loading="lazy" decoding="async" />
+          <img src="<%= featuredIssue.coverImage %>" alt="Обложка <%= featuredIssue.numberLabel %>" loading="lazy" decoding="async" />
         </div>
       <% } %>
     </div>

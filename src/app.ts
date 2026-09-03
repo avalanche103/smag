@@ -98,7 +98,8 @@ app.use((req, res, next) => {
   const settings = getSettings();
   res.locals.site = {
     ...settings,
-    analyticsId: settings.analyticsId?.trim() || env.analyticsId
+    // Analytics only from env, not CMS settings
+    analyticsId: env.analyticsId
   };
   res.locals.audienceTopics = getAudienceTopics(settings);
   res.locals.aboutAudienceHtml = formatAudienceHtml(settings.aboutAudience);

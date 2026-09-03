@@ -8,6 +8,11 @@
 %>
 <title><%= pageTitle %></title>
 <meta name="description" content="<%= pageDescription %>" />
+<% if (typeof path === 'string' && path.startsWith('/admin')) { %>
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<% } else if (meta?.robots) { %>
+<meta name="robots" content="<%= meta.robots %>" />
+<% } %>
 <link rel="canonical" href="<%= canonical %>" />
 <link rel="icon" href="/images/favicon.png" type="image/png" sizes="32x32" />
 <link rel="icon" href="/images/favicon-48.png" type="image/png" sizes="48x48" />

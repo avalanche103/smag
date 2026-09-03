@@ -62,6 +62,10 @@ function parseIssueMaterials(input: unknown): IssueMaterial[] {
 
 export default function adminRouter() {
   const router = Router();
+  router.use((_req, res, next) => {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+    next();
+  });
   const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5,
@@ -436,7 +440,6 @@ export default function adminRouter() {
       address: String(body.address ?? ""),
       requisites: rich("requisites"),
       siteUrl: String(body.siteUrl ?? ""),
-      analyticsId: String(body.analyticsId ?? ""),
       mailTo: String(body.mailTo ?? "")
     });
     writeAuditLog({ adminLogin: req.session.adminLogin ?? "unknown", action: "update_settings" });
@@ -480,14 +483,39 @@ export default function adminRouter() {
     } else if (pageKey === "about") {
       updatePageContent(pageKey, body.title ?? "", rich("lead"), rich("body"), {
         periodicity: body.periodicity ?? "",
-        distributionFormat: rich("distributionFormat")
+        distributionFormat: rich("distributionFormat"),
+        seoTitle: body.seoTitle ?? "",
+        seoDescription: rich("seoDescription")
       });
     } else if (pageKey === "contacts") {
       updatePageContent(pageKey, body.title ?? "", rich("lead"), "", {
-        workingHours: body.workingHours ?? ""
+        workingHours: body.workingHours ?? "",
+        seoTitle: body.seoTitle ?? "",
+        seoDescription: rich("seoDescription")
       });
     } else if (pageKey === "subscribe") {
-      updatePageContent(pageKey, body.title ?? "", rich("lead"), rich("body"));
+      updatePageContent(pageKey, body.title ?? "", rich("lead"), rich("body"), {
+        channelsLabel: body.channelsLabel ?? "",
+        directTitle: body.directTitle ?? "",
+        step1Text: body.step1Text ?? "",
+        step2Text: body.step2Text ?? "",
+        paymentNoteLabel: body.paymentNoteLabel ?? "",
+        paymentNoteText: body.paymentNoteText ?? "",
+        belpochtaTitle: body.belpochtaTitle ?? "",
+        belpochtaIntro: body.belpochtaIntro ?? "",
+        index1Label: body.index1Label ?? "",
+        index1Value: body.index1Value ?? "",
+        index2Label: body.index2Label ?? "",
+        index2Value: body.index2Value ?? "",
+        requisitesTitle: body.requisitesTitle ?? "",
+        hotlineTitle: body.hotlineTitle ?? "",
+        hotlineExpert: body.hotlineExpert ?? "",
+        hotlineSchedule: body.hotlineSchedule ?? "",
+        hotlineNote: body.hotlineNote ?? "",
+        helpTitle: body.helpTitle ?? "",
+        seoTitle: body.seoTitle ?? "",
+        seoDescription: rich("seoDescription")
+      });
     } else {
       updatePageContent(pageKey, body.title ?? "", rich("lead"), rich("body"));
     }
