@@ -30,6 +30,19 @@
   gap: 10px 12px;
 }
 
+/* Desktop: keep filters visible even when <details> is closed (summary is hidden). */
+@media (min-width: 721px) {
+  .published-materials-filters-panel .published-materials-filters {
+    display: grid !important;
+  }
+
+  .published-materials-filters-panel::details-content {
+    display: contents;
+    content-visibility: visible;
+    height: auto;
+  }
+}
+
 .published-materials-filters input,
 .published-materials-filters select {
   box-sizing: border-box;
