@@ -64,7 +64,13 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: rgba(18, 24, 30, 0.94);
+  background-color: #d7ebf3;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.12)),
+    url("/images/header-sky.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
   padding: 10px 10px 12px;
   overflow: hidden;
 }
@@ -95,7 +101,7 @@
 .article-viewer-page-label {
   text-align: center;
   font-size: 0.95rem;
-  color: #d7dde3;
+  color: #23313e;
 }
 
 .article-tool-btn {
@@ -103,10 +109,10 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(35, 49, 62, 0.16);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f4f7fa;
+  background: rgba(255, 255, 255, 0.55);
+  color: #23313e;
   cursor: pointer;
   font-size: 1.2rem;
   line-height: 1;
@@ -115,7 +121,7 @@
 .article-tool-btn:hover,
 .article-tool-btn:focus-visible,
 .article-tool-btn[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.9);
   outline: none;
 }
 
@@ -135,16 +141,16 @@
   align-self: center;
   width: 52px;
   height: 72px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(35, 49, 62, 0.16);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f4f7fa;
+  background: rgba(255, 255, 255, 0.55);
+  color: #23313e;
   cursor: pointer;
 }
 
 .article-side-nav:hover,
 .article-side-nav:focus-visible {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.9);
   outline: none;
 }
 
@@ -162,7 +168,8 @@
   display: grid;
   place-items: center;
   border-radius: 14px;
-  background: linear-gradient(180deg, #1b232b, #12181e);
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(35, 49, 62, 0.08);
 }
 
 .article-viewer-stage-spread.is-zoomed {
@@ -179,7 +186,7 @@
   max-width: 100%;
   max-height: 100%;
   align-items: stretch;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14px 36px rgba(24, 36, 48, 0.16);
 }
 
 .article-viewer-stage-spread.is-zoomed .article-spread {
@@ -242,8 +249,8 @@
   display: grid;
   place-items: center;
   margin: 0;
-  color: #d7dde3;
-  background: rgba(18, 24, 30, 0.55);
+  color: #23313e;
+  background: rgba(215, 235, 243, 0.72);
 }
 
 .article-viewer-status[hidden] {
