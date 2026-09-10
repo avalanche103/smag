@@ -41,6 +41,7 @@ app.use(
         connectSrc: ["'self'", "https://www.google-analytics.com", "https://region1.google-analytics.com", "https://www.googletagmanager.com"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
+        workerSrc: ["'self'", "blob:"],
         baseUri: ["'self'"]
       }
     }
@@ -83,9 +84,11 @@ const uploadStaticOptions = { maxAge: env.isProduction ? "7d" : 0 };
 
 app.use("/styles", express.static(path.join(env.rootDir, "src", "public", "styles"), staticOptions));
 app.use("/scripts", express.static(path.join(env.rootDir, "src", "public", "scripts"), staticOptions));
+app.use("/scripts/pdfjs", express.static(path.join(env.rootDir, "node_modules", "pdfjs-dist", "build"), staticOptions));
 app.use("/images", express.static(path.join(env.rootDir, "src", "public", "images"), staticOptions));
 app.use("/uploads/covers", express.static(env.coversDir, uploadStaticOptions));
 app.use("/uploads/lists", express.static(env.listsDir, uploadStaticOptions));
+// Articles PDFs are intentionally not served via express.static.
 app.get("/logo.jpg", (_req, res) => {
   res.sendFile(path.join(env.rootDir, "logo.jpg"));
 });

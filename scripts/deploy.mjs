@@ -140,7 +140,10 @@ const excludePatterns = [
   "data/backups",
   "data/audit.log",
   "data/*.sqlite",
-  "*.pdf"
+  "Stroitelstvo_*.pdf",
+  "YEAR.pdf",
+  "HALF.pdf",
+  "Перечень_*.pdf"
 ];
 
 console.log("[smag] Creating archive...");

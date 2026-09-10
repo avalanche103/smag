@@ -11,6 +11,9 @@
     <% if (typeof path === 'string' && path.startsWith('/published-lists')) { %>
       <link rel="stylesheet" href="/styles/published-lists.css?v=<%= assetVersion %>" />
     <% } %>
+    <% if (typeof path === 'string' && (path.startsWith('/articles') || path.startsWith('/a/'))) { %>
+      <link rel="stylesheet" href="/styles/article-viewer.css?v=<%= assetVersion %>" />
+    <% } %>
     <% if (site.analyticsId && !(typeof path === 'string' && path.startsWith('/admin'))) { %>
       <script async src="https://www.googletagmanager.com/gtag/js?id=<%= site.analyticsId %>"></script>
       <script nonce="<%= cspNonce %>">

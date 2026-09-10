@@ -1,0 +1,49 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Маркетинг</p>
+        <h1><%= article ? 'Редактирование статьи' : 'Новая статья' %></h1>
+      </div>
+      <a class="button button-secondary" href="/admin/articles">К списку</a>
+    </div>
+    <form method="post" action="/admin/articles" enctype="multipart/form-data" class="admin-card stack-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input type="hidden" name="id" value="<%= article?.id || '' %>" />
+      <label>Заголовок<input type="text" name="title" value="<%= article?.title || '' %>" required /></label>
+      <label>Slug (для URL /articles/…)<input type="text" name="slug" value="<%= article?.slug || '' %>" placeholder="Сгенерируется из заголовка" /></label>
+      <label>Код короткой ссылки<input type="text" name="shareCode" value="<%= article?.shareCode || '' %>" placeholder="Сгенерируется автоматически" maxlength="16" /></label>
+      <label>Краткое описание<textarea name="description" rows="3" placeholder="Для SEO и превью"><%= article?.description || '' %></textarea></label>
+      <label>Стартовая страница в развороте
+        <select name="startSide">
+          <option value="right" <%= !article || article.startSide !== 'left' ? 'selected' : '' %>>Правая (стр. 1 справа, как в журнале)</option>
+          <option value="left" <%= article?.startSide === 'left' ? 'selected' : '' %>>Левая (стр. 1 слева)</option>
+        </select>
+      </label>
+      <p class="form-note">Нужно, чтобы разворот «левая + правая» совпал с вёрсткой PDF.</p>
+      <label>PDF-файл<input type="file" name="pdfFile" accept="application/pdf,.pdf" <%= article ? '' : 'required' %> /></label>
+      <% if (article?.pdfPath) { %>
+        <p class="form-note">Текущий файл: <%= article.pdfPath.split('/').pop() %></p>
+      <% } %>
+      <label class="checkbox"><input type="checkbox" name="isPublished" value="1" <%= !article || article.isPublished ? 'checked' : '' %> /> Опубликовать</label>
+      <% if (article) { %>
+        <div class="admin-card" style="padding: 12px 14px;">
+          <p class="form-note" style="margin: 0 0 8px;">Ссылки для публикации</p>
+          <p><strong>Короткая:</strong> <code><%= siteBase %>/a/<%= article.shareCode %></code>
+            <button class="button-link" type="button" data-copy-trigger data-copy-target="<%= siteBase %>/a/<%= article.shareCode %>">Копировать</button>
+          </p>
+          <p><strong>Полная:</strong> <code><%= siteBase %>/articles/<%= article.slug %></code>
+            <button class="button-link" type="button" data-copy-trigger data-copy-target="<%= siteBase %>/articles/<%= article.slug %>">Копировать</button>
+          </p>
+        </div>
+      <% } %>
+      <button class="button button-accent" type="submit">Сохранить</button>
+    </form>
+  </section>
+</main>
+<script src="/scripts/admin-articles.js?v=<%= assetVersion %>" defer></script>
+</body>
+</html>

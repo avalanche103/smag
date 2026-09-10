@@ -35,6 +35,18 @@
           <% }) %>
         </ul>
       </article>
+      <article class="admin-card">
+        <h2>Статьи PDF</h2>
+        <ul class="admin-list">
+          <% if (!articles.length) { %>
+            <li>Пока нет статей</li>
+          <% } %>
+          <% articles.forEach((item) => { %>
+            <li><strong><%= item.title %></strong> — <%= item.isPublished ? 'опубликована' : 'черновик' %></li>
+          <% }) %>
+        </ul>
+        <p><a class="button-link" href="/admin/articles">Управлять статьями</a></p>
+      </article>
     </div>
   </section>
 </main>

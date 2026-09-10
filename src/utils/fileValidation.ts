@@ -4,6 +4,7 @@ const signatures: Array<{ kind: UploadKind; mime: string; check: (buffer: Buffer
   { kind: "cover", mime: "image/webp", check: (buffer) => buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP" },
   { kind: "invoice", mime: "application/pdf", check: (buffer) => buffer.subarray(0, 5).toString("ascii") === "%PDF-" },
   { kind: "pdfList", mime: "application/pdf", check: (buffer) => buffer.subarray(0, 5).toString("ascii") === "%PDF-" },
+  { kind: "article", mime: "application/pdf", check: (buffer) => buffer.subarray(0, 5).toString("ascii") === "%PDF-" },
   {
     kind: "list",
     mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -11,7 +12,7 @@ const signatures: Array<{ kind: UploadKind; mime: string; check: (buffer: Buffer
   }
 ];
 
-export type UploadKind = "cover" | "invoice" | "list" | "pdfList";
+export type UploadKind = "cover" | "invoice" | "list" | "pdfList" | "article";
 
 export async function validateUploadedFile(filePath: string, kind: UploadKind): Promise<boolean> {
   const fs = await import("node:fs/promises");

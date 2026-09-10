@@ -10,6 +10,7 @@ fs.mkdirSync(env.uploadsDir, { recursive: true });
 fs.mkdirSync(env.coversDir, { recursive: true });
 fs.mkdirSync(env.invoicesDir, { recursive: true });
 fs.mkdirSync(env.listsDir, { recursive: true });
+fs.mkdirSync(env.articlesDir, { recursive: true });
 
 const settingDefaults: Array<[string, string]> = [
   ["siteTitle", "Строительство: Экономика, учет, право"],
@@ -237,6 +238,7 @@ function createInitialStore(): DataStore {
       }
     ],
     publishedMaterials: [],
+    marketingArticles: [],
     contactMessages: []
   };
 }
@@ -348,6 +350,10 @@ function mergeDefaults(store: DataStore): DataStore {
     issues,
     publishedLists: store.publishedLists.length ? store.publishedLists : initial.publishedLists,
     publishedMaterials: store.publishedMaterials ?? [],
+    marketingArticles: (Array.isArray(store.marketingArticles) ? store.marketingArticles : []).map((item) => ({
+      ...item,
+      startSide: item.startSide === "left" ? "left" : "right"
+    })),
     contactMessages: store.contactMessages ?? []
   };
 

@@ -15,6 +15,8 @@ import {
   getPageExtra,
   getSettings,
   listIssues,
+  getMarketingArticleBySlug,
+  getMarketingArticleByShareCode,
   listPublishedMaterialsForPage,
   filterPublishedMaterials,
   saveMessage,
@@ -23,6 +25,7 @@ import {
 import { sendContactFormEmail } from "../services/mailService";
 import { verifyCsrfToken } from "../middleware/csrf";
 import { buildOrganizationJsonLd, buildPageMeta, buildPublicationIssueJsonLd } from "../utils/seo";
+import { createArticleViewToken, verifyArticleViewToken } from "../utils/articleViewToken";
 
 dayjs.extend(localizedFormat);
 dayjs.locale("ru");
@@ -116,6 +119,87 @@ export default function publicRouter(formLimiter: RequestHandler) {
       }),
       dayjs
     });
+  });
+
+  function resolveArticlePdfDiskPath(pdfPath: string): string | null {
+    if (!pdfPath.startsWith("/uploads/articles/")) {
+      return null;
+    }
+    const filename = path.basename(pdfPath);
+    if (!filename || filename !== path.basename(pdfPath) || filename.includes("..")) {
+      return null;
+    }
+    return path.join(env.articlesDir, filename);
+  }
+
+  function renderArticleViewer(
+    res: import("express").Response,
+    article: NonNullable<ReturnType<typeof getMarketingArticleBySlug>>,
+    settings: ReturnType<typeof getSettings>,
+    canonicalPath: string
+  ) {
+    const viewToken = createArticleViewToken(article.id);
+    const description =
+      stripHtmlTags(article.description) ||
+      `Статья журнала «Строительство: экономика, учет, право»: ${article.title}`;
+
+    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+    res.render("article-viewer", {
+      article,
+      viewToken,
+      streamUrl: `/articles/${encodeURIComponent(article.slug)}/stream`,
+      meta: withSiteMeta(settings, {
+        title: article.title,
+        description,
+        path: canonicalPath
+      })
+    });
+  }
+
+  router.get("/a/:shareCode", (req, res) => {
+    const article = getMarketingArticleByShareCode(req.params.shareCode);
+    if (!article) {
+      res.status(404).render("404", {
+        meta: { title: "Статья не найдена", description: "Запрошенная статья отсутствует." }
+      });
+      return;
+    }
+
+    res.redirect(302, `/articles/${encodeURIComponent(article.slug)}`);
+  });
+
+  router.get("/articles/:slug/stream", (req, res) => {
+    const article = getMarketingArticleBySlug(req.params.slug);
+    if (!article || !verifyArticleViewToken(article.id, typeof req.query.token === "string" ? req.query.token : undefined)) {
+      res.status(404).end();
+      return;
+    }
+
+    const diskPath = resolveArticlePdfDiskPath(article.pdfPath);
+    if (!diskPath || !fs.existsSync(diskPath)) {
+      res.status(404).end();
+      return;
+    }
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'inline; filename="document.pdf"');
+    res.setHeader("Cache-Control", "private, no-store, max-age=0");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.sendFile(diskPath);
+  });
+
+  router.get("/articles/:slug", (req, res) => {
+    const settings = getSettings();
+    const article = getMarketingArticleBySlug(req.params.slug);
+    if (!article) {
+      res.status(404).render("404", {
+        meta: { title: "Статья не найдена", description: "Запрошенная статья отсутствует." }
+      });
+      return;
+    }
+
+    renderArticleViewer(res, article, settings, `/articles/${article.slug}`);
   });
 
   router.get("/issues/:slug", (req, res) => {
@@ -374,6 +458,8 @@ export default function publicRouter(formLimiter: RequestHandler) {
           "Allow: /",
           "Disallow: /admin",
           "Disallow: /admin/",
+          "Disallow: /articles/",
+          "Disallow: /a/",
           `Sitemap: ${base}/sitemap.xml`,
           ""
         ].join("\n")

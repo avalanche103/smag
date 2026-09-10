@@ -1,8 +1,22 @@
 import bcrypt from "bcryptjs";
 import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
+import { nanoid } from "nanoid";
 import { readStore, updateStore } from "../db";
-import type { AdminRole, ContactMessage, IssueMaterial, JournalIssue, PageContent, PageKey, PublishedListItem, PublishedMaterial, PublishedMaterialRow } from "../types";
+import type {
+  AdminRole,
+  ArticleStartSide,
+  ContactMessage,
+  DataStore,
+  IssueMaterial,
+  JournalIssue,
+  MarketingArticle,
+  PageContent,
+  PageKey,
+  PublishedListItem,
+  PublishedMaterial,
+  PublishedMaterialRow
+} from "../types";
 import type { PublishedListEntry } from "../utils/publishedListPdf";
 
 export const DEFAULT_ISSUE_MATERIAL_COUNT = 10;
@@ -405,6 +419,120 @@ export function togglePublishedList(id: number, isVisible: number): void {
 export function deletePublishedList(id: number): void {
   updateStore((store) => {
     store.publishedLists = store.publishedLists.filter((item) => item.id !== id);
+  });
+}
+
+function ensureUniqueArticleSlug(store: DataStore, slug: string, excludeId?: number): string {
+  const base = slug || "statya";
+  let candidate = base;
+  let suffix = 2;
+  while (store.marketingArticles.some((item) => item.slug === candidate && item.id !== excludeId)) {
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  return candidate;
+}
+
+function ensureUniqueShareCode(store: DataStore, preferred?: string, excludeId?: number): string {
+  let code = preferred && /^[a-zA-Z0-9_-]{6,16}$/.test(preferred) ? preferred : nanoid(10);
+  while (store.marketingArticles.some((item) => item.shareCode === code && item.id !== excludeId)) {
+    code = nanoid(10);
+  }
+  return code;
+}
+
+function normalizeArticleStartSide(value: unknown): ArticleStartSide {
+  return value === "left" ? "left" : "right";
+}
+
+function normalizeMarketingArticle(item: MarketingArticle): MarketingArticle {
+  return {
+    ...item,
+    startSide: normalizeArticleStartSide(item.startSide)
+  };
+}
+
+export function listMarketingArticles(includeHidden = false): MarketingArticle[] {
+  return readStore()
+    .marketingArticles
+    .map(normalizeMarketingArticle)
+    .filter((item) => includeHidden || item.isPublished === 1)
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+}
+
+export function getMarketingArticleById(id: number): MarketingArticle | undefined {
+  const item = readStore().marketingArticles.find((entry) => entry.id === id);
+  return item ? normalizeMarketingArticle(item) : undefined;
+}
+
+export function getMarketingArticleBySlug(slug: string, publishedOnly = true): MarketingArticle | undefined {
+  const item = readStore().marketingArticles.find(
+    (entry) => entry.slug === slug && (!publishedOnly || entry.isPublished === 1)
+  );
+  return item ? normalizeMarketingArticle(item) : undefined;
+}
+
+export function getMarketingArticleByShareCode(shareCode: string, publishedOnly = true): MarketingArticle | undefined {
+  const item = readStore().marketingArticles.find(
+    (entry) => entry.shareCode === shareCode && (!publishedOnly || entry.isPublished === 1)
+  );
+  return item ? normalizeMarketingArticle(item) : undefined;
+}
+
+export function saveMarketingArticle(
+  article: Omit<MarketingArticle, "id" | "createdAt" | "updatedAt" | "shareCode" | "slug"> & {
+    id?: number;
+    slug?: string;
+    shareCode?: string;
+  }
+): MarketingArticle {
+  return updateStore((store) => {
+    const now = new Date().toISOString();
+    const title = article.title.trim();
+    const slugSource = (article.slug ?? title).trim() || "statya";
+    const slugBase = slugify(slugSource, { lower: true, strict: true, locale: "ru" }) || "statya";
+    const startSide = normalizeArticleStartSide(article.startSide);
+
+    if (article.id) {
+      const existing = store.marketingArticles.find((item) => item.id === article.id);
+      if (!existing) {
+        throw new Error(`Marketing article not found: ${article.id}`);
+      }
+
+      existing.title = title;
+      existing.slug = ensureUniqueArticleSlug(store, slugBase, existing.id);
+      existing.shareCode = ensureUniqueShareCode(store, article.shareCode || existing.shareCode, existing.id);
+      existing.description = article.description.trim();
+      existing.pdfPath = article.pdfPath;
+      existing.startSide = startSide;
+      existing.isPublished = article.isPublished ? 1 : 0;
+      existing.updatedAt = now;
+      return normalizeMarketingArticle(existing);
+    }
+
+    const nextId = Math.max(0, ...store.marketingArticles.map((item) => item.id)) + 1;
+    const created: MarketingArticle = {
+      id: nextId,
+      title,
+      slug: ensureUniqueArticleSlug(store, slugBase),
+      shareCode: ensureUniqueShareCode(store, article.shareCode),
+      description: article.description.trim(),
+      pdfPath: article.pdfPath,
+      startSide,
+      isPublished: article.isPublished ? 1 : 0,
+      createdAt: now,
+      updatedAt: now
+    };
+    store.marketingArticles.push(created);
+    return { ...created };
+  });
+}
+
+export function deleteMarketingArticle(id: number): MarketingArticle | undefined {
+  return updateStore((store) => {
+    const existing = store.marketingArticles.find((item) => item.id === id);
+    store.marketingArticles = store.marketingArticles.filter((item) => item.id !== id);
+    return existing ? { ...existing } : undefined;
   });
 }
 

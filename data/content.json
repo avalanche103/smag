@@ -2156,6 +2156,20 @@
       "author": "-"
     }
   ],
+  "marketingArticles": [
+    {
+      "id": 1,
+      "title": "Поставка оборудования подрядчиком для бюджетных объектов: целевой аванс или предоплата",
+      "slug": "statya",
+      "shareCode": "FFu1Xlb-re",
+      "description": "",
+      "pdfPath": "/uploads/articles/1789026836848-qzjqJaNM.pdf",
+      "isPublished": 1,
+      "createdAt": "2026-09-10T07:53:56.899Z",
+      "updatedAt": "2026-09-10T07:53:56.899Z",
+      "startSide": "right"
+    }
+  ],
   "contactMessages": [
     {
       "id": 3,

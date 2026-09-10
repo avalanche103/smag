@@ -6,6 +6,7 @@ import slugify from "slugify";import type { IssueMaterial, PageKey } from "../ty
 import {
   createPublishedList,
   deleteIssue,
+  deleteMarketingArticle,
   deletePublishedList,
   getAllPages,
   formatAudienceHtml,
@@ -13,13 +14,16 @@ import {
   getAudienceTopics,
   getIssueFormMaterials,
   getIssueById,
+  getMarketingArticleById,
   getSettings,
   listIssues,
+  listMarketingArticles,
   listMessages,
   listPublishedLists,
   markMessageRead,
   parseJournalNumber,
   saveIssue,
+  saveMarketingArticle,
   serializeAudienceTopics,
   sanitizeRichHtml,
   applyPublishedListImport,
@@ -30,9 +34,10 @@ import {
   updateSettings,
   verifyAdmin
 } from "../services/contentService";
+import { env } from "../config/env";
 import { requireAuth, requireFullAdmin } from "../middleware/auth";
 import { verifyCsrfToken } from "../middleware/csrf";
-import { coverUpload, invoiceUpload, listUpload, pdfListUpload } from "../middleware/uploads";
+import { articleUpload, coverUpload, invoiceUpload, listUpload, pdfListUpload } from "../middleware/uploads";
 import { writeAuditLog } from "../utils/auditLog";
 import { validateUploadedFile } from "../utils/fileValidation";
 import { processCoverImage } from "../utils/imageProcessing";
@@ -68,10 +73,11 @@ export default function adminRouter() {
   });
   const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: env.isProduction ? 5 : 100,
     standardHeaders: true,
     legacyHeaders: false,
-    message: "Слишком много попыток входа. Попробуйте позже."
+    message: "Слишком много попыток входа. Попробуйте позже.",
+    skip: () => !env.isProduction
   });
   router.get("/login", (req, res) => {
     if (req.session.adminId && req.session.adminLogin) {
@@ -402,6 +408,126 @@ export default function adminRouter() {
     res.redirect("/admin/issues");
   });
 
+  function siteBaseUrl(): string {
+    const settings = getSettings();
+    return (settings.siteUrl || env.siteUrl).replace(/\/$/, "");
+  }
+
+  router.get("/articles", (_req, res) => {
+    res.render("admin/articles", {
+      meta: { title: "Статьи PDF", description: "Маркетинговые статьи в PDF" },
+      items: listMarketingArticles(true),
+      siteBase: siteBaseUrl()
+    });
+  });
+
+  router.get("/articles/new", (_req, res) => {
+    res.render("admin/article-form", {
+      meta: { title: "Новая статья", description: "Добавление PDF-статьи" },
+      article: null,
+      siteBase: siteBaseUrl()
+    });
+  });
+
+  router.get("/articles/:id/edit", (req, res) => {
+    const article = getMarketingArticleById(Number(req.params.id));
+    if (!article) {
+      res.redirect("/admin/articles");
+      return;
+    }
+
+    res.render("admin/article-form", {
+      meta: { title: `Редактирование: ${article.title}`, description: "Редактирование PDF-статьи" },
+      article,
+      siteBase: siteBaseUrl()
+    });
+  });
+
+  router.post("/articles", articleUpload.single("pdfFile"), verifyCsrfToken, async (req, res) => {
+    const body = req.body as Record<string, unknown>;
+    const id = typeof body.id === "string" && body.id ? Number(body.id) : undefined;
+    const existing = id ? getMarketingArticleById(id) : undefined;
+    const redirectTo = id ? `/admin/articles/${id}/edit` : "/admin/articles/new";
+    let pdfPath = existing?.pdfPath ?? "";
+
+    if (req.file) {
+      const valid = await validateUploadedFile(req.file.path, "article");
+      if (!valid) {
+        fs.unlinkSync(req.file.path);
+        req.session.flash = { type: "error", message: "Недопустимый формат PDF-файла." };
+        res.redirect(redirectTo);
+        return;
+      }
+
+      if (existing?.pdfPath) {
+        const previousName = path.basename(existing.pdfPath);
+        const previousDisk = path.join(env.articlesDir, previousName);
+        if (fs.existsSync(previousDisk) && previousName !== req.file.filename) {
+          fs.unlinkSync(previousDisk);
+        }
+      }
+
+      pdfPath = `/uploads/articles/${req.file.filename}`;
+    }
+
+    if (!pdfPath) {
+      req.session.flash = { type: "error", message: "Загрузите PDF-файл статьи." };
+      res.redirect(redirectTo);
+      return;
+    }
+
+    const title = typeof body.title === "string" ? body.title.trim() : "";
+    if (!title) {
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      req.session.flash = { type: "error", message: "Укажите заголовок статьи." };
+      res.redirect(redirectTo);
+      return;
+    }
+
+    const saved = saveMarketingArticle({
+      id,
+      title,
+      slug: typeof body.slug === "string" ? body.slug : undefined,
+      shareCode: typeof body.shareCode === "string" ? body.shareCode : undefined,
+      description: typeof body.description === "string" ? body.description : "",
+      pdfPath,
+      startSide: body.startSide === "left" ? "left" : "right",
+      isPublished: body.isPublished ? 1 : 0
+    });
+
+    writeAuditLog({
+      adminLogin: req.session.adminLogin ?? "unknown",
+      action: id ? "update_article" : "create_article",
+      details: saved.slug
+    });
+
+    req.session.flash = {
+      type: "success",
+      message: id ? "Статья обновлена." : `Статья создана. Ссылка: ${siteBaseUrl()}/a/${saved.shareCode}`
+    };
+    res.redirect("/admin/articles");
+  });
+
+  router.post("/articles/:id/delete", verifyCsrfToken, (req, res) => {
+    const removed = deleteMarketingArticle(Number(req.params.id));
+    if (removed?.pdfPath) {
+      const diskPath = path.join(env.articlesDir, path.basename(removed.pdfPath));
+      if (fs.existsSync(diskPath)) {
+        fs.unlinkSync(diskPath);
+      }
+    }
+
+    writeAuditLog({
+      adminLogin: req.session.adminLogin ?? "unknown",
+      action: "delete_article",
+      details: String(req.params.id)
+    });
+    req.session.flash = { type: "success", message: "Статья удалена." };
+    res.redirect("/admin/articles");
+  });
+
   router.use(requireFullAdmin);
 
   router.get("/", (_req, res) => {
@@ -409,7 +535,8 @@ export default function adminRouter() {
       meta: { title: "Админ-панель", description: "Управление сайтом журнала" },
       issues: listIssues(true).slice(0, 5),
       messages: listMessages().slice(0, 5),
-      lists: listPublishedLists(false).slice(0, 5)
+      lists: listPublishedLists(false).slice(0, 5),
+      articles: listMarketingArticles(true).slice(0, 5)
     });
   });
 

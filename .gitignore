@@ -8,4 +8,5 @@ data/backups/
 data/uploads/lists/**
 !data/uploads/covers/**
 !data/uploads/invoices/**
+!data/uploads/articles/**
 !data/uploads/.gitkeep

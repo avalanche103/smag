@@ -1,0 +1,57 @@
+<%- include('../partials/head', { meta, site }) %>
+<main class="admin-layout">
+  <%- include('../partials/admin-nav', { csrfToken }) %>
+  <section class="admin-main">
+    <%- include('../partials/flash', { flash }) %>
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">Маркетинг</p>
+        <h1>Статьи PDF</h1>
+      </div>
+      <a class="button button-accent" href="/admin/articles/new">Добавить статью</a>
+    </div>
+    <div class="admin-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Заголовок</th>
+            <th>Короткая ссылка</th>
+            <th>Статус</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!items.length) { %>
+            <tr><td colspan="4">Пока нет статей. Загрузите первый PDF.</td></tr>
+          <% } %>
+          <% items.forEach((item) => { %>
+            <tr>
+              <td>
+                <strong><%= item.title %></strong>
+                <div class="form-note">/articles/<%= item.slug %></div>
+              </td>
+              <td>
+                <code data-copy-url="<%= siteBase %>/a/<%= item.shareCode %>"><%= siteBase %>/a/<%= item.shareCode %></code>
+                <button class="button-link" type="button" data-copy-trigger data-copy-target="<%= siteBase %>/a/<%= item.shareCode %>">Копировать</button>
+              </td>
+              <td><%= item.isPublished ? 'Опубликована' : 'Черновик' %></td>
+              <td class="action-cell">
+                <a class="button-link" href="/admin/articles/<%= item.id %>/edit">Изменить</a>
+                <% if (item.isPublished) { %>
+                  <a class="button-link" href="/a/<%= item.shareCode %>" target="_blank" rel="noopener">Открыть</a>
+                <% } %>
+                <form method="post" action="/admin/articles/<%= item.id %>/delete" onsubmit="return confirm('Удалить статью?');">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button class="button-link" type="submit">Удалить</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script src="/scripts/admin-articles.js?v=<%= assetVersion %>" defer></script>
+</body>
+</html>

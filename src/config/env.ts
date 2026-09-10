@@ -84,5 +84,6 @@ export const env = {
   uploadsDir: path.join(projectDataDir, "uploads"),
   coversDir: path.join(projectDataDir, "uploads", "covers"),
   invoicesDir: path.join(projectDataDir, "uploads", "invoices"),
-  listsDir: path.join(projectDataDir, "uploads", "lists")
+  listsDir: path.join(projectDataDir, "uploads", "lists"),
+  articlesDir: path.join(projectDataDir, "uploads", "articles")
 };

@@ -43,6 +43,22 @@ export interface PublishedListItem {
   isVisible: number;
 }
 
+export type ArticleStartSide = "left" | "right";
+
+export interface MarketingArticle {
+  id: number;
+  title: string;
+  slug: string;
+  shareCode: string;
+  description: string;
+  pdfPath: string;
+  /** Where page 1 sits in the first spread for the book viewer. */
+  startSide: ArticleStartSide;
+  isPublished: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PublishedMaterial {
   id: number;
   issueNumber: number;
@@ -90,5 +106,6 @@ export interface DataStore {
   issues: JournalIssue[];
   publishedLists: PublishedListItem[];
   publishedMaterials: PublishedMaterial[];
+  marketingArticles: MarketingArticle[];
   contactMessages: ContactMessage[];
 }
