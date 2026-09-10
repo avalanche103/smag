@@ -42,17 +42,18 @@ function withSiteMeta(
     title: string;
     description: string;
     path: string;
-    ogImage?: string;
     ogType?: string;
     jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
   }
 ) {
+  const featuredIssue = getFeaturedIssue();
   return buildPageMeta({
     title: input.title,
     description: input.description,
     siteUrl: siteBase(settings),
     path: input.path,
-    ogImage: input.ogImage,
+    // Always the latest issue cover for messenger/social previews (Viber, Telegram, etc.).
+    ogImage: featuredIssue?.coverImage,
     ogType: input.ogType,
     jsonLd: input.jsonLd
   });
@@ -84,7 +85,6 @@ export default function publicRouter(formLimiter: RequestHandler) {
         title: seoTitle,
         description: stripHtmlTags(seoDescription),
         path: "/",
-        ogImage: featuredIssue?.coverImage,
         jsonLd: buildOrganizationJsonLd(settings, siteBase(settings))
       }),
       dayjs
@@ -232,7 +232,6 @@ export default function publicRouter(formLimiter: RequestHandler) {
         title: issue.numberLabel,
         description: metaDescription,
         path: `/issues/${issue.slug}`,
-        ogImage: issue.coverImage.startsWith("http") ? issue.coverImage : `${base}${issue.coverImage}`,
         ogType: "article",
         jsonLd: [buildOrganizationJsonLd(settings, base), buildPublicationIssueJsonLd(issue, base)]
       }),
