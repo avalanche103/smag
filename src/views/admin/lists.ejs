@@ -33,7 +33,7 @@
                   <input type="hidden" name="isVisible" value="<%= item.isVisible ? 0 : 1 %>" />
                   <button class="button-link" type="submit"><%= item.isVisible ? 'Скрыть' : 'Показать' %></button>
                 </form>
-                <form method="post" action="/admin/lists/<%= item.id %>/delete">
+                <form method="post" action="/admin/lists/<%= item.id %>/delete" onsubmit="return confirm('Удалить перечень?');">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                   <button class="button-link" type="submit">Удалить</button>
                 </form>
