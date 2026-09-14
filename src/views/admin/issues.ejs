@@ -27,7 +27,7 @@
               <td class="action-cell">
                 <a class="text-link" href="/admin/issues/<%= issue.id %>/edit">Редактировать</a>
                 <% if (admin && admin.role === 'admin') { %>
-                <form method="post" action="/admin/issues/<%= issue.id %>/delete" onsubmit="return confirm('Удалить выпуск?');">
+                <form method="post" action="/admin/issues/<%= issue.id %>/delete" data-confirm="Удалить выпуск?">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                   <button class="button-link" type="submit">Удалить</button>
                 </form>
@@ -40,5 +40,6 @@
     </div>
   </section>
 </main>
+<script src="/scripts/admin-confirm.js?v=<%= assetVersion %>" defer></script>
 </body>
 </html>

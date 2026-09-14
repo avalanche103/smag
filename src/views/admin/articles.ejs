@@ -40,7 +40,7 @@
                 <% if (item.isPublished) { %>
                   <a class="button-link" href="/a/<%= item.shareCode %>" target="_blank" rel="noopener">Открыть</a>
                 <% } %>
-                <form method="post" action="/admin/articles/<%= item.id %>/delete" onsubmit="return confirm('Удалить статью?');">
+                <form method="post" action="/admin/articles/<%= item.id %>/delete" data-confirm="Удалить статью?">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                   <button class="button-link" type="submit">Удалить</button>
                 </form>
@@ -52,6 +52,7 @@
     </div>
   </section>
 </main>
+<script src="/scripts/admin-confirm.js?v=<%= assetVersion %>" defer></script>
 <script src="/scripts/admin-articles.js?v=<%= assetVersion %>" defer></script>
 </body>
 </html>
