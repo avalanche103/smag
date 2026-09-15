@@ -95,6 +95,9 @@ app.get("/logo.jpg", (_req, res) => {
 app.get("/favicon.ico", (_req, res) => {
   res.sendFile(path.join(env.rootDir, "src", "public", "images", "favicon.png"));
 });
+app.get("/yandex_9c00690ed18b1f71.html", (_req, res) => {
+  res.sendFile(path.join(env.rootDir, "src", "public", "yandex_9c00690ed18b1f71.html"));
+});
 app.use(attachCsrfToken);
 
 app.use((req, res, next) => {
