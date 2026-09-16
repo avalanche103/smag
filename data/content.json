@@ -502,8 +502,26 @@
       ],
       "coverImage": "/uploads/covers/1787735378282-XSQKzgcO.jpg",
       "isPublished": 1,
-      "isFeatured": 1,
+      "isFeatured": 0,
       "createdAt": "2026-08-26T09:09:38.463Z"
+    },
+    {
+      "id": 8,
+      "numberLabel": "№ 8 (2026)",
+      "publishDate": "2026-08-31",
+      "slug": "8-2026-o-prognoznyh-indeksah-pismo-minstrojarhitektury-ot-21082026-043-0510416",
+      "materials": [
+        {
+          "title": "О прогнозных индексах (письмо Минстройархитектуры от 21.08.2026 № 04.3-05/10416)",
+          "isPrimary": 1,
+          "author": "-",
+          "section": "Официальные разъяснения"
+        }
+      ],
+      "coverImage": "/uploads/covers/1789370762309-zzYxSyQM.jpg",
+      "isPublished": 1,
+      "isFeatured": 1,
+      "createdAt": "2026-09-14T07:26:03.022Z"
     }
   ],
   "publishedLists": [

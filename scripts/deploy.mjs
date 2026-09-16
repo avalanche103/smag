@@ -139,6 +139,8 @@ const excludePatterns = [
   "data/sessions",
   "data/backups",
   "data/audit.log",
+  "data/content.json",
+  "data/uploads",
   "data/*.sqlite",
   "Stroitelstvo_*.pdf",
   "YEAR.pdf",
