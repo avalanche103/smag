@@ -77,8 +77,15 @@ $remoteScript = @"
 set -e
 mkdir -p '$remotePath'
 cd '$remotePath'
+mkdir -p data/backups
+stamp=`$(date -u +%Y-%m-%dT%H-%M-%SZ)
+pre_dir="data/backups/pre-deploy-`$stamp"
+mkdir -p "`$pre_dir"
+if [[ -f data/content.json ]]; then cp -a data/content.json "`$pre_dir/content.json"; echo "[smag] Pre-deploy backup: `$pre_dir/content.json"; fi
+if [[ -d data/uploads ]]; then cp -a data/uploads "`$pre_dir/uploads"; echo "[smag] Pre-deploy uploads copied"; fi
+ls -1dt data/backups/pre-deploy-* 2>/dev/null | tail -n +11 | xargs -r rm -rf
 tar -xzf /tmp/$archiveName
-chmod +x scripts/remote-install.sh
+chmod +x scripts/remote-install.sh scripts/remote-backup.sh 2>/dev/null || chmod +x scripts/remote-install.sh
 bash scripts/remote-install.sh '$remotePath'
 rm -f /tmp/$archiveName
 "@
@@ -95,6 +102,20 @@ if (Test-Path ".env.production") {
     & scp @("-P", $port, "-o", "StrictHostKeyChecking=accept-new", ".env.production", "${sshTarget}:${remotePath}/.env.production")
     & ssh @sshArgs $sshTarget "cd '$remotePath' && cp -n .env.production .env 2>/dev/null || cp .env.production .env"
 }
+
+Write-Host "[smag] Ensuring daily backup cron ..."
+$cronRemote = @"
+set -e
+SITE='$remotePath'
+# expand ~ if present
+SITE=`$(bash -lc "cd '$remotePath' && pwd")
+CRON_LINE="15 3 * * * `$SITE/scripts/remote-backup.sh >> `$SITE/data/backups/cron.log 2>&1"
+chmod +x "`$SITE/scripts/remote-backup.sh" 2>/dev/null || true
+mkdir -p "`$SITE/data/backups"
+(crontab -l 2>/dev/null | grep -v 'scripts/remote-backup.sh' || true; echo "`$CRON_LINE") | crontab -
+echo "[smag] Cron installed"
+"@
+$cronRemote | & ssh @sshArgs $sshTarget "bash -s"
 
 Write-Host ""
 Write-Host "[smag] Deploy finished." -ForegroundColor Green

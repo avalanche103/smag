@@ -95,3 +95,25 @@ npm run db:seed
 ```
 
 Проверка: открыть сайт и `/admin`.
+
+## Бэкапы на бою
+
+Три слоя защиты `data/content.json` и uploads:
+
+1. **Снимок при каждом сохранении в админке** — `data/backups/mutations/` (последние 30 копий JSON).
+2. **Бэкап перед деплоем** — `data/backups/pre-deploy-*/` (последние 10; деплой **не** перезаписывает `content.json` и `uploads`).
+3. **Ежедневный cron** (03:15) — `scripts/remote-backup.sh` → полный снимок JSON + uploads, ротация 14 дней. Ставится автоматически при `npm run deploy`.
+
+Ручной бэкап на сервере:
+
+```bash
+cd ~/www/stroydelo.by   # или ваш путь
+bash scripts/remote-backup.sh
+```
+
+### Восстановление
+
+1. Найти снимок: `ls -lt data/backups/mutations` или `data/backups/pre-deploy-*` / дневной каталог.
+2. `cp data/backups/.../content.json data/content.json` (для mutation-файла — скопировать сам `content-*.json` как `data/content.json`).
+3. При необходимости вернуть файлы из `uploads/` бэкапа.
+4. Перезапустить Node (иначе отдаётся кэш в памяти): убить pid из `~/.pm2/pids/stroydelo.by-0.pid` и сохранить сайт в ISPmanager.

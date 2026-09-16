@@ -21,7 +21,11 @@ echo "[smag] Removing devDependencies..."
 npm prune --production
 
 echo "[smag] Ensuring data directories..."
-mkdir -p data/sessions data/uploads/covers data/uploads/invoices data/uploads/lists data/backups data/import-previews
+mkdir -p data/sessions data/uploads/covers data/uploads/invoices data/uploads/lists data/backups/mutations data/import-previews
+
+if [[ -f scripts/remote-backup.sh ]]; then
+  chmod +x scripts/remote-backup.sh
+fi
 
 if [[ ! -f data/content.json ]]; then
   echo "[smag] WARNING: data/content.json not found. Run npm run db:seed on the server if this is a fresh install."

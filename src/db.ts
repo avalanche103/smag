@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { env } from "./config/env";
 import type { AdminRecord, AdminRole, DataStore, IssueMaterial, JournalIssue, PageContent } from "./types";
+import { snapshotContentBeforeWrite } from "./utils/contentBackup";
 
 fs.mkdirSync(path.dirname(env.contentFile), { recursive: true });
 fs.mkdirSync(env.uploadsDir, { recursive: true });
@@ -11,6 +12,7 @@ fs.mkdirSync(env.coversDir, { recursive: true });
 fs.mkdirSync(env.invoicesDir, { recursive: true });
 fs.mkdirSync(env.listsDir, { recursive: true });
 fs.mkdirSync(env.articlesDir, { recursive: true });
+fs.mkdirSync(path.join(env.dataDir, "backups", "mutations"), { recursive: true });
 
 const settingDefaults: Array<[string, string]> = [
   ["siteTitle", "Строительство: Экономика, учет, право"],
@@ -400,6 +402,11 @@ export function readStore(): DataStore {
 }
 
 export function writeStore(store: DataStore): void {
+  try {
+    snapshotContentBeforeWrite();
+  } catch (error) {
+    console.error("[smag] Failed to snapshot content.json before write:", error);
+  }
   fs.writeFileSync(env.contentFile, JSON.stringify(store, null, 2), "utf-8");
   storeCache = store;
 }

@@ -180,8 +180,16 @@ try {
   const remoteScript = [
     "set -e",
     `cd ${shellSingleQuote(resolvedRemotePath)}`,
+    'mkdir -p data/backups',
+    'stamp=$(date -u +%Y-%m-%dT%H-%M-%S-%3NZ 2>/dev/null || date -u +%Y-%m-%dT%H-%M-%SZ)',
+    'pre_dir="data/backups/pre-deploy-$stamp"',
+    'mkdir -p "$pre_dir"',
+    'if [[ -f data/content.json ]]; then cp -a data/content.json "$pre_dir/content.json"; echo "[smag] Pre-deploy backup: $pre_dir/content.json"; fi',
+    'if [[ -d data/uploads ]]; then cp -a data/uploads "$pre_dir/uploads"; echo "[smag] Pre-deploy uploads copied"; fi',
+    // keep last 10 pre-deploy dirs
+    'ls -1dt data/backups/pre-deploy-* 2>/dev/null | tail -n +11 | xargs -r rm -rf',
     `tar -xzf /tmp/${archiveName}`,
-    "chmod +x scripts/remote-install.sh",
+    "chmod +x scripts/remote-install.sh scripts/remote-backup.sh 2>/dev/null || chmod +x scripts/remote-install.sh",
     `bash scripts/remote-install.sh ${shellSingleQuote(resolvedRemotePath)}`,
     `rm -f /tmp/${archiveName}`
   ].join("\n");
@@ -196,6 +204,25 @@ try {
       conn,
       `bash -lc "cd ${shellSingleQuote(resolvedRemotePath)} && cp .env.production .env"`
     );
+  }
+
+  // Ensure daily backup cron (idempotent)
+  try {
+    console.log("[smag] Ensuring daily backup cron ...");
+    await sshExec(
+      conn,
+      `bash -s <<'EOF'
+set -e
+SITE=${shellSingleQuote(resolvedRemotePath)}
+CRON_LINE="15 3 * * * $SITE/scripts/remote-backup.sh >> $SITE/data/backups/cron.log 2>&1"
+chmod +x "$SITE/scripts/remote-backup.sh" 2>/dev/null || true
+mkdir -p "$SITE/data/backups"
+(crontab -l 2>/dev/null | grep -v 'scripts/remote-backup.sh' || true; echo "$CRON_LINE") | crontab -
+echo "[smag] Cron installed: $CRON_LINE"
+EOF`
+    );
+  } catch (error) {
+    console.warn("[smag] Could not install backup cron:", error instanceof Error ? error.message : error);
   }
 
   if (password && domain) {
@@ -221,8 +248,24 @@ try {
     }
 
     try {
-      await sshExec(conn, "pkill -f node || true");
-      console.log("[smag] Node process restarted.");
+      await sshExec(
+        conn,
+        `bash -s <<'EOF'
+set +e
+PIDFILE="$HOME/.pm2/pids/${domain}-0.pid"
+if [[ -f "$PIDFILE" ]]; then
+  OLD=$(cat "$PIDFILE")
+  echo "[smag] Stopping pid $OLD from $PIDFILE"
+  kill "$OLD" 2>/dev/null
+  sleep 1
+  kill -9 "$OLD" 2>/dev/null
+fi
+pkill -f 'node dist/server.js' 2>/dev/null || true
+sleep 1
+pgrep -af 'node dist/server.js' || echo "[smag] Waiting for ISPmanager to respawn node"
+EOF`
+      );
+      console.log("[smag] Node process recycle requested.");
     } catch {
       console.warn("[smag] Could not restart Node process via SSH.");
     }
