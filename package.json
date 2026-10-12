@@ -11,6 +11,7 @@
     "db:seed": "ts-node --files src/scripts/seed.ts",
     "recompress:covers": "ts-node --files src/scripts/recompress-covers.ts",
     "backup": "ts-node --files src/scripts/backup.ts",
+    "digest:invoices": "ts-node --files src/scripts/invoice-download-digest.ts",
     "import:archive-materials": "ts-node --files scripts/import-archive-materials.ts",
     "lint": "tsc --noEmit",
     "admin:sync-passwords": "ts-node --files scripts/sync-admin-passwords.ts",

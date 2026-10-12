@@ -26,6 +26,9 @@ mkdir -p data/sessions data/uploads/covers data/uploads/invoices data/uploads/li
 if [[ -f scripts/remote-backup.sh ]]; then
   chmod +x scripts/remote-backup.sh
 fi
+if [[ -f scripts/remote-invoice-digest.sh ]]; then
+  chmod +x scripts/remote-invoice-digest.sh
+fi
 
 if [[ ! -f data/content.json ]]; then
   echo "[smag] WARNING: data/content.json not found. Run npm run db:seed on the server if this is a fresh install."

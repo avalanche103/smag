@@ -66,7 +66,8 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: env.isProduction,
+      // "auto" = Secure only over HTTPS (works on localhost http even if NODE_ENV=production).
+      secure: "auto",
       maxAge: 1000 * 60 * 60 * 8
     }
   })

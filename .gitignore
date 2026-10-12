@@ -5,6 +5,8 @@ dist/
 .env.production
 data/*.sqlite
 data/backups/
+data/invoice-downloads.jsonl
+data/audit.log
 data/uploads/lists/**
 !data/uploads/covers/**
 !data/uploads/invoices/**

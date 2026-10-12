@@ -388,6 +388,45 @@ function loadStoreFromDisk(): DataStore {
   return merged;
 }
 
+/** In development, keep admin hashes aligned with .env so local login works after prod content pulls. */
+function syncDevAdminPasswordsFromEnv(store: DataStore): boolean {
+  if (env.isProduction) {
+    return false;
+  }
+
+  let changed = false;
+  const desired: Array<{ login: string; password: string; role: AdminRole }> = [
+    { login: env.adminLogin, password: env.adminPassword, role: "admin" },
+    { login: env.adminUserLogin, password: env.adminUserPassword, role: "user" }
+  ];
+
+  for (const item of desired) {
+    if (!item.login || !item.password) {
+      continue;
+    }
+    const existing = store.admins.find((admin) => admin.login === item.login);
+    if (existing) {
+      if (!bcrypt.compareSync(item.password, existing.passwordHash)) {
+        existing.passwordHash = bcrypt.hashSync(item.password, 10);
+        existing.role = item.role;
+        changed = true;
+      }
+      continue;
+    }
+    const nextId = Math.max(0, ...store.admins.map((admin) => admin.id)) + 1;
+    store.admins.push({
+      id: nextId,
+      login: item.login,
+      passwordHash: bcrypt.hashSync(item.password, 10),
+      role: item.role,
+      createdAt: new Date().toISOString()
+    });
+    changed = true;
+  }
+
+  return changed;
+}
+
 export function ensureDataFile(): void {
   if (!storeCache) {
     storeCache = loadStoreFromDisk();
@@ -397,6 +436,10 @@ export function ensureDataFile(): void {
 export function readStore(): DataStore {
   if (!storeCache) {
     storeCache = loadStoreFromDisk();
+    if (syncDevAdminPasswordsFromEnv(storeCache)) {
+      fs.writeFileSync(env.contentFile, JSON.stringify(storeCache, null, 2), "utf-8");
+      console.warn("[smag] Synced local admin passwords from .env into data/content.json");
+    }
   }
   return storeCache;
 }
@@ -419,3 +462,7 @@ export function updateStore<T>(updater: (store: DataStore) => T): T {
 }
 
 storeCache = loadStoreFromDisk();
+if (syncDevAdminPasswordsFromEnv(storeCache)) {
+  fs.writeFileSync(env.contentFile, JSON.stringify(storeCache, null, 2), "utf-8");
+  console.warn("[smag] Synced local admin passwords from .env into data/content.json");
+}

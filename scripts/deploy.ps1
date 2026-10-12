@@ -103,16 +103,20 @@ if (Test-Path ".env.production") {
     & ssh @sshArgs $sshTarget "cd '$remotePath' && cp -n .env.production .env 2>/dev/null || cp .env.production .env"
 }
 
-Write-Host "[smag] Ensuring daily backup cron ..."
+Write-Host "[smag] Ensuring daily backup and invoice digest cron ..."
 $cronRemote = @"
 set -e
 SITE='$remotePath'
-# expand ~ if present
 SITE=`$(bash -lc "cd '$remotePath' && pwd")
-CRON_LINE="15 3 * * * `$SITE/scripts/remote-backup.sh >> `$SITE/data/backups/cron.log 2>&1"
-chmod +x "`$SITE/scripts/remote-backup.sh" 2>/dev/null || true
+BACKUP_LINE="15 3 * * * `$SITE/scripts/remote-backup.sh >> `$SITE/data/backups/cron.log 2>&1"
+DIGEST_LINE="5 20 * * * `$SITE/scripts/remote-invoice-digest.sh >> `$SITE/data/backups/invoice-digest.log 2>&1"
+chmod +x "`$SITE/scripts/remote-backup.sh" "`$SITE/scripts/remote-invoice-digest.sh" 2>/dev/null || true
 mkdir -p "`$SITE/data/backups"
-(crontab -l 2>/dev/null | grep -v 'scripts/remote-backup.sh' || true; echo "`$CRON_LINE") | crontab -
+(
+  crontab -l 2>/dev/null | grep -v 'scripts/remote-backup.sh' | grep -v 'scripts/remote-invoice-digest.sh' || true
+  echo "`$BACKUP_LINE"
+  echo "`$DIGEST_LINE"
+) | crontab -
 echo "[smag] Cron installed"
 "@
 $cronRemote | & ssh @sshArgs $sshTarget "bash -s"

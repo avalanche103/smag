@@ -72,3 +72,71 @@ export async function sendContactFormEmail(input: {
     html
   });
 }
+
+export async function sendInvoiceDownloadDigestEmail(input: {
+  to: string;
+  dateYmd: string;
+  label1: string;
+  label2: string;
+  count1: number;
+  count2: number;
+  total: number;
+  events: Array<{ time: string; label: string; geo: string; ip: string }>;
+  geoSummary: Array<{ place: string; count: number }>;
+}): Promise<void> {
+  if (!isMailConfigured()) {
+    throw new Error("SMTP не настроен. Укажите SMTP_HOST, SMTP_USER, SMTP_PASS и MAIL_FROM.");
+  }
+
+  const subject = `Скачивания счетов за ${input.dateYmd}`;
+  const eventLines = input.events.map(
+    (event) => `${event.time} — ${event.label} — ${event.geo} — ${event.ip || "IP н/д"}`
+  );
+  const geoLines = input.geoSummary.map((item) => `${item.place} — ${item.count}`);
+
+  const text = [
+    `Скачивания счетов за ${input.dateYmd} (Europe/Minsk)`,
+    "",
+    `${input.label1}: ${input.count1}`,
+    `${input.label2}: ${input.count2}`,
+    `Всего: ${input.total}`,
+    "",
+    "Кто скачал:",
+    ...eventLines,
+    "",
+    "По географии:",
+    ...geoLines
+  ].join("\n");
+
+  const htmlEvents = input.events
+    .map(
+      (event) =>
+        `<li><strong>${escapeText(event.time)}</strong> — ${escapeText(event.label)} — ${escapeText(event.geo)} — <code>${escapeText(event.ip || "IP н/д")}</code></li>`
+    )
+    .join("");
+  const htmlGeo = input.geoSummary
+    .map((item) => `<li>${escapeText(item.place)} — ${item.count}</li>`)
+    .join("");
+
+  const html = `
+    <p><strong>Скачивания счетов за ${escapeText(input.dateYmd)}</strong> (Europe/Minsk)</p>
+    <ul>
+      <li>${escapeText(input.label1)}: <strong>${input.count1}</strong></li>
+      <li>${escapeText(input.label2)}: <strong>${input.count2}</strong></li>
+      <li>Всего: <strong>${input.total}</strong></li>
+    </ul>
+    <p><strong>Кто скачал</strong></p>
+    <ul>${htmlEvents}</ul>
+    <p><strong>По географии</strong></p>
+    <ul>${htmlGeo}</ul>
+  `;
+
+  const transporter = createTransport();
+  await transporter.sendMail({
+    from: env.mailFrom,
+    to: input.to,
+    subject,
+    text,
+    html
+  });
+}

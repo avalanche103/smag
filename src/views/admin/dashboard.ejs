@@ -47,6 +47,43 @@
         </ul>
         <p><a class="button-link" href="/admin/articles">Управлять статьями</a></p>
       </article>
+      <% if (typeof invoiceStats !== 'undefined' && invoiceStats) { %>
+        <article class="admin-card">
+          <h2>Скачивания счетов</h2>
+          <p class="form-note">Учёт по кликам на кнопки скачивания (Europe/Minsk).</p>
+          <table class="admin-table" style="width:100%;">
+            <thead>
+              <tr>
+                <th>Период</th>
+                <th><%= invoiceStats.labels.invoice1 %></th>
+                <th><%= invoiceStats.labels.invoice2 %></th>
+                <th>Всего</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Сегодня</td>
+                <td><%= invoiceStats.today.invoice1 %></td>
+                <td><%= invoiceStats.today.invoice2 %></td>
+                <td><strong><%= invoiceStats.today.total %></strong></td>
+              </tr>
+              <tr>
+                <td>7 дней</td>
+                <td><%= invoiceStats.last7Days.invoice1 %></td>
+                <td><%= invoiceStats.last7Days.invoice2 %></td>
+                <td><strong><%= invoiceStats.last7Days.total %></strong></td>
+              </tr>
+              <tr>
+                <td>Всё время</td>
+                <td><%= invoiceStats.allTime.invoice1 %></td>
+                <td><%= invoiceStats.allTime.invoice2 %></td>
+                <td><strong><%= invoiceStats.allTime.total %></strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <p><a class="button-link" href="/admin/pages/subscribe">Управлять счетами</a></p>
+        </article>
+      <% } %>
     </div>
   </section>
 </main>

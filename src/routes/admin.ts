@@ -1,5 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import { Router, type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
 import slugify from "slugify";import type { IssueMaterial, PageKey } from "../types";
@@ -43,6 +44,8 @@ import { validateUploadedFile } from "../utils/fileValidation";
 import { processCoverImage } from "../utils/imageProcessing";
 import { deleteImportPreview, readImportPreview, saveImportPreview } from "../utils/importPreviewStore";
 import { parsePublishedListPdfInWorker } from "../utils/pdfParseJob";
+import { summarizeInvoiceDownloads } from "../utils/invoiceDownloadLog";
+
 function parseIssueMaterials(input: unknown): IssueMaterial[] {
   const entries = Array.isArray(input)
     ? input
@@ -94,27 +97,50 @@ export default function adminRouter() {
     });
   });
 
-  router.post("/login", loginLimiter, verifyCsrfToken, (req, res) => {
+  router.post("/login", loginLimiter, (req, res, next) => {
+    const token = typeof req.body?._csrf === "string" ? req.body._csrf : req.get("x-csrf-token");
+    if (!token || token !== req.session.csrfToken) {
+      req.session.flash = { type: "error", message: "Сессия устарела. Обновите страницу и попробуйте снова." };
+      req.session.save(() => res.redirect("/admin/login"));
+      return;
+    }
+    next();
+  }, (req, res) => {
     const { login, password } = req.body as Record<string, string>;
-    const admin = verifyAdmin(String(login ?? "").trim(), String(password ?? ""));
+    const trimmedLogin = String(login ?? "").trim();
+    const admin = verifyAdmin(trimmedLogin, String(password ?? ""));
 
     if (!admin) {
-      req.session.flash = { type: "error", message: "Неверный логин или пароль." };
-      res.redirect("/admin/login");
+      console.warn(`[smag] Admin login failed for login="${trimmedLogin || "(empty)"}"`);
+      const hint = env.isProduction
+        ? "Неверный логин или пароль."
+        : "Неверный логин или пароль. Локально используйте ADMIN_LOGIN / ADMIN_PASSWORD из .env (после правок content.json пароли подтягиваются при старте).";
+      req.session.flash = { type: "error", message: hint };
+      req.session.save(() => res.redirect("/admin/login"));
       return;
     }
 
     req.session.regenerate((error) => {
       if (error) {
         req.session.flash = { type: "error", message: "Не удалось создать сессию. Попробуйте снова." };
-        res.redirect("/admin/login");
+        req.session.save(() => res.redirect("/admin/login"));
         return;
       }
 
       req.session.adminId = admin.id;
       req.session.adminLogin = admin.login;
       req.session.adminRole = admin.role;
-      res.redirect(admin.role === "admin" ? "/admin" : "/admin/issues");
+      // New session needs a fresh CSRF token for subsequent forms.
+      req.session.csrfToken = crypto.randomUUID();
+      req.session.save((saveError) => {
+        if (saveError) {
+          console.error("[smag] Failed to persist admin session:", saveError);
+          req.session.flash = { type: "error", message: "Не удалось сохранить сессию. Попробуйте снова." };
+          req.session.save(() => res.redirect("/admin/login"));
+          return;
+        }
+        res.redirect(admin.role === "admin" ? "/admin" : "/admin/issues");
+      });
     });
   });
 
@@ -531,12 +557,17 @@ export default function adminRouter() {
   router.use(requireFullAdmin);
 
   router.get("/", (_req, res) => {
+    const subscribePage = getAllPages().find((item) => item.pageKey === "subscribe");
     res.render("admin/dashboard", {
       meta: { title: "Админ-панель", description: "Управление сайтом журнала" },
       issues: listIssues(true).slice(0, 5),
       messages: listMessages().slice(0, 5),
       lists: listPublishedLists(false).slice(0, 5),
-      articles: listMarketingArticles(true).slice(0, 5)
+      articles: listMarketingArticles(true).slice(0, 5),
+      invoiceStats: summarizeInvoiceDownloads({
+        invoice1: subscribePage?.extras?.invoiceLabel1 || "Счёт 1",
+        invoice2: subscribePage?.extras?.invoiceLabel2 || "Счёт 2"
+      })
     });
   });
 

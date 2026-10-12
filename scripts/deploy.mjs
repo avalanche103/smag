@@ -189,7 +189,7 @@ try {
     // keep last 10 pre-deploy dirs
     'ls -1dt data/backups/pre-deploy-* 2>/dev/null | tail -n +11 | xargs -r rm -rf',
     `tar -xzf /tmp/${archiveName}`,
-    "chmod +x scripts/remote-install.sh scripts/remote-backup.sh 2>/dev/null || chmod +x scripts/remote-install.sh",
+    "chmod +x scripts/remote-install.sh scripts/remote-backup.sh scripts/remote-invoice-digest.sh 2>/dev/null || chmod +x scripts/remote-install.sh",
     `bash scripts/remote-install.sh ${shellSingleQuote(resolvedRemotePath)}`,
     `rm -f /tmp/${archiveName}`
   ].join("\n");
@@ -206,23 +206,29 @@ try {
     );
   }
 
-  // Ensure daily backup cron (idempotent)
+  // Ensure daily backup + invoice digest cron (idempotent)
   try {
-    console.log("[smag] Ensuring daily backup cron ...");
+    console.log("[smag] Ensuring daily backup and invoice digest cron ...");
     await sshExec(
       conn,
       `bash -s <<'EOF'
 set -e
 SITE=${shellSingleQuote(resolvedRemotePath)}
-CRON_LINE="15 3 * * * $SITE/scripts/remote-backup.sh >> $SITE/data/backups/cron.log 2>&1"
-chmod +x "$SITE/scripts/remote-backup.sh" 2>/dev/null || true
+BACKUP_LINE="15 3 * * * $SITE/scripts/remote-backup.sh >> $SITE/data/backups/cron.log 2>&1"
+DIGEST_LINE="5 20 * * * $SITE/scripts/remote-invoice-digest.sh >> $SITE/data/backups/invoice-digest.log 2>&1"
+chmod +x "$SITE/scripts/remote-backup.sh" "$SITE/scripts/remote-invoice-digest.sh" 2>/dev/null || true
 mkdir -p "$SITE/data/backups"
-(crontab -l 2>/dev/null | grep -v 'scripts/remote-backup.sh' || true; echo "$CRON_LINE") | crontab -
-echo "[smag] Cron installed: $CRON_LINE"
+(
+  crontab -l 2>/dev/null | grep -v 'scripts/remote-backup.sh' | grep -v 'scripts/remote-invoice-digest.sh' || true
+  echo "$BACKUP_LINE"
+  echo "$DIGEST_LINE"
+) | crontab -
+echo "[smag] Cron installed: $BACKUP_LINE"
+echo "[smag] Cron installed: $DIGEST_LINE"
 EOF`
     );
   } catch (error) {
-    console.warn("[smag] Could not install backup cron:", error instanceof Error ? error.message : error);
+    console.warn("[smag] Could not install cron jobs:", error instanceof Error ? error.message : error);
   }
 
   if (password && domain) {

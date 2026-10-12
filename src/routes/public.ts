@@ -26,6 +26,7 @@ import { sendContactFormEmail } from "../services/mailService";
 import { verifyCsrfToken } from "../middleware/csrf";
 import { buildOrganizationJsonLd, buildPageMeta, buildPublicationIssueJsonLd } from "../utils/seo";
 import { createArticleViewToken, verifyArticleViewToken } from "../utils/articleViewToken";
+import { getClientIp, recordInvoiceDownload, type InvoiceKey } from "../utils/invoiceDownloadLog";
 
 dayjs.extend(localizedFormat);
 dayjs.locale("ru");
@@ -321,6 +322,26 @@ export default function publicRouter(formLimiter: RequestHandler) {
         }
       });
       return;
+    }
+
+    const invoiceKey: InvoiceKey =
+      getPageExtra(page, "invoiceFile1") === filePath ? "invoice1" : "invoice2";
+    const label =
+      (invoiceKey === "invoice1"
+        ? getPageExtra(page, "invoiceLabel1")
+        : getPageExtra(page, "invoiceLabel2")) ||
+      (invoiceKey === "invoice1" ? "Счёт 1" : "Счёт 2");
+
+    try {
+      recordInvoiceDownload({
+        invoiceKey,
+        label,
+        filename,
+        ip: getClientIp(req),
+        ua: String(req.headers["user-agent"] || "").slice(0, 300)
+      });
+    } catch (error) {
+      console.error("[smag] Failed to record invoice download:", error);
     }
 
     res.download(diskPath, filename);

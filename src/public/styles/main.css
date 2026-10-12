@@ -1836,6 +1836,10 @@ select {
   width: min(480px, 100%);
 }
 
+.admin-login-flash {
+  margin: 0 0 16px;
+}
+
 .admin-logout {
   margin-top: 24px;
   width: 100%;
